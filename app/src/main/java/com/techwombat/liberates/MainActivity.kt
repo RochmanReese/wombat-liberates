@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.WHITE)
             textSize = 16f
             setOnClickListener {
-                sendBroadcast(Intent(KindleTextExtractorService.ACTION_START_CAPTURE))
+                sendControlIntent(KindleTextExtractorService.ACTION_START_CAPTURE)
                 statusTv.text = "Capture Status: RUNNING"
                 statusTv.setTextColor(Color.parseColor("#2E7D32"))
             }
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.WHITE)
             textSize = 16f
             setOnClickListener {
-                sendBroadcast(Intent(KindleTextExtractorService.ACTION_STOP_CAPTURE))
+                sendControlIntent(KindleTextExtractorService.ACTION_STOP_CAPTURE)
                 statusTv.text = "Capture Status: STOPPED"
                 statusTv.setTextColor(Color.RED)
             }
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             text = "🗑 CLEAR BUFFER"
             textSize = 16f
             setOnClickListener {
-                sendBroadcast(Intent(KindleTextExtractorService.ACTION_CLEAR_BUFFER))
+                sendControlIntent(KindleTextExtractorService.ACTION_CLEAR_BUFFER)
                 updateUI(0, 0, "None")
             }
         }
@@ -123,6 +123,13 @@ class MainActivity : AppCompatActivity() {
         layout.addView(settingsBtn)
 
         setContentView(layout)
+    }
+
+    private fun sendControlIntent(action: String) {
+        val intent = Intent(action).apply {
+            setPackage("com.techwombat.liberates")
+        }
+        sendBroadcast(intent)
     }
 
     override fun onResume() {

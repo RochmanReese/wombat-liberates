@@ -44,7 +44,7 @@ class KindleTextExtractorService : AccessibilityService() {
             when (intent?.action) {
                 ACTION_START_CAPTURE -> {
                     isCapturing = true
-                    Log.i(TAG, "=== Capture Mode ENABLED ===")
+                    Log.i(TAG, "=== Capture Mode ENABLED via Broadcast ===")
                 }
                 ACTION_STOP_CAPTURE -> {
                     isCapturing = false
@@ -68,7 +68,7 @@ class KindleTextExtractorService : AccessibilityService() {
             addAction(ACTION_CLEAR_BUFFER)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(controlReceiver, filter, RECEIVER_NOT_EXPORTED)
+            registerReceiver(controlReceiver, filter, RECEIVER_EXPORTED)
         } else {
             registerReceiver(controlReceiver, filter)
         }
