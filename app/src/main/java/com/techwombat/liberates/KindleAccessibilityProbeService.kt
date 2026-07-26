@@ -292,7 +292,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     companion object {
         private const val KINDLE_PACKAGE = "com.amazon.kindle"
         private const val MAX_TREE_NODES = 400
-        private const val MAX_BATCH_PAGES = 10
+        private const val MAX_BATCH_PAGES = 1_000
         private const val BATCH_FOREGROUND_CHECK_MS = 500L
         private const val BATCH_PAGE_SETTLE_MS = 1_200L
         private const val NEXT_PAGE_X_FRACTION = 0.86f

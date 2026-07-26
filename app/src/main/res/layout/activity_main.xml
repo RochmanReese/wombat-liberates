@@ -18,11 +18,10 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/instructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Automatic batches OCR a small, user-authorized Kindle page range. Open Kindle at the first page after arming a batch. Screenshots are discarded; only clean OCR text is retained."
+            android:text="First collect a user-authorized Kindle range as raw local OCR. Return here afterward to correct the saved text on-device; raw OCR is always retained separately. Screenshots are discarded."
             android:textSize="16sp" />
 
         <TextView
@@ -45,34 +44,51 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Stop probe and batch" />
+            android:text="Stop probe and capture" />
+
+        <EditText
+            android:id="@+id/pageCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Pages to capture (1–1,000)"
+            android:inputType="number"
+            android:singleLine="true"
+            android:text="10" />
 
         <Button
-            android:id="@+id/startThreePageBatchButton"
+            android:id="@+id/startBookCaptureButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Start 3-page automatic batch" />
-
-        <Button
-            android:id="@+id/startTenPageBatchButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Start 10-page automatic batch" />
+            android:text="Start automatic raw book capture" />
 
         <Button
             android:id="@+id/stopBatchButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Stop automatic batch" />
+            android:text="Stop automatic capture" />
+
+        <Button
+            android:id="@+id/correctOnDeviceButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Correct saved OCR on this device" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Correction requires a compatible Gemini Nano device and runs only while this app stays open in front."
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/armTreeSnapshotButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="Arm next Kindle tree snapshot" />
 
         <Button
@@ -87,7 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Clear captured text and diagnostics" />
+            android:text="Clear raw OCR, corrected OCR, and diagnostics" />
 
         <EditText
             android:id="@+id/exportFileName"
@@ -100,11 +116,18 @@
             android:text="kindle-ocr.txt" />
 
         <Button
-            android:id="@+id/saveLogButton"
+            android:id="@+id/saveRawTextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Save clean OCR text" />
+            android:text="Save raw OCR text" />
+
+        <Button
+            android:id="@+id/saveCorrectedTextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Save corrected OCR text" />
 
         <TextView
             android:id="@+id/logText"
