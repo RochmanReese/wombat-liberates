@@ -1,6 +1,17 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+## 2026-07-26 — Consolidated session summary
+
+- Analysed and evolved the Kindle OCR app from a diagnostic/manual collector into a bounded whole-book capture workflow, with user-selected screen limits, Stop controls, foreground checks, duplicate-final-screen/end-of-book detection, and discarded screenshots after OCR.
+- Improved OCR text assembly: visual OCR blocks are joined, cross-page continuations are joined with a space or de-hyphenated as appropriate, while genuine paragraph boundaries are retained.
+- Kept capture output safe and reversible: raw OCR, corrected OCR, diagnostics, and exports are separate; correction never overwrites the raw capture. Added raw text-file import for testing and removed obsolete tree-snapshot/one-page debug controls from the main UI.
+- Added two correction paths: optional on-device Gemini Nano through ML Kit Prompt, and HTTPS Ollama correction using conservative 2,500-character paragraph chunks. Ollama settings are stored locally with Android Keystore encryption; no credentials are committed.
+- Added clear correction feedback: connection, progress bar, completed/remaining chunk counter, completion, and failure messages.
+- Added local EPUB 3 export using corrected text when available (otherwise raw text), editable title/author metadata, readable reflowable styling, chapter detection for headings such as CHAPTER SIX, a contents list, and Kobo-compatible packaging.
+- Fixed EPUB compatibility and formatting based on testing: explicit title-page/manifest/spine entries resolved Calibre loading, and paragraph spacing is visibly retained. Calibre and phone EPUB readers now open the generated book successfully.
+- Repeatedly built and verified the debug APK. This work was pushed in commits 80534dc, 91777d7, 1d1dbd9, 3b60643, ff47c53, 7e10d51, b237da9, 46c7be6, 63b9e24, 9d98565, 78eca05, and afd1dd0.
+
 - Restored visible paragraph separation in generated EPUBs: paragraphs now have a readable bottom margin and no first-line indent, matching the captured text’s blank-line structure.
 
 - Reworked EPUB packaging after Calibre reported an empty spine: added a title-page XHTML document and explicit manifest/spine entries for it and every chapter, preserving the required uncompressed mimetype-first EPUB layout.
