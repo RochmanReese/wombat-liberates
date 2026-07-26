@@ -18,60 +18,56 @@
             android:scaleType="centerCrop"
             android:src="@drawable/wombat_banner" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Wombat Liberates"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Wombat Liberates"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/helpButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Help" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Capture your reading text, clean it, and create an EPUB."
+            android:text="Scan your reading text, clean it, and create an EPUB."
             android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Ready"
-            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="1. Capture or import"
+            android:text="1. Scan or import"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/pageCount"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Screens to capture (1–1,000)"
-            android:inputType="number"
-            android:singleLine="true"
-            android:text="10" />
 
         <Button
             android:id="@+id/startBookCaptureButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Start Kindle capture" />
+            android:text="Start Kindle scan" />
 
         <Button
             android:id="@+id/stopBatchButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Stop capture" />
+            android:text="Stop scan" />
 
         <Button
             android:id="@+id/importRawTextButton"
@@ -81,10 +77,18 @@
             android:text="Import text file" />
 
         <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Ready to scan or import."
+            android:textSize="12sp" />
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Kindle screenshots are OCRed locally then discarded."
+            android:text="Scans until Kindle reaches the end of the book. Screenshots are OCRed locally, then discarded."
             android:textSize="12sp" />
 
         <TextView
@@ -176,6 +180,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:text="Scan settings"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/pageCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Maximum screens (safety limit)"
+                android:inputType="number"
+                android:singleLine="true"
+                android:text="1000" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="The app normally stops at the end of a book. Leave this at 1,000 unless you want to capture only part of one."
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="Ollama connection"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -235,7 +264,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Capture and files"
+                android:text="Accessibility and files"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -244,14 +273,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Start accessibility probe" />
+                android:text="Enable scanning service" />
 
             <Button
                 android:id="@+id/stopButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Stop probe and capture" />
+                android:text="Stop scan service" />
 
             <EditText
                 android:id="@+id/exportFileName"

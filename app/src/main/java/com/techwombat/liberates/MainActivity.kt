@@ -93,6 +93,8 @@ class MainActivity : AppCompatActivity() {
             KindleAccessibilityProbeService.stopBatch()
             renderState()
         }
+        binding.helpButton.setOnClickListener { startActivity(Intent(this, HelpActivity::class.java)) }
+
         binding.advancedControlsButton.setOnClickListener {
             val showAdvanced = binding.advancedControls.visibility != View.VISIBLE
             binding.advancedControls.visibility = if (showAdvanced) View.VISIBLE else View.GONE
@@ -144,14 +146,14 @@ class MainActivity : AppCompatActivity() {
     private fun startBatch(pageCount: Int) {
         if (!ProbeLog.isActive) ProbeLog.start()
         if (!isAccessibilityServiceEnabled()) {
-            binding.statusText.text = "Enable the Wombat Liberates accessibility service, then start capture again."
+            binding.statusText.text = "Enable Wombat Liberates in Accessibility settings, then start the scan again."
             showAccessibilitySetupDialog()
             return
         }
         if (KindleAccessibilityProbeService.startBatch(pageCount)) {
-            binding.statusText.text = "Book capture armed for $pageCount screens; open Kindle at the starting page."
+            binding.statusText.text = "Book scan ready for up to $pageCount screens; open Kindle at the starting page."
         } else {
-            binding.statusText.text = "Start the probe and enable accessibility first."
+            binding.statusText.text = "Enable Wombat Liberates in Accessibility settings first."
         }
     }
 
@@ -159,8 +161,8 @@ class MainActivity : AppCompatActivity() {
         if (correctionJob?.isActive == true) return
         val rawText = OcrTextStore.rawText()
         if (rawText.isBlank()) {
-            binding.statusText.text = "Capture raw OCR text before correcting it."
-            Toast.makeText(this, "Import or capture raw text first.", Toast.LENGTH_SHORT).show()
+            binding.statusText.text = "Scan or import text before cleaning it."
+            Toast.makeText(this, "Import or scan text first.", Toast.LENGTH_SHORT).show()
             return
         }
         correctionJob = lifecycleScope.launch {
@@ -191,8 +193,8 @@ class MainActivity : AppCompatActivity() {
         val username = binding.ollamaUsername.text.toString().trim()
         val password = binding.ollamaPassword.text.toString()
         if (rawText.isBlank()) {
-            binding.statusText.text = "Capture raw OCR text before correcting it."
-            Toast.makeText(this, "Import or capture raw text first.", Toast.LENGTH_SHORT).show()
+            binding.statusText.text = "Scan or import text before cleaning it."
+            Toast.makeText(this, "Import or scan text first.", Toast.LENGTH_SHORT).show()
             return
         }
         if (!baseUrl.startsWith("https://") || model.isBlank() || username.isBlank() || password.isBlank()) {
@@ -346,9 +348,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderState() {
         binding.statusText.text = if (ProbeLog.isActive) {
-            "Probe: running. ${KindleAccessibilityProbeService.batchStatus()}"
+            "Scanning service ready. ${KindleAccessibilityProbeService.batchStatus()}"
         } else {
-            "Probe: stopped"
+            "Ready to scan or import."
         }
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
@@ -401,8 +403,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAccessibilitySetupDialog() {
         AlertDialog.Builder(this)
-            .setTitle("Enable the accessibility service")
-            .setMessage("Android must enable the probe service before it can receive Kindle events. Starting the probe does not enable it automatically.")
+            .setTitle("Turn on Wombat Liberates")
+            .setMessage("Wombat Liberates needs Android Accessibility access to read Kindle pages during a scan. Android will now open Accessibility settings. Scroll down to Wombat Liberates, tap it, then turn on Allow.")
             .setPositiveButton("Open settings") { _, _ -> startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
             .setNegativeButton("Not now", null)
             .show()

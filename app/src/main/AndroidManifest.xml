@@ -9,6 +9,10 @@
         android:label="Wombat Liberates"
         android:theme="@style/Theme.WombatLiberates">
         <activity
+            android:name=".HelpActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -19,7 +23,7 @@
 
         <service
             android:name=".KindleAccessibilityProbeService"
-            android:label="Wombat Liberates accessibility probe"
+            android:label="Wombat Liberates"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="false">
             <intent-filter>
