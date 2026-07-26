@@ -137,9 +137,18 @@ class KindleTextExtractorService : AccessibilityService() {
         if (event == null) return
 
         val packageName = event.packageName?.toString() ?: ""
-        if (packageName.isNotEmpty() && packageName != "com.techwombat.liberates") {
-            getPrefs(this).edit().putString(PREF_LAST_PACKAGE, packageName).apply()
+
+        // EXCLUDE system UI, launchers, and our own app from capture
+        if (packageName.isEmpty() ||
+            packageName == "com.techwombat.liberates" ||
+            packageName == "com.android.systemui" ||
+            packageName.contains("launcher", ignoreCase = true) ||
+            packageName == "android"
+        ) {
+            return
         }
+
+        getPrefs(this).edit().putString(PREF_LAST_PACKAGE, packageName).apply()
 
         val capturing = isCapturing(this)
         if (!capturing) return
@@ -193,36 +202,31 @@ class KindleTextExtractorService : AccessibilityService() {
         val height = displayMetrics.heightPixels.toFloat()
 
         // Humanized dynamic coordinates with random Y-variation (45% to 55%)
-        val startX = width * (0.83f + Random.nextFloat() * 0.04f) // ~83% to 87%
-        val endX = width * (0.13f + Random.nextFloat() * 0.04f)   // ~13% to 17%
-        val startY = height * (0.45f + Random.nextFloat() * 0.10f) // ~45% to 55%
-        val endY = startY + (Random.nextFloat() * 20f - 10f)       // Natural slight vertical curve
+        val startX = width * (0.83f + Random.nextFloat() * 0.04f)
+        val endX = width * (0.13f + Random.nextFloat() * 0.04f)
+        val startY = height * (0.45f + Random.nextFloat() * 0.10f)
+        val endY = startY + (Random.nextFloat() * 20f - 10f)
 
         val swipePath = Path().apply {
             moveTo(startX, startY)
             lineTo(endX, endY)
         }
 
-        // Humanized duration (200ms to 280ms)
         val strokeDuration = 200L + Random.nextLong(80)
 
         val gestureBuilder = GestureDescription.Builder()
         val stroke = GestureDescription.StrokeDescription(swipePath, 0, strokeDuration)
         gestureBuilder.addStroke(stroke)
 
-        Log.d(TAG, "Executing humanized auto-swipe gesture (X: ${startX.toInt()} -> ${endX.toInt()}, Y: ${startY.toInt()}, ${strokeDuration}ms)")
-
         dispatchGesture(
             gestureBuilder.build(),
             object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                     super.onCompleted(gestureDescription)
-                    Log.d(TAG, "Humanized swipe completed.")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription?) {
                     super.onCancelled(gestureDescription)
-                    Log.w(TAG, "Swipe gesture cancelled by OS.")
                 }
             },
             mainHandler
@@ -255,8 +259,12 @@ class KindleTextExtractorService : AccessibilityService() {
         if (node == null) return
 
         val text = node.text?.toString()?.trim()
-        if (!text.isNullOrEmpty()) {
-            outputList.add(text)
+        val contentDesc = node.contentDescription?.toString()?.trim()
+
+        val textToUse = if (!text.isNullOrEmpty()) text else contentDesc
+
+        if (!textToUse.isNullOrEmpty()) {
+            outputList.add(textToUse)
         }
 
         for (i in 0 until node.childCount) {
