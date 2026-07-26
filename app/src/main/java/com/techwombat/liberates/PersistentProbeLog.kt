@@ -22,6 +22,11 @@ object PersistentProbeLog {
     }
 
     @Synchronized
+    fun clear() {
+        if (::logFile.isInitialized) logFile.writeText("")
+    }
+
+    @Synchronized
     fun file(): File {
         check(::logFile.isInitialized) { "PersistentProbeLog must be initialized before use." }
         return logFile

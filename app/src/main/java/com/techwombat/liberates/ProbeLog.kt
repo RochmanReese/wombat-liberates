@@ -46,6 +46,13 @@ object ProbeLog {
     }
 
     @Synchronized
+    fun clear() {
+        entries.clear()
+        PersistentProbeLog.clear()
+        notifyListeners()
+    }
+
+    @Synchronized
     fun snapshot(): String = entries.joinToString("\n\n").ifBlank { "No events logged." }
 
     @Synchronized
