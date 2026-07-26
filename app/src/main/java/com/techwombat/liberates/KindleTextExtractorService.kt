@@ -96,7 +96,38 @@ class KindleTextExtractorService : AccessibilityService() {
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
-    private var isSwipePending = false
+    private var autoSwipeRunnable: Runnable? = null
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        Log.i(TAG, "Wombat-Liberates Kindle Accessibility Service Connected!")
+        startAutoSwipeLoop()
+    }
+
+    private fun startAutoSwipeLoop() {
+        autoSwipeRunnable = object : Runnable {
+            override fun run() {
+                try {
+                    val capturing = isCapturing(this@KindleTextExtractorService)
+                    val autoSwipe = isAutoSwipe(this@KindleTextExtractorService)
+
+                    if (capturing && autoSwipe) {
+                        dispatchSwipeGesture()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in auto-swipe loop", e)
+                } finally {
+                    mainHandler.postDelayed(this, 1800) // Continuous swipe every 1.8 seconds
+                }
+            }
+        }
+        mainHandler.postDelayed(autoSwipeRunnable!!, 1800)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        autoSwipeRunnable?.let { mainHandler.removeCallbacks(it) }
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
@@ -150,11 +181,6 @@ class KindleTextExtractorService : AccessibilityService() {
             .apply()
 
         Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
-
-        // Trigger Auto-Swipe if enabled
-        if (isAutoSwipe(this) && !isSwipePending) {
-            scheduleNextSwipe()
-        }
     }
 
     fun dispatchSwipeGesture() {
@@ -172,39 +198,26 @@ class KindleTextExtractorService : AccessibilityService() {
         }
 
         val gestureBuilder = GestureDescription.Builder()
-        val stroke = GestureDescription.StrokeDescription(swipePath, 0, 200)
+        val stroke = GestureDescription.StrokeDescription(swipePath, 0, 250)
         gestureBuilder.addStroke(stroke)
 
-        Log.d(TAG, "Dispatching page-swipe gesture (X: $startX -> $endX)")
+        Log.d(TAG, "Executing continuous auto-swipe gesture (X: $startX -> $endX)")
 
         dispatchGesture(
             gestureBuilder.build(),
             object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                     super.onCompleted(gestureDescription)
-                    Log.d(TAG, "Swipe gesture completed successfully.")
-                    isSwipePending = false
+                    Log.d(TAG, "Swipe gesture completed.")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription?) {
                     super.onCancelled(gestureDescription)
-                    Log.w(TAG, "Swipe gesture cancelled.")
-                    isSwipePending = false
+                    Log.w(TAG, "Swipe gesture cancelled by OS.")
                 }
             },
             mainHandler
         )
-    }
-
-    private fun scheduleNextSwipe() {
-        isSwipePending = true
-        mainHandler.postDelayed({
-            if (isCapturing(this) && isAutoSwipe(this)) {
-                dispatchSwipeGesture()
-            } else {
-                isSwipePending = false
-            }
-        }, 1500) // 1.5 second delay between page turns
     }
 
     private fun savePages(pages: List<CapturedPage>) {
@@ -266,10 +279,5 @@ class KindleTextExtractorService : AccessibilityService() {
 
     override fun onInterrupt() {
         Log.w(TAG, "KindleTextExtractorService interrupted.")
-    }
-
-    override fun onServiceConnected() {
-        super.onServiceConnected()
-        Log.i(TAG, "Wombat-Liberates Kindle Accessibility Service Connected!")
     }
 }
