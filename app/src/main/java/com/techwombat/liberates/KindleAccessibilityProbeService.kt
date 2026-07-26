@@ -4,6 +4,9 @@ import android.accessibilityservice.AccessibilityService
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -24,8 +27,20 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     @Volatile
     private var onePageOcrArmed = false
 
+    @Volatile
+    private var manualCollectionActive = false
+
+    private var lastManualCaptureAtMs = 0L
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val ocrExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+    private val manualCaptureRunnable = Runnable {
+        if (!manualCollectionActive || !ProbeLog.isActive) return@Runnable
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastManualCaptureAtMs < MANUAL_CAPTURE_MIN_INTERVAL_MS) return@Runnable
+        lastManualCaptureAtMs = now
+        captureOnePageForOcr()
+    }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -36,6 +51,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
 
     override fun onDestroy() {
         if (activeService === this) activeService = null
+        mainHandler.removeCallbacks(manualCaptureRunnable)
         textRecognizer.close()
         ocrExecutor.shutdown()
         super.onDestroy()
@@ -52,6 +68,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             onePageOcrArmed = false
             captureOnePageForOcr()
         }
+        if (manualCollectionActive) scheduleManualCapture()
 
         val eventText = event.text.joinToString(" | ") { it?.toString().orEmpty() }.ifBlank { "(none)" }
         val sourceText = event.source?.readableText().orEmpty().ifBlank { "(none)" }
@@ -59,6 +76,11 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     }
 
     override fun onInterrupt() = Unit
+
+    private fun scheduleManualCapture() {
+        mainHandler.removeCallbacks(manualCaptureRunnable)
+        mainHandler.postDelayed(manualCaptureRunnable, MANUAL_CAPTURE_SETTLE_MS)
+    }
 
     private fun captureOnePageForOcr() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -179,6 +201,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     companion object {
         private const val KINDLE_PACKAGE = "com.amazon.kindle"
         private const val MAX_TREE_NODES = 400
+        private const val MANUAL_CAPTURE_SETTLE_MS = 900L
+        private const val MANUAL_CAPTURE_MIN_INTERVAL_MS = 1_800L
 
         @Volatile
         private var activeService: KindleAccessibilityProbeService? = null
@@ -195,6 +219,21 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             if (!ProbeLog.isActive) return false
             service.onePageOcrArmed = true
             return true
+        }
+
+        fun startManualCollection(): Boolean {
+            val service = activeService ?: return false
+            if (!ProbeLog.isActive) return false
+            service.lastManualCaptureAtMs = 0L
+            service.manualCollectionActive = true
+            return true
+        }
+
+        fun stopManualCollection() {
+            activeService?.let { service ->
+                service.manualCollectionActive = false
+                service.mainHandler.removeCallbacks(service.manualCaptureRunnable)
+            }
         }
     }
 }

@@ -32,8 +32,20 @@ class MainActivity : AppCompatActivity() {
             if (!isAccessibilityServiceEnabled()) showAccessibilitySetupDialog()
         }
         binding.stopButton.setOnClickListener {
+            KindleAccessibilityProbeService.stopManualCollection()
             ProbeLog.stop()
             renderState()
+        }
+        binding.startManualCollectionButton.setOnClickListener {
+            if (KindleAccessibilityProbeService.startManualCollection()) {
+                binding.statusText.text = "Manual collection active; switch to Kindle and turn pages yourself."
+            } else {
+                binding.statusText.text = "Start the probe and enable accessibility first."
+            }
+        }
+        binding.stopManualCollectionButton.setOnClickListener {
+            KindleAccessibilityProbeService.stopManualCollection()
+            binding.statusText.text = "Manual collection stopped."
         }
         binding.saveLogButton.setOnClickListener {
             saveOcrText.launch(exportFileName())

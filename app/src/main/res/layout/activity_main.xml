@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="One-page OCR runs locally when armed. Captured text is cleaned and stored separately from diagnostics; screenshots are discarded. The app never turns pages or runs a capture loop."
+            android:text="Manual collection captures and OCRs each page after you turn it in Kindle. Screenshots are discarded; the app does not tap, swipe, or navigate Kindle."
             android:textSize="16sp" />
 
         <TextView
@@ -45,7 +45,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Stop probe" />
+            android:text="Stop probe and collection" />
+
+        <Button
+            android:id="@+id/startManualCollectionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Start manual page collection" />
+
+        <Button
+            android:id="@+id/stopManualCollectionButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Stop manual page collection" />
 
         <Button
             android:id="@+id/armTreeSnapshotButton"
