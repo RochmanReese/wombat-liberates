@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.techwombat.liberates.app-mergeReleaseResources-30:/values-en-rXC/values-en-rXC.xml",
+            "outputFile": "com.techwombat.liberates.app-mergeReleaseResources-32:/values-en-rXC/values-en-rXC.xml",
             "map": [
                 {
                     "source": "/home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/res/values-en-rXC/values-en-rXC.xml",

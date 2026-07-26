@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.EpubPackagerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-07-26T03:15:36.758Z" hostname="wombat-server" time="0.027">
+<testsuite name="com.techwombat.liberates.EpubPackagerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-07-26T03:26:28.989Z" hostname="wombat-server" time="0.035">
   <properties/>
-  <testcase name="testEpubCreationProducesValidZipEntries" classname="com.techwombat.liberates.EpubPackagerTest" time="0.027"/>
+  <testcase name="testEpubCreationProducesValidZipEntries" classname="com.techwombat.liberates.EpubPackagerTest" time="0.035"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

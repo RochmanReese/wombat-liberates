@@ -4,12 +4,15 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.Path
 import android.graphics.Rect
+import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import org.json.JSONArray
@@ -127,7 +130,8 @@ class KindleTextExtractorService : AccessibilityService() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var autoSwipeRunnable: Runnable? = null
-    private var lastDismissTime = 0L
+    private var currentPackageName = ""
+    private var isOcrPending = false
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -139,14 +143,19 @@ class KindleTextExtractorService : AccessibilityService() {
     private fun startAutoSwipeLoop() {
         autoSwipeRunnable = object : Runnable {
             override fun run() {
-                var nextDelay = 1800L
+                var nextDelay = 2000L
                 try {
                     val capturing = isCapturing(this@KindleTextExtractorService)
                     val autoSwipe = isAutoSwipe(this@KindleTextExtractorService)
 
                     if (capturing && autoSwipe) {
                         dispatchSwipeGesture()
-                        nextDelay = 1600L + Random.nextLong(600)
+                        nextDelay = 1800L + Random.nextLong(600)
+
+                        // Schedule screenshot OCR after swipe animation finishes (~400ms)
+                        mainHandler.postDelayed({
+                            captureScreenOcr()
+                        }, 450)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in auto-swipe loop", e)
@@ -155,7 +164,7 @@ class KindleTextExtractorService : AccessibilityService() {
                 }
             }
         }
-        mainHandler.postDelayed(autoSwipeRunnable!!, 1800)
+        mainHandler.postDelayed(autoSwipeRunnable!!, 2000)
     }
 
     override fun onDestroy() {
@@ -166,65 +175,66 @@ class KindleTextExtractorService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        val packageName = event.packageName?.toString() ?: ""
+        val pkg = event.packageName?.toString() ?: ""
 
-        // EXCLUDE system UI, keyboards, launchers, and our own app from capture
-        if (packageName.isEmpty() ||
-            packageName == "com.techwombat.liberates" ||
-            packageName == "com.android.systemui" ||
-            packageName.contains("launcher", ignoreCase = true) ||
-            packageName.contains("inputmethod", ignoreCase = true) ||
-            packageName.contains("keyboard", ignoreCase = true) ||
-            packageName.contains("gboard", ignoreCase = true) ||
-            packageName == "android"
+        if (pkg.isNotEmpty() &&
+            pkg != "com.techwombat.liberates" &&
+            pkg != "com.android.systemui" &&
+            !pkg.contains("launcher", ignoreCase = true) &&
+            !pkg.contains("inputmethod", ignoreCase = true) &&
+            !pkg.contains("keyboard", ignoreCase = true) &&
+            pkg != "android"
         ) {
-            return
+            currentPackageName = pkg
+            getPrefs(this).edit().putString(PREF_LAST_PACKAGE, currentPackageName).apply()
         }
+    }
 
-        getPrefs(this).edit().putString(PREF_LAST_PACKAGE, packageName).apply()
-
+    private fun captureScreenOcr() {
+        if (isOcrPending) return
         val capturing = isCapturing(this)
-        val dumpLogEnabled = isDumpLogEnabled(this)
-
-        val rootNode = rootInActiveWindow ?: return
-
-        if (dumpLogEnabled) {
-            val sb = StringBuilder()
-            sb.append("\n=== ACCESSIBILITY NODE DUMP (Pkg: $packageName, Event: ${AccessibilityEvent.eventTypeToString(event.eventType)}) ===\n")
-            dumpNodeHierarchy(rootNode, 0, sb)
-            sb.append("================================================================================\n")
-            logToFile(this, sb.toString())
-        }
-
         if (!capturing) return
 
-        val extractedLines = mutableListOf<String>()
-        traverseNodeTree(rootNode, extractedLines)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            isOcrPending = true
+            takeScreenshot(
+                Display.DEFAULT_DISPLAY,
+                mainHandler::post,
+                object : TakeScreenshotCallback {
+                    override fun onSuccess(screenshotResult: ScreenshotResult) {
+                        try {
+                            val bitmap = Bitmap.wrapHardwareBuffer(
+                                screenshotResult.hardwareBuffer,
+                                screenshotResult.colorSpace
+                            )
+                            if (bitmap != null) {
+                                val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                OcrExtractor.extractTextFromBitmap(softwareBitmap) { cleanLines ->
+                                    isOcrPending = false
+                                    processExtractedPage(cleanLines)
+                                }
+                            } else {
+                                isOcrPending = false
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error processing screenshot bitmap", e)
+                            isOcrPending = false
+                        }
+                    }
 
-        if (extractedLines.isEmpty()) return
-
-        // CHECK IF KINDLE MENU OVERLAY IS OPEN
-        val isMenuOverlayVisible = extractedLines.any { line ->
-            line.equals("Table of Contents", ignoreCase = true) ||
-            line.equals("Reading Settings", ignoreCase = true) ||
-            line.equals("Add bookmark", ignoreCase = true) ||
-            line.equals("Close Book", ignoreCase = true)
+                    override fun onFailure(errorCode: Int) {
+                        Log.e(TAG, "takeScreenshot failed code: $errorCode")
+                        isOcrPending = false
+                    }
+                }
+            )
         }
+    }
 
-        if (isMenuOverlayVisible) {
-            val now = System.currentTimeMillis()
-            if (now - lastDismissTime > 2000) {
-                lastDismissTime = now
-                logToFile(this, "Kindle Menu Overlay detected! Dismissing with center tap.")
-                dismissMenuOverlay()
-            }
-            return
-        }
+    private fun processExtractedPage(cleanLines: List<String>) {
+        if (cleanLines.isEmpty()) return
 
-        val cleanBookLines = TextCleaner.cleanPageLines(extractedLines)
-        if (cleanBookLines.isEmpty()) return
-
-        val combinedContent = cleanBookLines.joinToString("\n")
+        val combinedContent = cleanLines.joinToString("\n")
         val contentHash = computeHash(combinedContent)
 
         val existingPages = getCapturedPages(this).toMutableList()
@@ -238,12 +248,13 @@ class KindleTextExtractorService : AccessibilityService() {
             return
         }
 
+        val pkgToUse = if (currentPackageName.isNotEmpty()) currentPackageName else "com.amazon.kindle"
         val newPageNum = existingPages.size + 1
         val newPage = CapturedPage(
             pageNumber = newPageNum,
-            textLines = cleanBookLines,
+            textLines = cleanLines,
             contentHash = contentHash,
-            packageName = packageName
+            packageName = pkgToUse
         )
 
         existingPages.add(newPage)
@@ -251,30 +262,10 @@ class KindleTextExtractorService : AccessibilityService() {
 
         getPrefs(this).edit()
             .putInt(PREF_PAGE_COUNT, newPageNum)
-            .putInt(PREF_LAST_LINE_COUNT, cleanBookLines.size)
+            .putInt(PREF_LAST_LINE_COUNT, cleanLines.size)
             .apply()
 
-        logToFile(this, "CAPTURED PAGE #$newPageNum (${cleanBookLines.size} lines from $packageName)")
-    }
-
-    private fun dumpNodeHierarchy(node: AccessibilityNodeInfo?, depth: Int, sb: StringBuilder) {
-        if (node == null) return
-        val indent = "  ".repeat(depth)
-        val bounds = Rect()
-        node.getBoundsInScreen(bounds)
-
-        val className = node.className?.toString() ?: "UnknownClass"
-        val viewId = node.viewIdResourceName ?: "NoId"
-        val text = node.text?.toString()?.replace("\n", "\\n") ?: ""
-        val contentDesc = node.contentDescription?.toString()?.replace("\n", "\\n") ?: ""
-
-        sb.append("$indent- [$className] id=$viewId bounds=$bounds text=\"$text\" desc=\"$contentDesc\" clickable=${node.isClickable} visible=${node.isVisibleToUser}\n")
-
-        for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
-            dumpNodeHierarchy(child, depth + 1, sb)
-            child?.recycle()
-        }
+        logToFile(this, "OCR CAPTURED PAGE #$newPageNum (${cleanLines.size} lines from $pkgToUse)")
     }
 
     fun dispatchSwipeGesture() {
@@ -313,22 +304,6 @@ class KindleTextExtractorService : AccessibilityService() {
         )
     }
 
-    private fun dismissMenuOverlay() {
-        val displayMetrics = resources.displayMetrics
-        val centerX = displayMetrics.widthPixels.toFloat() * 0.5f
-        val centerY = displayMetrics.heightPixels.toFloat() * 0.5f
-
-        val tapPath = Path().apply {
-            moveTo(centerX, centerY)
-        }
-
-        val gestureBuilder = GestureDescription.Builder()
-        val stroke = GestureDescription.StrokeDescription(tapPath, 0, 50)
-        gestureBuilder.addStroke(stroke)
-
-        dispatchGesture(gestureBuilder.build(), null, mainHandler)
-    }
-
     private fun savePages(pages: List<CapturedPage>) {
         try {
             val jsonArray = JSONArray()
@@ -348,25 +323,6 @@ class KindleTextExtractorService : AccessibilityService() {
             file.writeText(jsonArray.toString(2))
         } catch (e: Exception) {
             Log.e(TAG, "Error saving pages to disk", e)
-        }
-    }
-
-    private fun traverseNodeTree(node: AccessibilityNodeInfo?, outputList: MutableList<String>) {
-        if (node == null) return
-
-        val text = node.text?.toString()?.trim()
-        val contentDesc = node.contentDescription?.toString()?.trim()
-
-        val textToUse = if (!text.isNullOrEmpty()) text else contentDesc
-
-        if (!textToUse.isNullOrEmpty()) {
-            outputList.add(textToUse)
-        }
-
-        for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
-            traverseNodeTree(child, outputList)
-            child?.recycle()
         }
     }
 
