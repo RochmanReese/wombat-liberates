@@ -97,13 +97,21 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", "Screenshot returned no readable bitmap.")
                     return
                 }
-                recognizeScreenshot(bitmap)
+                val readingBitmap = cropToReadingArea(bitmap)
+                bitmap.recycle()
+                recognizeScreenshot(readingBitmap)
             }
 
             override fun onFailure(errorCode: Int) {
                 ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", screenshotError(errorCode))
             }
         })
+    }
+
+    private fun cropToReadingArea(bitmap: Bitmap): Bitmap {
+        val top = (bitmap.height * 0.06f).toInt()
+        val bottom = (bitmap.height * 0.03f).toInt()
+        return Bitmap.createBitmap(bitmap, 0, top, bitmap.width, bitmap.height - top - bottom)
     }
 
     private fun recognizeScreenshot(bitmap: Bitmap) {
