@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Wombat Liberates</string>
+    <string name="accessibility_service_description">Logs Kindle accessibility event text only while an explicitly started probe is active.</string>
+</resources>
+
