@@ -3213,6 +3213,7 @@ id btnExportEpub
 id btnSettings
 id btnStart
 id btnStop
+id btnUploadServer
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3297,6 +3298,7 @@ id enterAlwaysCollapsed
 id escape
 id etBookAuthor
 id etBookTitle
+id etServerUrl
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu

@@ -24,7 +24,7 @@
 17-->[androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
 18
 19    <application
-19-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:6:5-35:19
+19-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:6:5-36:19
 20        android:allowBackup="true"
 20-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:7:9-35
 21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
@@ -34,116 +34,118 @@
 23-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:8:9-41
 24        android:supportsRtl="true"
 24-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:9:9-35
-25        android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar" >
-25-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:10:9-70
-26        <activity
-26-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:12:9-19:20
-27            android:name="com.techwombat.liberates.MainActivity"
-27-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:13:13-41
-28            android:exported="true" >
-28-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:14:13-36
-29            <intent-filter>
-29-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:15:13-18:29
-30                <action android:name="android.intent.action.MAIN" />
-30-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:16:17-69
-30-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:16:25-66
-31
-32                <category android:name="android.intent.category.LAUNCHER" />
-32-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:17:17-77
-32-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:17:27-74
-33            </intent-filter>
-34        </activity>
-35
-36        <service
-36-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:21:9-33:19
-37            android:name="com.techwombat.liberates.KindleTextExtractorService"
-37-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:22:13-55
-38            android:exported="true"
-38-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:23:13-36
-39            android:label="@string/accessibility_service_label"
-39-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:24:13-64
-40            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
-40-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:25:13-79
-41            <intent-filter>
-41-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:26:13-28:29
-42                <action android:name="android.accessibilityservice.AccessibilityService" />
-42-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:27:17-92
-42-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:27:25-89
-43            </intent-filter>
-44
-45            <meta-data
-45-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:30:13-32:72
-46                android:name="android.accessibilityservice"
-46-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:31:17-60
-47                android:resource="@xml/accessibility_service_config" />
-47-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:32:17-69
-48        </service>
-49
-50        <provider
-50-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
-51            android:name="androidx.startup.InitializationProvider"
-51-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
-52            android:authorities="com.techwombat.liberates.androidx-startup"
-52-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
-53            android:exported="false" >
-53-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
-54            <meta-data
-54-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
-55                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-55-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
-56                android:value="androidx.startup" />
-56-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
-57            <meta-data
-57-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
-58                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-58-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
-59                android:value="androidx.startup" />
-59-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
-60            <meta-data
-60-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
-61                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-61-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
-62                android:value="androidx.startup" />
-62-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
-63        </provider>
-64
-65        <receiver
-65-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
-66            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-66-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
-67            android:directBootAware="false"
-67-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
-68            android:enabled="true"
-68-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
-69            android:exported="true"
-69-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
-70            android:permission="android.permission.DUMP" >
-70-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
-71            <intent-filter>
-71-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
-72                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-72-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
-72-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
-73            </intent-filter>
-74            <intent-filter>
-74-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
-75                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-75-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
-75-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
-76            </intent-filter>
-77            <intent-filter>
-77-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
-78                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-78-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
-78-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
-79            </intent-filter>
-80            <intent-filter>
-80-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
-81                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-81-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
-81-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
-82            </intent-filter>
-83        </receiver>
-84    </application>
-85
-86</manifest>
+25        android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
+25-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:11:9-70
+26        android:usesCleartextTraffic="true" >
+26-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:10:9-44
+27        <activity
+27-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:13:9-20:20
+28            android:name="com.techwombat.liberates.MainActivity"
+28-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:14:13-41
+29            android:exported="true" >
+29-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:15:13-36
+30            <intent-filter>
+30-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:16:13-19:29
+31                <action android:name="android.intent.action.MAIN" />
+31-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:17:17-69
+31-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:17:25-66
+32
+33                <category android:name="android.intent.category.LAUNCHER" />
+33-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:18:17-77
+33-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:18:27-74
+34            </intent-filter>
+35        </activity>
+36
+37        <service
+37-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:22:9-34:19
+38            android:name="com.techwombat.liberates.KindleTextExtractorService"
+38-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:23:13-55
+39            android:exported="true"
+39-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:24:13-36
+40            android:label="@string/accessibility_service_label"
+40-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:25:13-64
+41            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+41-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:26:13-79
+42            <intent-filter>
+42-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:27:13-29:29
+43                <action android:name="android.accessibilityservice.AccessibilityService" />
+43-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:28:17-92
+43-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:28:25-89
+44            </intent-filter>
+45
+46            <meta-data
+46-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:31:13-33:72
+47                android:name="android.accessibilityservice"
+47-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:32:17-60
+48                android:resource="@xml/accessibility_service_config" />
+48-->/home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:33:17-69
+49        </service>
+50
+51        <provider
+51-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+52            android:name="androidx.startup.InitializationProvider"
+52-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+53            android:authorities="com.techwombat.liberates.androidx-startup"
+53-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+54            android:exported="false" >
+54-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+55            <meta-data
+55-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+56                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+56-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+57                android:value="androidx.startup" />
+57-->[androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+58            <meta-data
+58-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+59                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+59-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+60                android:value="androidx.startup" />
+60-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+61            <meta-data
+61-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+62                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+62-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+63                android:value="androidx.startup" />
+63-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+64        </provider>
+65
+66        <receiver
+66-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+67            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+67-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+68            android:directBootAware="false"
+68-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+69            android:enabled="true"
+69-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+70            android:exported="true"
+70-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+71            android:permission="android.permission.DUMP" >
+71-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+72            <intent-filter>
+72-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+73                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+73-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+73-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+74            </intent-filter>
+75            <intent-filter>
+75-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+76                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+76-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+76-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+77            </intent-filter>
+78            <intent-filter>
+78-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+79                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+79-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+79-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+80            </intent-filter>
+81            <intent-filter>
+81-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+82                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+82-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+82-->[androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+83            </intent-filter>
+84        </receiver>
+85    </application>
+86
+87</manifest>

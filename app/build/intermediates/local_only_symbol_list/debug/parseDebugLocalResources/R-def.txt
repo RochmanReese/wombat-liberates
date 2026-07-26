@@ -7,8 +7,10 @@ id btnExportEpub
 id btnSettings
 id btnStart
 id btnStop
+id btnUploadServer
 id etBookAuthor
 id etBookTitle
+id etServerUrl
 id lastPkgTv
 id pageCountTv
 id statusTv

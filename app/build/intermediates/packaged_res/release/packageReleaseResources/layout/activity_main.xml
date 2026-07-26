@@ -42,6 +42,14 @@
             android:layout_height="wrap_content"
             android:hint="Author Name (e.g. Jim Butcher)"
             android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etServerUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Server URL (e.g. 192.168.1.100:8000)"
+            android:textSize="14sp"
             android:layout_marginBottom="16dp" />
 
         <TextView
@@ -115,6 +123,16 @@
             android:layout_height="56dp"
             android:backgroundTint="#6A1B9A"
             android:text="📦 EXPORT EPUB"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btnUploadServer"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#E65100"
+            android:text="🚀 UPLOAD TO WOMBAT-NARRATES"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:layout_marginBottom="10dp" />

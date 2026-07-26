@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lastPkgTv: TextView
     private lateinit var etBookTitle: EditText
     private lateinit var etBookAuthor: EditText
+    private lateinit var etServerUrl: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         lastPkgTv = findViewById(R.id.lastPkgTv)
         etBookTitle = findViewById(R.id.etBookTitle)
         etBookAuthor = findViewById(R.id.etBookAuthor)
+        etServerUrl = findViewById(R.id.etServerUrl)
 
         findViewById<Button>(R.id.btnStart).setOnClickListener {
             KindleTextExtractorService.setCapturing(this, true)
@@ -49,7 +51,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnExportEpub).setOnClickListener {
-            exportEpub()
+            exportEpub(false)
+        }
+
+        findViewById<Button>(R.id.btnUploadServer).setOnClickListener {
+            uploadToServer()
         }
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
@@ -62,11 +68,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun exportEpub() {
+    private fun exportEpub(silent: Boolean = false): File? {
         val capturedPages = KindleTextExtractorService.getCapturedPages(this)
         if (capturedPages.isEmpty()) {
-            Toast.makeText(this, "No pages captured to export!", Toast.LENGTH_SHORT).show()
-            return
+            if (!silent) Toast.makeText(this, "No pages captured to export!", Toast.LENGTH_SHORT).show()
+            return null
         }
 
         val rawTitle = etBookTitle.text.toString().trim()
@@ -87,12 +93,40 @@ class MainActivity : AppCompatActivity() {
         val sanitizedTitle = title.replace(Regex("[^a-zA-Z0-9._-]"), "_")
         val outputFile = File(downloadsDir, "$sanitizedTitle.epub")
 
-        try {
+        return try {
             EpubPackager.createEpub(title, author, chapters, outputFile)
-            Toast.makeText(this, "EPUB Exported to Downloads:\n${outputFile.name}", Toast.LENGTH_LONG).show()
+            if (!silent) Toast.makeText(this, "EPUB Exported to Downloads:\n${outputFile.name}", Toast.LENGTH_LONG).show()
             syncStateUI()
+            outputFile
         } catch (e: Exception) {
-            Toast.makeText(this, "Export Failed: ${e.message}", Toast.LENGTH_LONG).show()
+            if (!silent) Toast.makeText(this, "Export Failed: ${e.message}", Toast.LENGTH_LONG).show()
+            null
+        }
+    }
+
+    private fun uploadToServer() {
+        val serverUrl = etServerUrl.text.toString().trim()
+        if (serverUrl.isEmpty()) {
+            Toast.makeText(this, "Please enter your Server URL (e.g. 192.168.1.100:8000)", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val epubFile = exportEpub(silent = true)
+        if (epubFile == null || !epubFile.exists()) {
+            Toast.makeText(this, "No captured pages available to upload!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val rawTitle = etBookTitle.text.toString().trim()
+        val title = if (rawTitle.isNotEmpty()) rawTitle else "Liberated Book"
+
+        val rawAuthor = etBookAuthor.text.toString().trim()
+        val author = if (rawAuthor.isNotEmpty()) rawAuthor else "Wombat-Liberates"
+
+        Toast.makeText(this, "Uploading ${epubFile.name} to $serverUrl...", Toast.LENGTH_SHORT).show()
+
+        ServerUploader.uploadEpub(serverUrl, epubFile, title, author) { success, msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
         }
     }
 
