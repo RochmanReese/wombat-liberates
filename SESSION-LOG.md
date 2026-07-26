@@ -14,5 +14,6 @@ Add each session summary immediately below this heading so the newest entry rema
 - Added HTTPS Ollama server correction using chunked POST /api/generate calls, configurable model selection, HTTP Basic Auth, and Android Keystore-encrypted local credential storage. No endpoint or credentials are stored in source control.
 - Added raw text-file import for testing existing captures; importing replaces raw text and clears only the derived corrected file. Removed the obsolete tree-snapshot and one-page OCR controls from the main UI.
 - Improved import feedback with a visible confirmation toast showing the imported character count.
+- Added visible Ollama connection, progress, completion, and failure notifications to make endpoint/auth/TLS/model issues diagnosable during testing.
 - Verified with `./gradlew :app:assembleDebug`.
 - Pushed commits: `80534dc`, `91777d7`, and `1d1dbd9`.

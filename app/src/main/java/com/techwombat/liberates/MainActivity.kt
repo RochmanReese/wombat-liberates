@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
         val rawText = OcrTextStore.rawText()
         if (rawText.isBlank()) {
             binding.statusText.text = "Capture raw OCR text before correcting it."
+            Toast.makeText(this, "Import or capture raw text first.", Toast.LENGTH_SHORT).show()
             return
         }
         correctionJob = lifecycleScope.launch {
@@ -157,7 +158,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startOllamaCorrection() {
-        if (correctionJob?.isActive == true) return
+        if (correctionJob?.isActive == true) {
+            binding.statusText.text = "A correction job is already running."
+            Toast.makeText(this, "A correction job is already running.", Toast.LENGTH_SHORT).show()
+            return
+        }
         val rawText = OcrTextStore.rawText()
         val baseUrl = binding.ollamaBaseUrl.text.toString().trim().trimEnd('/')
         val model = binding.ollamaModel.text.toString().trim()
@@ -165,12 +170,16 @@ class MainActivity : AppCompatActivity() {
         val password = binding.ollamaPassword.text.toString()
         if (rawText.isBlank()) {
             binding.statusText.text = "Capture raw OCR text before correcting it."
+            Toast.makeText(this, "Import or capture raw text first.", Toast.LENGTH_SHORT).show()
             return
         }
         if (!baseUrl.startsWith("https://") || model.isBlank() || username.isBlank() || password.isBlank()) {
             binding.statusText.text = "Enter an HTTPS Ollama URL, model, username, and password."
+            Toast.makeText(this, "Ollama connection details are incomplete.", Toast.LENGTH_SHORT).show()
             return
         }
+        binding.statusText.text = "Connecting to Ollama…"
+        Toast.makeText(this, "Connecting to Ollama…", Toast.LENGTH_SHORT).show()
         OllamaCredentialsStore.save(applicationContext, OllamaCredentialsStore.Credentials(baseUrl, model, username, password))
         correctionJob = lifecycleScope.launch {
             runOllamaCorrection(rawText, baseUrl, model, username, password)
@@ -218,8 +227,10 @@ class MainActivity : AppCompatActivity() {
                 OcrTextStore.appendCorrectedChunk(corrected)
             }
             binding.statusText.text = "$source correction complete: ${chunks.size} chunks saved separately."
+            Toast.makeText(this, "$source correction complete.", Toast.LENGTH_LONG).show()
         } catch (error: Exception) {
             binding.statusText.text = "$source correction stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
+            Toast.makeText(this, "$source correction failed: ${error.message ?: error.javaClass.simpleName}", Toast.LENGTH_LONG).show()
         } finally {
             binding.correctOnDeviceButton.isEnabled = true
             binding.correctOllamaButton.isEnabled = true
