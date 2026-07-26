@@ -32,20 +32,15 @@ class MainActivity : AppCompatActivity() {
             if (!isAccessibilityServiceEnabled()) showAccessibilitySetupDialog()
         }
         binding.stopButton.setOnClickListener {
-            KindleAccessibilityProbeService.stopManualCollection()
+            KindleAccessibilityProbeService.stopBatch()
             ProbeLog.stop()
             renderState()
         }
-        binding.startManualCollectionButton.setOnClickListener {
-            if (KindleAccessibilityProbeService.startManualCollection()) {
-                binding.statusText.text = "Manual collection active; switch to Kindle and turn pages yourself."
-            } else {
-                binding.statusText.text = "Start the probe and enable accessibility first."
-            }
-        }
-        binding.stopManualCollectionButton.setOnClickListener {
-            KindleAccessibilityProbeService.stopManualCollection()
-            binding.statusText.text = "Manual collection stopped."
+        binding.startThreePageBatchButton.setOnClickListener { startBatch(3) }
+        binding.startTenPageBatchButton.setOnClickListener { startBatch(10) }
+        binding.stopBatchButton.setOnClickListener {
+            KindleAccessibilityProbeService.stopBatch()
+            renderState()
         }
         binding.saveLogButton.setOnClickListener {
             saveOcrText.launch(exportFileName())
@@ -82,8 +77,20 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
+    private fun startBatch(pageCount: Int) {
+        if (KindleAccessibilityProbeService.startBatch(pageCount)) {
+            binding.statusText.text = "Batch armed for $pageCount pages; open Kindle at the starting page."
+        } else {
+            binding.statusText.text = "Start the probe and enable accessibility first."
+        }
+    }
+
     private fun renderState() {
-        binding.statusText.text = if (ProbeLog.isActive) "Probe: running (Kindle events only)" else "Probe: stopped"
+        binding.statusText.text = if (ProbeLog.isActive) {
+            "Probe: running. ${KindleAccessibilityProbeService.batchStatus()}"
+        } else {
+            "Probe: stopped"
+        }
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
         binding.logText.text = ProbeLog.snapshot()
