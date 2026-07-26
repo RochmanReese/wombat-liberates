@@ -1,0 +1,292 @@
+[16:58:58.411] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:58:58.423] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:58:58.425] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[16:58:59.780] TYPE_WINDOW_STATE_CHANGED
+event: Kindle
+source: (none)
+
+[16:58:59.905] TYPE_WINDOW_STATE_CHANGED
+event: Kindle 
+source: (none)
+
+[16:59:00.060] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:00.064] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:00.068] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:00.082] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[16:59:00.184] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:01.657] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[16:59:02.220] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:02.804] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:03.025] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[16:59:06.680] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:02:23.667] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:14.515] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:14.518] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:14.523] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:03:15.370] TYPE_WINDOW_STATE_CHANGED
+event: Kindle
+source: (none)
+
+[17:03:15.519] TYPE_WINDOW_STATE_CHANGED
+event: Kindle 
+source: (none)
+
+[17:03:15.648] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:15.652] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:15.656] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:15.672] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:03:15.774] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:16.797] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:03:16.900] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:17.420] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:17.791] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:18.872] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:18.977] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:18.992] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.087] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.188] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.306] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.406] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.875] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:19.974] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:20.499] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:20.601] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:20.704] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:20.800] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:03:21.816] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:50.416] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:50.430] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:50.435] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:11:51.465] TYPE_WINDOW_STATE_CHANGED
+event: Kindle
+source: (none)
+
+[17:11:51.645] TYPE_WINDOW_STATE_CHANGED
+event: Kindle 
+source: (none)
+
+[17:11:51.649] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:51.652] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:51.654] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:51.680] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:11:51.779] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:52.848] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:11:52.973] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:53.486] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:54.112] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:54.823] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:54.928] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:54.946] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:55.046] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:55.146] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:55.248] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:55.347] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:55.935] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.039] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.085] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.186] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.290] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.392] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:56.604] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:11:57.912] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
