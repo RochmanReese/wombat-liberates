@@ -62,6 +62,13 @@
             android:text="Arm one-page OCR capture" />
 
         <Button
+            android:id="@+id/clearLogButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Clear log from phone" />
+
+        <Button
             android:id="@+id/saveLogButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

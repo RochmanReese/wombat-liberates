@@ -37,6 +37,10 @@ class MainActivity : AppCompatActivity() {
         binding.saveLogButton.setOnClickListener {
             saveLog.launch("kindle-accessibility-probe.log")
         }
+        binding.clearLogButton.setOnClickListener {
+            ProbeLog.clear()
+            Toast.makeText(this, "Log cleared from this phone", Toast.LENGTH_SHORT).show()
+        }
         binding.armTreeSnapshotButton.setOnClickListener {
             val message = if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
                 "Snapshot armed. Switch to Kindle; its next event will be logged once."
