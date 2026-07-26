@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">Extracts readable text nodes from Kindle for conversion to EPUB audiobooks.</string>
+    <string name="accessibility_service_label">Wombat-Liberates Kindle Text Extractor</string>
+    <string name="app_name">Wombat-Liberates</string>
+</resources>
