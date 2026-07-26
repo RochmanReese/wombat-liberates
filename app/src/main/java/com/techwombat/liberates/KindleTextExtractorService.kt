@@ -1,20 +1,21 @@
 package com.techwombat.liberates
 
 import android.accessibilityservice.AccessibilityService
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
+import android.content.SharedPreferences
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
 import java.security.MessageDigest
 
 data class CapturedPage(
     val pageNumber: Int,
     val textLines: List<String>,
     val contentHash: String,
+    val packageName: String,
     val timestamp: Long = System.currentTimeMillis()
 )
 
@@ -22,64 +23,62 @@ class KindleTextExtractorService : AccessibilityService() {
 
     companion object {
         private const val TAG = "WOMBAT_LIBERATES"
+        private const val PREFS_NAME = "wombat_liberates_prefs"
         
-        const val ACTION_START_CAPTURE = "com.techwombat.liberates.START_CAPTURE"
-        const val ACTION_STOP_CAPTURE = "com.techwombat.liberates.STOP_CAPTURE"
-        const val ACTION_CLEAR_BUFFER = "com.techwombat.liberates.CLEAR_BUFFER"
-        const val ACTION_PAGE_CAPTURED = "com.techwombat.liberates.PAGE_CAPTURED"
-        
-        const val EXTRA_PAGE_COUNT = "extra_page_count"
-        const val EXTRA_LAST_LINE_COUNT = "extra_last_line_count"
-        const val EXTRA_LAST_PACKAGE = "extra_last_package"
-        
-        @Volatile var isCapturing: Boolean = false
-            private set
+        const val PREF_IS_CAPTURING = "is_capturing"
+        const val PREF_PAGE_COUNT = "page_count"
+        const val PREF_LAST_PACKAGE = "last_package"
+        const val PREF_LAST_LINE_COUNT = "last_line_count"
 
-        val capturedPages = mutableListOf<CapturedPage>()
-        var lastDetectedPackage: String = "None"
-    }
+        fun getPrefs(context: Context): SharedPreferences {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        }
 
-    private val controlReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                ACTION_START_CAPTURE -> {
-                    isCapturing = true
-                    Log.i(TAG, "=== Capture Mode ENABLED via Broadcast ===")
-                }
-                ACTION_STOP_CAPTURE -> {
-                    isCapturing = false
-                    Log.i(TAG, "=== Capture Mode DISABLED. Total pages captured: ${capturedPages.size} ===")
-                }
-                ACTION_CLEAR_BUFFER -> {
-                    synchronized(capturedPages) {
-                        capturedPages.clear()
+        fun isCapturing(context: Context): Boolean {
+            return getPrefs(context).getBoolean(PREF_IS_CAPTURING, false)
+        }
+
+        fun setCapturing(context: Context, capturing: Boolean) {
+            getPrefs(context).edit().putBoolean(PREF_IS_CAPTURING, capturing).apply()
+        }
+
+        fun clearPages(context: Context) {
+            getPrefs(context).edit()
+                .putInt(PREF_PAGE_COUNT, 0)
+                .putInt(PREF_LAST_LINE_COUNT, 0)
+                .putString(PREF_LAST_PACKAGE, "None")
+                .apply()
+            val file = File(context.filesDir, "captured_pages.json")
+            if (file.exists()) file.delete()
+        }
+
+        fun getCapturedPages(context: Context): List<CapturedPage> {
+            val file = File(context.filesDir, "captured_pages.json")
+            if (!file.exists()) return emptyList()
+            val pages = mutableListOf<CapturedPage>()
+            try {
+                val jsonArray = JSONArray(file.readText())
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    val linesArray = obj.getJSONArray("lines")
+                    val lines = mutableListOf<String>()
+                    for (j in 0 until linesArray.length()) {
+                        lines.add(linesArray.getString(j))
                     }
-                    Log.i(TAG, "=== Page Buffer Cleared ===")
+                    pages.add(
+                        CapturedPage(
+                            pageNumber = obj.getInt("pageNumber"),
+                            textLines = lines,
+                            contentHash = obj.getString("contentHash"),
+                            packageName = obj.optString("packageName", "unknown"),
+                            timestamp = obj.optLong("timestamp", System.currentTimeMillis())
+                        )
+                    )
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error reading captured_pages.json", e)
             }
-        }
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        val filter = IntentFilter().apply {
-            addAction(ACTION_START_CAPTURE)
-            addAction(ACTION_STOP_CAPTURE)
-            addAction(ACTION_CLEAR_BUFFER)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(controlReceiver, filter, RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(controlReceiver, filter)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        try {
-            unregisterReceiver(controlReceiver)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error unregistering receiver", e)
+            return pages
         }
     }
 
@@ -88,10 +87,11 @@ class KindleTextExtractorService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: ""
         if (packageName.isNotEmpty() && packageName != "com.techwombat.liberates") {
-            lastDetectedPackage = packageName
+            getPrefs(this).edit().putString(PREF_LAST_PACKAGE, packageName).apply()
         }
 
-        if (!isCapturing) return
+        val capturing = isCapturing(this)
+        if (!capturing) return
 
         val rootNode = rootInActiveWindow ?: return
 
@@ -103,38 +103,58 @@ class KindleTextExtractorService : AccessibilityService() {
         val combinedContent = extractedLines.joinToString("\n")
         val contentHash = computeHash(combinedContent)
 
-        synchronized(capturedPages) {
-            val lastPage = capturedPages.lastOrNull()
-            
-            // Deduplication Check 1: Exact Hash Match
-            if (lastPage != null && lastPage.contentHash == contentHash) {
-                return
+        val existingPages = getCapturedPages(this).toMutableList()
+        val lastPage = existingPages.lastOrNull()
+
+        // Deduplication Check 1: Exact Hash Match
+        if (lastPage != null && lastPage.contentHash == contentHash) {
+            return
+        }
+
+        // Deduplication Check 2: High Content Similarity (>85% character overlap)
+        if (lastPage != null && isSimilarContent(lastPage.textLines.joinToString("\n"), combinedContent)) {
+            Log.d(TAG, "Skipped duplicate/similar page redraw.")
+            return
+        }
+
+        val newPageNum = existingPages.size + 1
+        val newPage = CapturedPage(
+            pageNumber = newPageNum,
+            textLines = extractedLines,
+            contentHash = contentHash,
+            packageName = packageName
+        )
+
+        existingPages.add(newPage)
+        savePages(existingPages)
+
+        getPrefs(this).edit()
+            .putInt(PREF_PAGE_COUNT, newPageNum)
+            .putInt(PREF_LAST_LINE_COUNT, extractedLines.size)
+            .apply()
+
+        Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
+    }
+
+    private fun savePages(pages: List<CapturedPage>) {
+        try {
+            val jsonArray = JSONArray()
+            for (p in pages) {
+                val obj = JSONObject().apply {
+                    put("pageNumber", p.pageNumber)
+                    put("contentHash", p.contentHash)
+                    put("packageName", p.packageName)
+                    put("timestamp", p.timestamp)
+                    val linesArr = JSONArray()
+                    p.textLines.forEach { linesArr.put(it) }
+                    put("lines", linesArr)
+                }
+                jsonArray.put(obj)
             }
-
-            // Deduplication Check 2: High Content Similarity (>85% character overlap)
-            if (lastPage != null && isSimilarContent(lastPage.textLines.joinToString("\n"), combinedContent)) {
-                Log.d(TAG, "Skipped duplicate/similar page redraw.")
-                return
-            }
-
-            val newPageNum = capturedPages.size + 1
-            val newPage = CapturedPage(
-                pageNumber = newPageNum,
-                textLines = extractedLines,
-                contentHash = contentHash
-            )
-
-            capturedPages.add(newPage)
-            Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
-
-            // Broadcast page update to MainActivity
-            val updateIntent = Intent(ACTION_PAGE_CAPTURED).apply {
-                putExtra(EXTRA_PAGE_COUNT, newPageNum)
-                putExtra(EXTRA_LAST_LINE_COUNT, extractedLines.size)
-                putExtra(EXTRA_LAST_PACKAGE, packageName)
-                setPackage("com.techwombat.liberates")
-            }
-            sendBroadcast(updateIntent)
+            val file = File(filesDir, "captured_pages.json")
+            file.writeText(jsonArray.toString(2))
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving pages to disk", e)
         }
     }
 

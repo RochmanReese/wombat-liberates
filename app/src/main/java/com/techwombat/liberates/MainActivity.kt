@@ -1,11 +1,7 @@
 package com.techwombat.liberates
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
@@ -18,17 +14,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusTv: TextView
     private lateinit var pageCountTv: TextView
     private lateinit var lastPkgTv: TextView
-
-    private val pageUpdateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == KindleTextExtractorService.ACTION_PAGE_CAPTURED) {
-                val pageCount = intent.getIntExtra(KindleTextExtractorService.EXTRA_PAGE_COUNT, 0)
-                val lineCount = intent.getIntExtra(KindleTextExtractorService.EXTRA_LAST_LINE_COUNT, 0)
-                val lastPkg = intent.getStringExtra(KindleTextExtractorService.EXTRA_LAST_PACKAGE) ?: ""
-                updateUI(pageCount, lineCount, lastPkg)
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         layout.addView(pageCountTv)
 
         lastPkgTv = TextView(this).apply {
-            text = "Last App: ${KindleTextExtractorService.lastDetectedPackage}"
+            text = "Last App: None"
             textSize = 14f
             setTextColor(Color.GRAY)
             setPadding(0, 0, 0, 36)
@@ -83,9 +68,8 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.WHITE)
             textSize = 16f
             setOnClickListener {
-                sendControlIntent(KindleTextExtractorService.ACTION_START_CAPTURE)
-                statusTv.text = "Capture Status: RUNNING"
-                statusTv.setTextColor(Color.parseColor("#2E7D32"))
+                KindleTextExtractorService.setCapturing(this@MainActivity, true)
+                syncStateUI()
             }
         }
         layout.addView(startBtn)
@@ -96,9 +80,8 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.WHITE)
             textSize = 16f
             setOnClickListener {
-                sendControlIntent(KindleTextExtractorService.ACTION_STOP_CAPTURE)
-                statusTv.text = "Capture Status: STOPPED"
-                statusTv.setTextColor(Color.RED)
+                KindleTextExtractorService.setCapturing(this@MainActivity, false)
+                syncStateUI()
             }
         }
         layout.addView(stopBtn)
@@ -107,8 +90,8 @@ class MainActivity : AppCompatActivity() {
             text = "🗑 CLEAR BUFFER"
             textSize = 16f
             setOnClickListener {
-                sendControlIntent(KindleTextExtractorService.ACTION_CLEAR_BUFFER)
-                updateUI(0, 0, "None")
+                KindleTextExtractorService.clearPages(this@MainActivity)
+                syncStateUI()
             }
         }
         layout.addView(clearBtn)
@@ -125,46 +108,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(layout)
     }
 
-    private fun sendControlIntent(action: String) {
-        val intent = Intent(action).apply {
-            setPackage("com.techwombat.liberates")
-        }
-        sendBroadcast(intent)
-    }
-
     override fun onResume() {
         super.onResume()
-        val filter = IntentFilter(KindleTextExtractorService.ACTION_PAGE_CAPTURED)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(pageUpdateReceiver, filter, RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(pageUpdateReceiver, filter)
-        }
-
-        // Sync initial state
-        val count = KindleTextExtractorService.capturedPages.size
-        val isRunning = KindleTextExtractorService.isCapturing
-        statusTv.text = if (isRunning) "Capture Status: RUNNING" else "Capture Status: STOPPED"
-        statusTv.setTextColor(if (isRunning) Color.parseColor("#2E7D32") else Color.RED)
-        pageCountTv.text = "Pages Captured: $count"
-        lastPkgTv.text = "Last App: ${KindleTextExtractorService.lastDetectedPackage}"
+        syncStateUI()
     }
 
-    override fun onPause() {
-        super.onPause()
-        try {
-            unregisterReceiver(pageUpdateReceiver)
-        } catch (e: Exception) {
-            // Ignore
-        }
-    }
+    private fun syncStateUI() {
+        val prefs = KindleTextExtractorService.getPrefs(this)
+        val isRunning = prefs.getBoolean(KindleTextExtractorService.PREF_IS_CAPTURING, false)
+        val pageCount = prefs.getInt(KindleTextExtractorService.PREF_PAGE_COUNT, 0)
+        val lineCount = prefs.getInt(KindleTextExtractorService.PREF_LAST_LINE_COUNT, 0)
+        val lastPkg = prefs.getString(KindleTextExtractorService.PREF_LAST_PACKAGE, "None") ?: "None"
 
-    private fun updateUI(pageCount: Int, lineCount: Int, lastPkg: String) {
         runOnUiThread {
+            statusTv.text = if (isRunning) "Capture Status: RUNNING" else "Capture Status: STOPPED"
+            statusTv.setTextColor(if (isRunning) Color.parseColor("#2E7D32") else Color.RED)
             pageCountTv.text = "Pages Captured: $pageCount (Last page: $lineCount lines)"
-            if (lastPkg.isNotEmpty()) {
-                lastPkgTv.text = "Last App: $lastPkg"
-            }
+            lastPkgTv.text = "Last App Detected: $lastPkg"
         }
     }
 }
