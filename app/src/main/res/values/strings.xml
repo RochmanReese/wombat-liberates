@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Wombat-Liberates</string>
+    <string name="accessibility_service_label">Wombat-Liberates Kindle Text Extractor</string>
+    <string name="accessibility_service_description">Extracts readable text nodes from Kindle for conversion to EPUB audiobooks.</string>
+</resources>
