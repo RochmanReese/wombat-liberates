@@ -290,3 +290,107 @@ source: (none)
 event: (none)
 source: (none)
 
+[17:21:10.353] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:10.410] TYPE_WINDOW_STATE_CHANGED
+event: Kindle Home
+source: (none)
+
+[17:21:10.442] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:10.542] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:10.889] TYPE_VIEW_ACCESSIBILITY_FOCUSED
+event: Search Kindle
+source: (none)
+
+[17:21:13.739] TYPE_VIEW_ACCESSIBILITY_FOCUSED
+event: (none)
+source: (none)
+
+[17:21:14.924] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:14.929] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:21:14.937] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:15.140] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:15.158] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.051] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.116] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.138] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.205] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.362] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:17.462] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:22.140] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:23.957] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:46.899] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:21:47.003] TYPE_WINDOW_STATE_CHANGED
+event: (none)
+source: (none)
+
+[17:21:47.313] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:22:20.889] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:22:20.933] TYPE_WINDOW_CONTENT_CHANGED
+event: (none)
+source: (none)
+
+[17:22:20.963] TYPE_VIEW_ACCESSIBILITY_FOCUSED
+event: (none)
+source: Close Book.
+
+[17:22:23.332] TYPE_VIEW_ACCESSIBILITY_FOCUSED
+event: (none)
+source: Book Actions Menu. Exit
+
