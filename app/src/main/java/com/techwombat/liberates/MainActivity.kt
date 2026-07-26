@@ -19,10 +19,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PersistentProbeLog.initialize(applicationContext)
+        OcrTextStore.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val saveLog = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-            if (uri != null) writeLogTo(uri)
+        val saveOcrText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+            if (uri != null) writeOcrTextTo(uri)
         }
 
         binding.startButton.setOnClickListener {
@@ -35,27 +36,26 @@ class MainActivity : AppCompatActivity() {
             renderState()
         }
         binding.saveLogButton.setOnClickListener {
-            saveLog.launch(exportFileName())
+            saveOcrText.launch(exportFileName())
         }
         binding.clearLogButton.setOnClickListener {
             ProbeLog.clear()
-            Toast.makeText(this, "Log cleared from this phone", Toast.LENGTH_SHORT).show()
+            OcrTextStore.clear()
+            Toast.makeText(this, "Captured OCR text and diagnostics cleared", Toast.LENGTH_SHORT).show()
         }
         binding.armTreeSnapshotButton.setOnClickListener {
-            val message = if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
-                "Snapshot armed. Switch to Kindle; its next event will be logged once."
+            if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
+                binding.statusText.text = "Tree snapshot armed; switch to Kindle."
             } else {
-                "Start the probe and enable its accessibility service before arming a snapshot."
+                binding.statusText.text = "Start the probe and enable accessibility first."
             }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
         binding.armOcrButton.setOnClickListener {
-            val message = if (KindleAccessibilityProbeService.armOnePageOcrCapture()) {
-                "OCR capture armed. Switch to Kindle; its next event will be captured once."
+            if (KindleAccessibilityProbeService.armOnePageOcrCapture()) {
+                binding.statusText.text = "One-page OCR armed; switch to Kindle."
             } else {
-                "Start the probe and enable its accessibility service before arming OCR."
+                binding.statusText.text = "Start the probe and enable accessibility first."
             }
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -85,11 +85,11 @@ class MainActivity : AppCompatActivity() {
         return if (safeName.endsWith(".txt", ignoreCase = true)) safeName else "$safeName.txt"
     }
 
-    private fun writeLogTo(destination: Uri) {
+    private fun writeOcrTextTo(destination: Uri) {
         contentResolver.openOutputStream(destination)?.use { output ->
-            PersistentProbeLog.file().inputStream().use { input -> input.copyTo(output) }
+            OcrTextStore.file().inputStream().use { input -> input.copyTo(output) }
         } ?: return
-        Toast.makeText(this, "Log file saved", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Clean OCR text saved", Toast.LENGTH_SHORT).show()
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {

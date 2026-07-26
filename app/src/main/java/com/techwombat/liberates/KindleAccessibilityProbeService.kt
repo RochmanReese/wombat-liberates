@@ -8,6 +8,7 @@ import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.text.SimpleDateFormat
@@ -29,6 +30,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         PersistentProbeLog.initialize(applicationContext)
+        OcrTextStore.initialize(applicationContext)
         activeService = this
     }
 
@@ -88,11 +90,12 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         textRecognizer.process(image)
             .addOnSuccessListener(ocrExecutor) { result ->
                 bitmap.recycle()
-                val text = result.text.trim()
+                val text = cleanRecognizedText(result)
                 if (text.isBlank()) {
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "No text recognized.")
                 } else {
-                    ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", text)
+                    OcrTextStore.appendPage(text)
+                    ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "Clean text saved for export:\n$text")
                 }
             }
             .addOnFailureListener(ocrExecutor) { error ->
@@ -102,6 +105,25 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                     "Recognition failed: ${error.message ?: error.javaClass.simpleName}",
                 )
             }
+    }
+
+    private fun cleanRecognizedText(result: Text): String = result.textBlocks
+        .map { block -> block.lines.map { line -> line.text.trim() }.filter { it.isNotBlank() } }
+        .filter { it.isNotEmpty() }
+        .joinToString("\n\n") { lines -> joinVisualLines(lines) }
+
+    private fun joinVisualLines(lines: List<String>): String = buildString {
+        lines.forEachIndexed { index, line ->
+            if (index == 0) {
+                append(line)
+            } else if (endsWith("-")) {
+                deleteCharAt(length - 1)
+                append(line)
+            } else {
+                append(' ')
+                append(line)
+            }
+        }
     }
 
     private fun screenshotError(errorCode: Int): String = when (errorCode) {
