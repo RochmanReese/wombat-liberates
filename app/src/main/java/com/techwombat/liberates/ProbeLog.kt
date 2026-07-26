@@ -29,6 +29,7 @@ object ProbeLog {
         if (!isActive) return
         val timestamp = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date())
         entries.addLast("[$timestamp] $eventName\nevent: $eventText\nsource: $sourceText")
+        PersistentProbeLog.append("[$timestamp] $eventName\nevent: $eventText\nsource: $sourceText")
         while (entries.size > MAX_ENTRIES) entries.removeFirst()
         notifyListeners()
     }
