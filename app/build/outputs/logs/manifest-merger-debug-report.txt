@@ -4,47 +4,47 @@ ADDED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:2:1-37:12
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:2:1-37:12
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:2:1-37:12
-MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/85153b7b9507a555613a913901420db7/transformed/material-1.12.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/53f2f6b51a3b073a8b2a2330eacb66ec/transformed/constraintlayout-2.2.0/AndroidManifest.xml:2:1-9:12
-MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/a391f7450838d503f855abea2a173e25/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/812015bedb3c5347d72556072e5816b0/transformed/appcompat-1.7.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/b41b51819123e36f86a633ed63a55b95/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:17:1-35:12
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/694998f4268d7211eca2aef427accf81/transformed/viewpager2-1.0.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/9565dee82e301ac936a3f43da6252cfc/transformed/fragment-1.5.4/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/c0842464f30d832c0eae0a93a3da2dc1/transformed/activity-1.8.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/dd2119b7972312c5b22e560bedb77e3d/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd310b0015a150a27b5dbe8fec3b4368/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/aa3453042ca6ae08a2e786b10135454d/transformed/transition-1.5.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/3386c1a0a9c75e73318d8dea7e3911cc/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/960c725b3892dd261c909669f5aac5e9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/34f3728cf68e16d64810ccaac8117c1d/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/eedd8e6b18dca44d42d5932428bf2481/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/99079849086cafb34afb372d92b97e27/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/9bf9885f7eb0884fcc53e0a9d8c3cc7c/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/5fca671751d8190f9559c7165f4f1c1b/transformed/recyclerview-1.1.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/6f8582edea94eada0f74cb90e25264d3/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
-MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:17:1-30:12
-MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/db81f5a0693a14c6c077319a93d02e23/transformed/savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/315b64bb1968aeb476558d1fc3b92e2b/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/9d9558b90774efe334aae28abad08e75/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:17:1-35:12
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/128bd22e75f8384a216a1761c625c029/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e319556baceac5add3e1e45331863141/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e6efda4b83c2f75bfcd0936c26a9fbda/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/35c5d8f84d0d8d5d9fced3a869d06bca/transformed/core-ktx-1.15.0/AndroidManifest.xml:2:1-7:12
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/134dce5c59ebe0a059c503ee3ac57e30/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/dc984bee366950133bfeb2be9035eb23/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:17:1-55:12
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a0e2ef31d74829636454c82a1ed6d766/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
-MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/057a46749af5db441d2f16bbfe04de41/transformed/tracing-1.2.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/f04248379c9c55d04466ce8a9bd64b6a/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
-MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/d7cdf69413ae8a1192d452059411a067/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/26828ac9d2231ef248888a18ac4e96f6/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a99b22c7dc652429521b5bd36002edc2/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a546bc1b4ad20d0a8c0d328662c341c9/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/71efc5ce5cf1b8e6e10221d9f2e1a443/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/5f7300f370742532b20193ca559d9f62/transformed/material-1.12.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/baa0146ffd8ab49c691547115c93456c/transformed/constraintlayout-2.2.0/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/9a84792cff4833d9ecd7e72b62e2d186/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/47a18bae8a4f26b076f704aaffc74e58/transformed/appcompat-1.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/92ccd85bb63045032116e6f046a1f2f3/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/e389a949f195a3aec8d6ace7fab58b1a/transformed/viewpager2-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/365a964bfd3ee491b34e8933c59d58d7/transformed/fragment-1.5.4/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/3838005e4c203590f0f85a0b0a494308/transformed/activity-1.8.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/08fe2da21de0b5f8bb30487a02ac1c14/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/60221b3f126a89a63742d3b5f9df3eac/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/37d16cc3f85ebebb609159fb06aa3bdf/transformed/transition-1.5.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/f4179f85491eae47f4bc300e6af5e03d/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/621095ec3c22945b543c7f1ca477f82e/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3d70f67684d6bd82da4f18fa8a5dbccf/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/90cd8fc3d58962cc0847fe35434e618c/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a6cec1715d7526eb5720094206ce1008/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/29b484d14b04914e45285cdfd02c591a/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3ca260742a48b7d60b957acc18f058d8/transformed/recyclerview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/ddd79e67b6806e5f52b2e0a8d4c729da/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/cec5005bd3da1606c4f946612d4e6a06/transformed/savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/7305650c28ca760bd1a1189d7f02dbf7/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e519baa08352c8ff4a31c8280c677f21/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/eede25b33298ae8c157632075ab0e8bd/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/118286d881bd2c553e4324d9e6784bdb/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/11de3ebc18b5b3bf664878d2ebba7463/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/02a945212833dea64f1586ded0900c03/transformed/core-ktx-1.15.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/ea0b743fee0c8c61ad7681a52ca325e6/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cb170205673a52405c9d8cbb529af277/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/c80f6d4960af5817d02534b15b54586a/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/05c3a52971a05bdf46ae65d66506f732/transformed/tracing-1.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/b088dfa0d5cc38fb0c2900bb3a97b731/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/ee19ff88e5dfe8747bd5787980f9dcd5/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/da2428fda0bf61e51f42c6e1c00ff46e/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd688270bf58b9c273a822ee2867a2ca/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/76e9aec31ee9c591bc1f0cc30aa4fe21/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/df202ee35ff3fb42f0ec8c71ca7f84b3/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
 	package
 		INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
 	android:versionName
@@ -60,26 +60,26 @@ ADDED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:
 application
 ADDED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:6:5-35:19
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:6:5-35:19
-MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/85153b7b9507a555613a913901420db7/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
-MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/85153b7b9507a555613a913901420db7/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
-MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/53f2f6b51a3b073a8b2a2330eacb66ec/transformed/constraintlayout-2.2.0/AndroidManifest.xml:7:5-20
-MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/53f2f6b51a3b073a8b2a2330eacb66ec/transformed/constraintlayout-2.2.0/AndroidManifest.xml:7:5-20
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:28:5-89
-MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:28:5-89
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/f04248379c9c55d04466ce8a9bd64b6a/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/f04248379c9c55d04466ce8a9bd64b6a/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/5f7300f370742532b20193ca559d9f62/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/5f7300f370742532b20193ca559d9f62/transformed/material-1.12.0/AndroidManifest.xml:22:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/baa0146ffd8ab49c691547115c93456c/transformed/constraintlayout-2.2.0/AndroidManifest.xml:7:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/baa0146ffd8ab49c691547115c93456c/transformed/constraintlayout-2.2.0/AndroidManifest.xml:7:5-20
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/b088dfa0d5cc38fb0c2900bb3a97b731/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/b088dfa0d5cc38fb0c2900bb3a97b731/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
 	android:extractNativeLibs
 		INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
 	android:appComponentFactory
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
 		ADDED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml:9:9-35
 	android:label
@@ -130,179 +130,179 @@ uses-sdk
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
 INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
-MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/85153b7b9507a555613a913901420db7/transformed/material-1.12.0/AndroidManifest.xml:20:5-44
-MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/85153b7b9507a555613a913901420db7/transformed/material-1.12.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/53f2f6b51a3b073a8b2a2330eacb66ec/transformed/constraintlayout-2.2.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/53f2f6b51a3b073a8b2a2330eacb66ec/transformed/constraintlayout-2.2.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/a391f7450838d503f855abea2a173e25/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/a391f7450838d503f855abea2a173e25/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/812015bedb3c5347d72556072e5816b0/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/812015bedb3c5347d72556072e5816b0/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/b41b51819123e36f86a633ed63a55b95/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/b41b51819123e36f86a633ed63a55b95/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/694998f4268d7211eca2aef427accf81/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/694998f4268d7211eca2aef427accf81/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/9565dee82e301ac936a3f43da6252cfc/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/9565dee82e301ac936a3f43da6252cfc/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/c0842464f30d832c0eae0a93a3da2dc1/transformed/activity-1.8.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/c0842464f30d832c0eae0a93a3da2dc1/transformed/activity-1.8.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/dd2119b7972312c5b22e560bedb77e3d/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/dd2119b7972312c5b22e560bedb77e3d/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd310b0015a150a27b5dbe8fec3b4368/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd310b0015a150a27b5dbe8fec3b4368/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/aa3453042ca6ae08a2e786b10135454d/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/aa3453042ca6ae08a2e786b10135454d/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/3386c1a0a9c75e73318d8dea7e3911cc/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/3386c1a0a9c75e73318d8dea7e3911cc/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/960c725b3892dd261c909669f5aac5e9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/960c725b3892dd261c909669f5aac5e9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/34f3728cf68e16d64810ccaac8117c1d/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/34f3728cf68e16d64810ccaac8117c1d/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/eedd8e6b18dca44d42d5932428bf2481/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/eedd8e6b18dca44d42d5932428bf2481/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/99079849086cafb34afb372d92b97e27/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/99079849086cafb34afb372d92b97e27/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/9bf9885f7eb0884fcc53e0a9d8c3cc7c/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/9bf9885f7eb0884fcc53e0a9d8c3cc7c/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/5fca671751d8190f9559c7165f4f1c1b/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/5fca671751d8190f9559c7165f4f1c1b/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/6f8582edea94eada0f74cb90e25264d3/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/6f8582edea94eada0f74cb90e25264d3/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/db81f5a0693a14c6c077319a93d02e23/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/db81f5a0693a14c6c077319a93d02e23/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/315b64bb1968aeb476558d1fc3b92e2b/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/315b64bb1968aeb476558d1fc3b92e2b/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/9d9558b90774efe334aae28abad08e75/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/9d9558b90774efe334aae28abad08e75/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/128bd22e75f8384a216a1761c625c029/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/128bd22e75f8384a216a1761c625c029/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e319556baceac5add3e1e45331863141/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
-MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e319556baceac5add3e1e45331863141/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e6efda4b83c2f75bfcd0936c26a9fbda/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e6efda4b83c2f75bfcd0936c26a9fbda/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
-MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/35c5d8f84d0d8d5d9fced3a869d06bca/transformed/core-ktx-1.15.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/35c5d8f84d0d8d5d9fced3a869d06bca/transformed/core-ktx-1.15.0/AndroidManifest.xml:5:5-44
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/134dce5c59ebe0a059c503ee3ac57e30/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/134dce5c59ebe0a059c503ee3ac57e30/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/dc984bee366950133bfeb2be9035eb23/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/dc984bee366950133bfeb2be9035eb23/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a0e2ef31d74829636454c82a1ed6d766/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a0e2ef31d74829636454c82a1ed6d766/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
-MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/057a46749af5db441d2f16bbfe04de41/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/057a46749af5db441d2f16bbfe04de41/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/f04248379c9c55d04466ce8a9bd64b6a/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/f04248379c9c55d04466ce8a9bd64b6a/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
-MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/d7cdf69413ae8a1192d452059411a067/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/d7cdf69413ae8a1192d452059411a067/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/26828ac9d2231ef248888a18ac4e96f6/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/26828ac9d2231ef248888a18ac4e96f6/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a99b22c7dc652429521b5bd36002edc2/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a99b22c7dc652429521b5bd36002edc2/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a546bc1b4ad20d0a8c0d328662c341c9/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a546bc1b4ad20d0a8c0d328662c341c9/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/71efc5ce5cf1b8e6e10221d9f2e1a443/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
-MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/71efc5ce5cf1b8e6e10221d9f2e1a443/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/5f7300f370742532b20193ca559d9f62/transformed/material-1.12.0/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.12.0] /home/wombat/.gradle/caches/8.14.3/transforms/5f7300f370742532b20193ca559d9f62/transformed/material-1.12.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/baa0146ffd8ab49c691547115c93456c/transformed/constraintlayout-2.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/baa0146ffd8ab49c691547115c93456c/transformed/constraintlayout-2.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/9a84792cff4833d9ecd7e72b62e2d186/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/9a84792cff4833d9ecd7e72b62e2d186/transformed/appcompat-resources-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/47a18bae8a4f26b076f704aaffc74e58/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.0] /home/wombat/.gradle/caches/8.14.3/transforms/47a18bae8a4f26b076f704aaffc74e58/transformed/appcompat-1.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/92ccd85bb63045032116e6f046a1f2f3/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/92ccd85bb63045032116e6f046a1f2f3/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/e389a949f195a3aec8d6ace7fab58b1a/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/e389a949f195a3aec8d6ace7fab58b1a/transformed/viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/365a964bfd3ee491b34e8933c59d58d7/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.5.4] /home/wombat/.gradle/caches/8.14.3/transforms/365a964bfd3ee491b34e8933c59d58d7/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/3838005e4c203590f0f85a0b0a494308/transformed/activity-1.8.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.8.0] /home/wombat/.gradle/caches/8.14.3/transforms/3838005e4c203590f0f85a0b0a494308/transformed/activity-1.8.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/08fe2da21de0b5f8bb30487a02ac1c14/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/08fe2da21de0b5f8bb30487a02ac1c14/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/60221b3f126a89a63742d3b5f9df3eac/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/60221b3f126a89a63742d3b5f9df3eac/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/37d16cc3f85ebebb609159fb06aa3bdf/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.transition:transition:1.5.0] /home/wombat/.gradle/caches/8.14.3/transforms/37d16cc3f85ebebb609159fb06aa3bdf/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/f4179f85491eae47f4bc300e6af5e03d/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/f4179f85491eae47f4bc300e6af5e03d/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/621095ec3c22945b543c7f1ca477f82e/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/621095ec3c22945b543c7f1ca477f82e/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3d70f67684d6bd82da4f18fa8a5dbccf/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3d70f67684d6bd82da4f18fa8a5dbccf/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/90cd8fc3d58962cc0847fe35434e618c/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/90cd8fc3d58962cc0847fe35434e618c/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a6cec1715d7526eb5720094206ce1008/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/a6cec1715d7526eb5720094206ce1008/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/29b484d14b04914e45285cdfd02c591a/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/29b484d14b04914e45285cdfd02c591a/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3ca260742a48b7d60b957acc18f058d8/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/3ca260742a48b7d60b957acc18f058d8/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/ddd79e67b6806e5f52b2e0a8d4c729da/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /home/wombat/.gradle/caches/8.14.3/transforms/ddd79e67b6806e5f52b2e0a8d4c729da/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/cec5005bd3da1606c4f946612d4e6a06/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/wombat/.gradle/caches/8.14.3/transforms/cec5005bd3da1606c4f946612d4e6a06/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/7305650c28ca760bd1a1189d7f02dbf7/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/7305650c28ca760bd1a1189d7f02dbf7/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e519baa08352c8ff4a31c8280c677f21/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/e519baa08352c8ff4a31c8280c677f21/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/eede25b33298ae8c157632075ab0e8bd/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/eede25b33298ae8c157632075ab0e8bd/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/118286d881bd2c553e4324d9e6784bdb/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/118286d881bd2c553e4324d9e6784bdb/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/11de3ebc18b5b3bf664878d2ebba7463/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/11de3ebc18b5b3bf664878d2ebba7463/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/02a945212833dea64f1586ded0900c03/transformed/core-ktx-1.15.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/02a945212833dea64f1586ded0900c03/transformed/core-ktx-1.15.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/ea0b743fee0c8c61ad7681a52ca325e6/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/ea0b743fee0c8c61ad7681a52ca325e6/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cb170205673a52405c9d8cbb529af277/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cb170205673a52405c9d8cbb529af277/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/c80f6d4960af5817d02534b15b54586a/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/c80f6d4960af5817d02534b15b54586a/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/05c3a52971a05bdf46ae65d66506f732/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/05c3a52971a05bdf46ae65d66506f732/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/b088dfa0d5cc38fb0c2900bb3a97b731/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/b088dfa0d5cc38fb0c2900bb3a97b731/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/ee19ff88e5dfe8747bd5787980f9dcd5/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/wombat/.gradle/caches/8.14.3/transforms/ee19ff88e5dfe8747bd5787980f9dcd5/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/da2428fda0bf61e51f42c6e1c00ff46e/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/da2428fda0bf61e51f42c6e1c00ff46e/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd688270bf58b9c273a822ee2867a2ca/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/cd688270bf58b9c273a822ee2867a2ca/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/76e9aec31ee9c591bc1f0cc30aa4fe21/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/wombat/.gradle/caches/8.14.3/transforms/76e9aec31ee9c591bc1f0cc30aa4fe21/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/df202ee35ff3fb42f0ec8c71ca7f84b3/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /home/wombat/.gradle/caches/8.14.3/transforms/df202ee35ff3fb42f0ec8c71ca7f84b3/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
 	android:targetSdkVersion
 		INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
 		INJECTED from /home/wombat/repos/wombat-liberates/app/src/main/AndroidManifest.xml
 provider#androidx.startup.InitializationProvider
-ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
-MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/0f29a904ba8696b50021d4ae2a9ef43e/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/wombat/.gradle/caches/8.14.3/transforms/c8f0e3cedb84e00d613d771f11ad8255/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
 	tools:node
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:28:13-31
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:28:13-31
 	android:authorities
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
 	android:exported
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
 	android:name
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
 meta-data#androidx.emoji2.text.EmojiCompatInitializer
-ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/2d4ec70857c9560b3a6e256c33ae0c78/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /home/wombat/.gradle/caches/8.14.3/transforms/4f45a83438a24fbd38dcecee94c98a8f/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
 permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
 	android:name
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
 permission#com.techwombat.liberates.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
 	android:name
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
 uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
 	android:name
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
 uses-permission#com.techwombat.liberates.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
-ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
 	android:name
-		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/618c0c2ee5b7e00bda92201fb7491b4d/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+		ADDED from [androidx.core:core:1.15.0] /home/wombat/.gradle/caches/8.14.3/transforms/29c728060228dab33e0fbb27720de795/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
 meta-data#androidx.lifecycle.ProcessLifecycleInitializer
-ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/53d295dcf0db48db79d78c3eb0167f4a/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /home/wombat/.gradle/caches/8.14.3/transforms/1ddf0b21b59a5a13cfdfdebcdeb10bec/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
 meta-data#androidx.profileinstaller.ProfileInstallerInitializer
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
 	android:value
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
 receiver#androidx.profileinstaller.ProfileInstallReceiver
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
 	android:enabled
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
 	android:exported
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
 	android:permission
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
 	android:directBootAware
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
 intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
 action#androidx.profileinstaller.action.INSTALL_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
 intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
 action#androidx.profileinstaller.action.SKIP_FILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
 intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
 action#androidx.profileinstaller.action.SAVE_PROFILE
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
 intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
 action#androidx.profileinstaller.action.BENCHMARK_OPERATION
-ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
 	android:name
-		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/e47b787ea3486a55dad851a8ced1d686/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /home/wombat/.gradle/caches/8.14.3/transforms/4d9a0998e8ee3d9fb77c45b6d9249bb8/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
