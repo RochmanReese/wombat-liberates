@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.techwombat.liberates.app-debug-32:/xml_accessibility_service_config.xml.flat",
+        "source": "com.techwombat.liberates.app-main-34:/xml/accessibility_service_config.xml"
+    },
+    {
+        "merged": "/home/wombat/.gradle/daemon/8.14.3/com.techwombat.liberates.app-debug-32:/xml_accessibility_service_config.xml.flat",
+        "source": "/home/wombat/.gradle/daemon/8.14.3/com.techwombat.liberates.app-main-34:/xml/accessibility_service_config.xml"
+    }
+]

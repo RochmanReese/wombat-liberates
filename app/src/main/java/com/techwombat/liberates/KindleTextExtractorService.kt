@@ -1,8 +1,12 @@
 package com.techwombat.liberates
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Path
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -26,6 +30,7 @@ class KindleTextExtractorService : AccessibilityService() {
         private const val PREFS_NAME = "wombat_liberates_prefs"
         
         const val PREF_IS_CAPTURING = "is_capturing"
+        const val PREF_AUTO_SWIPE = "auto_swipe"
         const val PREF_PAGE_COUNT = "page_count"
         const val PREF_LAST_PACKAGE = "last_package"
         const val PREF_LAST_LINE_COUNT = "last_line_count"
@@ -40,6 +45,14 @@ class KindleTextExtractorService : AccessibilityService() {
 
         fun setCapturing(context: Context, capturing: Boolean) {
             getPrefs(context).edit().putBoolean(PREF_IS_CAPTURING, capturing).apply()
+        }
+
+        fun isAutoSwipe(context: Context): Boolean {
+            return getPrefs(context).getBoolean(PREF_AUTO_SWIPE, false)
+        }
+
+        fun setAutoSwipe(context: Context, enabled: Boolean) {
+            getPrefs(context).edit().putBoolean(PREF_AUTO_SWIPE, enabled).apply()
         }
 
         fun clearPages(context: Context) {
@@ -81,6 +94,9 @@ class KindleTextExtractorService : AccessibilityService() {
             return pages
         }
     }
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var isSwipePending = false
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
@@ -134,6 +150,61 @@ class KindleTextExtractorService : AccessibilityService() {
             .apply()
 
         Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
+
+        // Trigger Auto-Swipe if enabled
+        if (isAutoSwipe(this) && !isSwipePending) {
+            scheduleNextSwipe()
+        }
+    }
+
+    fun dispatchSwipeGesture() {
+        val displayMetrics = resources.displayMetrics
+        val width = displayMetrics.widthPixels.toFloat()
+        val height = displayMetrics.heightPixels.toFloat()
+
+        val startX = width * 0.85f
+        val endX = width * 0.15f
+        val startY = height * 0.5f
+
+        val swipePath = Path().apply {
+            moveTo(startX, startY)
+            lineTo(endX, startY)
+        }
+
+        val gestureBuilder = GestureDescription.Builder()
+        val stroke = GestureDescription.StrokeDescription(swipePath, 0, 200)
+        gestureBuilder.addStroke(stroke)
+
+        Log.d(TAG, "Dispatching page-swipe gesture (X: $startX -> $endX)")
+
+        dispatchGesture(
+            gestureBuilder.build(),
+            object : GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription?) {
+                    super.onCompleted(gestureDescription)
+                    Log.d(TAG, "Swipe gesture completed successfully.")
+                    isSwipePending = false
+                }
+
+                override fun onCancelled(gestureDescription: GestureDescription?) {
+                    super.onCancelled(gestureDescription)
+                    Log.w(TAG, "Swipe gesture cancelled.")
+                    isSwipePending = false
+                }
+            },
+            mainHandler
+        )
+    }
+
+    private fun scheduleNextSwipe() {
+        isSwipePending = true
+        mainHandler.postDelayed({
+            if (isCapturing(this) && isAutoSwipe(this)) {
+                dispatchSwipeGesture()
+            } else {
+                isSwipePending = false
+            }
+        }, 1500) // 1.5 second delay between page turns
     }
 
     private fun savePages(pages: List<CapturedPage>) {

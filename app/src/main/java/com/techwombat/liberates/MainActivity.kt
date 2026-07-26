@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var statusTv: TextView
     private lateinit var pageCountTv: TextView
+    private lateinit var autoSwipeTv: TextView
     private lateinit var lastPkgTv: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +46,14 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 0, 0, 12)
         }
         layout.addView(statusTv)
+
+        autoSwipeTv = TextView(this).apply {
+            text = "Auto-Swipe: OFF"
+            textSize = 18f
+            setTextColor(Color.GRAY)
+            setPadding(0, 0, 0, 12)
+        }
+        layout.addView(autoSwipeTv)
 
         pageCountTv = TextView(this).apply {
             text = "Pages Captured: 0"
@@ -86,6 +95,19 @@ class MainActivity : AppCompatActivity() {
         }
         layout.addView(stopBtn)
 
+        val autoSwipeBtn = Button(this).apply {
+            text = "🔄 TOGGLE AUTO-SWIPE"
+            setBackgroundColor(Color.parseColor("#1565C0"))
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            setOnClickListener {
+                val current = KindleTextExtractorService.isAutoSwipe(this@MainActivity)
+                KindleTextExtractorService.setAutoSwipe(this@MainActivity, !current)
+                syncStateUI()
+            }
+        }
+        layout.addView(autoSwipeBtn)
+
         val clearBtn = Button(this).apply {
             text = "🗑 CLEAR BUFFER"
             textSize = 16f
@@ -116,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     private fun syncStateUI() {
         val prefs = KindleTextExtractorService.getPrefs(this)
         val isRunning = prefs.getBoolean(KindleTextExtractorService.PREF_IS_CAPTURING, false)
+        val isAutoSwipe = prefs.getBoolean(KindleTextExtractorService.PREF_AUTO_SWIPE, false)
         val pageCount = prefs.getInt(KindleTextExtractorService.PREF_PAGE_COUNT, 0)
         val lineCount = prefs.getInt(KindleTextExtractorService.PREF_LAST_LINE_COUNT, 0)
         val lastPkg = prefs.getString(KindleTextExtractorService.PREF_LAST_PACKAGE, "None") ?: "None"
@@ -123,6 +146,10 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             statusTv.text = if (isRunning) "Capture Status: RUNNING" else "Capture Status: STOPPED"
             statusTv.setTextColor(if (isRunning) Color.parseColor("#2E7D32") else Color.RED)
+            
+            autoSwipeTv.text = if (isAutoSwipe) "Auto-Swipe: ON (1.5s delay)" else "Auto-Swipe: OFF"
+            autoSwipeTv.setTextColor(if (isAutoSwipe) Color.parseColor("#1565C0") else Color.GRAY)
+
             pageCountTv.text = "Pages Captured: $pageCount (Last page: $lineCount lines)"
             lastPkgTv.text = "Last App Detected: $lastPkg"
         }
