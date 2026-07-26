@@ -44,7 +44,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Open Kindle at the first page you want, return to this app, then tap Start Kindle scan. It captures until the end of the book or until you tap Stop scan. You can also import an existing text file instead."
+            android:text="Tap Start Kindle scan, then open Kindle at the first page you want. Leave Kindle in the foreground until the scan finishes or you tap Stop scan. You can also import an existing text file instead."
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Keep Kindle open while scanning"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Kindle must stay open and visible on your screen for the entire scan. Wombat Liberates reads each Kindle page as it appears; switching to another app, locking the phone, or using the phone for something else interrupts the scan."
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="A long book can take five to ten minutes. It is best to connect your phone to power, start the scan when you do not need the phone, and leave Kindle on screen until it finishes."
             android:textSize="16sp" />
 
         <TextView
