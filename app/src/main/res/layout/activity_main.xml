@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Enable this app's accessibility service in Android settings. The probe records Kindle event and source text only after you press Start. It never turns pages, takes screenshots, exports content, or runs a loop. Use Save log file to export the diagnostic text."
+            android:text="Enable this app's accessibility service in Android settings. The probe records Kindle event and source text only after you press Start. Arm tree snapshot captures the next Kindle accessibility tree once. It never turns pages, takes screenshots, exports content, or runs a loop."
             android:textSize="16sp" />
 
         <TextView
@@ -46,6 +46,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Stop probe" />
+
+        <Button
+            android:id="@+id/armTreeSnapshotButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Arm next Kindle tree snapshot" />
 
         <Button
             android:id="@+id/saveLogButton"
