@@ -24,8 +24,9 @@ object OcrExtractor {
     }
 
     fun extractTextFromBitmap(bitmap: Bitmap, callback: (List<String>) -> Unit) {
+        var cropped: Bitmap? = null
         try {
-            val cropped = cropBitmapHeaderFooter(bitmap)
+            cropped = cropBitmapHeaderFooter(bitmap)
             val image = InputImage.fromBitmap(cropped, 0)
 
             recognizer.process(image)
@@ -46,8 +47,22 @@ object OcrExtractor {
                     Log.e(TAG, "ML Kit OCR Processing Error", e)
                     callback(emptyList())
                 }
+                .addOnCompleteListener {
+                    try {
+                        cropped?.recycle()
+                        if (!bitmap.isRecycled) {
+                            bitmap.recycle()
+                        }
+                    } catch (_: Exception) {}
+                }
         } catch (e: Exception) {
             Log.e(TAG, "OcrExtractor exception", e)
+            try {
+                cropped?.recycle()
+                if (!bitmap.isRecycled) {
+                    bitmap.recycle()
+                }
+            } catch (_: Exception) {}
             callback(emptyList())
         }
     }

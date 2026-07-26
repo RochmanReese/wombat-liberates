@@ -143,19 +143,19 @@ class KindleTextExtractorService : AccessibilityService() {
     private fun startAutoSwipeLoop() {
         autoSwipeRunnable = object : Runnable {
             override fun run() {
-                var nextDelay = 2000L
+                var nextDelay = 2200L
                 try {
                     val capturing = isCapturing(this@KindleTextExtractorService)
                     val autoSwipe = isAutoSwipe(this@KindleTextExtractorService)
 
                     if (capturing && autoSwipe) {
                         dispatchSwipeGesture()
-                        nextDelay = 1800L + Random.nextLong(600)
+                        nextDelay = 2000L + Random.nextLong(600)
 
-                        // Schedule screenshot OCR after swipe animation finishes (~400ms)
+                        // Schedule screenshot OCR after swipe animation finishes (~500ms)
                         mainHandler.postDelayed({
                             captureScreenOcr()
-                        }, 450)
+                        }, 500)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in auto-swipe loop", e)
@@ -197,37 +197,45 @@ class KindleTextExtractorService : AccessibilityService() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             isOcrPending = true
-            takeScreenshot(
-                Display.DEFAULT_DISPLAY,
-                mainHandler::post,
-                object : TakeScreenshotCallback {
-                    override fun onSuccess(screenshotResult: ScreenshotResult) {
-                        try {
-                            val bitmap = Bitmap.wrapHardwareBuffer(
-                                screenshotResult.hardwareBuffer,
-                                screenshotResult.colorSpace
-                            )
-                            if (bitmap != null) {
-                                val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                OcrExtractor.extractTextFromBitmap(softwareBitmap) { cleanLines ->
+            try {
+                takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    mainHandler::post,
+                    object : TakeScreenshotCallback {
+                        override fun onSuccess(screenshotResult: ScreenshotResult) {
+                            try {
+                                val hwBuffer = screenshotResult.hardwareBuffer
+                                val colorSpace = screenshotResult.colorSpace
+                                val bitmap = Bitmap.wrapHardwareBuffer(hwBuffer, colorSpace)
+                                hwBuffer.close() // CRITICAL: Close hardware buffer immediately to avoid OOM
+
+                                if (bitmap != null) {
+                                    val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                    bitmap.recycle() // Recycle original hardware bitmap
+
+                                    OcrExtractor.extractTextFromBitmap(softwareBitmap) { cleanLines ->
+                                        isOcrPending = false
+                                        processExtractedPage(cleanLines)
+                                    }
+                                } else {
                                     isOcrPending = false
-                                    processExtractedPage(cleanLines)
                                 }
-                            } else {
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error processing screenshot bitmap", e)
                                 isOcrPending = false
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error processing screenshot bitmap", e)
+                        }
+
+                        override fun onFailure(errorCode: Int) {
+                            Log.e(TAG, "takeScreenshot failed code: $errorCode")
                             isOcrPending = false
                         }
                     }
-
-                    override fun onFailure(errorCode: Int) {
-                        Log.e(TAG, "takeScreenshot failed code: $errorCode")
-                        isOcrPending = false
-                    }
-                }
-            )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "takeScreenshot exception", e)
+                isOcrPending = false
+            }
         }
     }
 

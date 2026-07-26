@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.TextCleanerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-07-26T03:26:29.027Z" hostname="wombat-server" time="0.007">
+<testsuite name="com.techwombat.liberates.TextCleanerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-07-26T03:39:17.728Z" hostname="wombat-server" time="0.011">
   <properties/>
-  <testcase name="testSentenceBoundaryStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.006"/>
+  <testcase name="testSentenceBoundaryStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.009"/>
   <testcase name="testHyphenatedWordStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.0"/>
-  <testcase name="testCleanPageLinesStripsNoise" classname="com.techwombat.liberates.TextCleanerTest" time="0.001"/>
-  <testcase name="testHeaderFooterDetection" classname="com.techwombat.liberates.TextCleanerTest" time="0.0"/>
+  <testcase name="testCleanPageLinesStripsNoise" classname="com.techwombat.liberates.TextCleanerTest" time="0.0"/>
+  <testcase name="testHeaderFooterDetection" classname="com.techwombat.liberates.TextCleanerTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
