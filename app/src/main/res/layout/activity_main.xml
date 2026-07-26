@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Enable this app's accessibility service in Android settings. The probe records Kindle event and source text only after you press Start. Arm tree snapshot captures the next Kindle accessibility tree once. It never turns pages, takes screenshots, exports content, or runs a loop."
+            android:text="Enable this app's accessibility service in Android settings. The probe records Kindle event and source text only after you press Start. Tree snapshot and OCR capture each run once on the next Kindle event. OCR runs locally; screenshots are discarded and the app never turns pages or runs a loop."
             android:textSize="16sp" />
 
         <TextView
@@ -53,6 +53,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Arm next Kindle tree snapshot" />
+
+        <Button
+            android:id="@+id/armOcrButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Arm one-page OCR capture" />
 
         <Button
             android:id="@+id/saveLogButton"

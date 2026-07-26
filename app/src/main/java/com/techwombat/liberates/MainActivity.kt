@@ -41,7 +41,15 @@ class MainActivity : AppCompatActivity() {
             val message = if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
                 "Snapshot armed. Switch to Kindle; its next event will be logged once."
             } else {
-                "Accessibility service is not connected. Enable it in Android settings first."
+                "Start the probe and enable its accessibility service before arming a snapshot."
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+        binding.armOcrButton.setOnClickListener {
+            val message = if (KindleAccessibilityProbeService.armOnePageOcrCapture()) {
+                "OCR capture armed. Switch to Kindle; its next event will be captured once."
+            } else {
+                "Start the probe and enable its accessibility service before arming OCR."
             }
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }

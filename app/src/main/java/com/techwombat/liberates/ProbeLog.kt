@@ -28,8 +28,19 @@ object ProbeLog {
     fun append(eventName: String, eventText: String, sourceText: String) {
         if (!isActive) return
         val timestamp = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date())
-        entries.addLast("[$timestamp] $eventName\nevent: $eventText\nsource: $sourceText")
-        PersistentProbeLog.append("[$timestamp] $eventName\nevent: $eventText\nsource: $sourceText")
+        appendEntry("[$timestamp] $eventName\nevent: $eventText\nsource: $sourceText")
+    }
+
+    @Synchronized
+    fun appendDiagnostic(title: String, body: String) {
+        if (!isActive) return
+        val timestamp = SimpleDateFormat("HH:mm:ss.SSS", Locale.US).format(Date())
+        appendEntry("[$timestamp] $title\n$body")
+    }
+
+    private fun appendEntry(entry: String) {
+        entries.addLast(entry)
+        PersistentProbeLog.append(entry)
         while (entries.size > MAX_ENTRIES) entries.removeFirst()
         notifyListeners()
     }
@@ -53,4 +64,3 @@ object ProbeLog {
         listeners.toList().forEach { it(current) }
     }
 }
-
