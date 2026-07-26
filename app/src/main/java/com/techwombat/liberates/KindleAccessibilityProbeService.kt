@@ -31,15 +31,14 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private var manualCollectionActive = false
 
     private var lastManualCaptureAtMs = 0L
+    private var lastManualOcrText: String? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private val ocrExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    private val manualCaptureRunnable = Runnable {
+    private val manualCaptureRunnable: Runnable = Runnable {
         if (!manualCollectionActive || !ProbeLog.isActive) return@Runnable
-        val now = SystemClock.elapsedRealtime()
-        if (now - lastManualCaptureAtMs < MANUAL_CAPTURE_MIN_INTERVAL_MS) return@Runnable
-        lastManualCaptureAtMs = now
         captureOnePageForOcr()
+        mainHandler.postDelayed(manualCaptureRunnable, MANUAL_CAPTURE_MIN_INTERVAL_MS)
     }
 
     override fun onServiceConnected() {
@@ -116,6 +115,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                 if (text.isBlank()) {
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "No text recognized.")
                 } else {
+                    if (manualCollectionActive && text == lastManualOcrText) return@addOnSuccessListener
+                    if (manualCollectionActive) lastManualOcrText = text
                     OcrTextStore.appendPage(text)
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "Clean text saved for export:\n$text")
                 }
@@ -225,7 +226,9 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             val service = activeService ?: return false
             if (!ProbeLog.isActive) return false
             service.lastManualCaptureAtMs = 0L
+            service.lastManualOcrText = null
             service.manualCollectionActive = true
+            service.scheduleManualCapture()
             return true
         }
 
