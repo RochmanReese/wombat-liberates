@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Restored visible paragraph separation in generated EPUBs: paragraphs now have a readable bottom margin and no first-line indent, matching the captured text’s blank-line structure.
+
 - Reworked EPUB packaging after Calibre reported an empty spine: added a title-page XHTML document and explicit manifest/spine entries for it and every chapter, preserving the required uncompressed mimetype-first EPUB layout.
 
 - Added a local EPUB 3 exporter with title/author fields, Kobo-compatible ZIP structure, clean reflowable typography, escaped XHTML, and an automatic contents list from CHAPTER headings. It uses corrected OCR when available and never sends book text to a server.

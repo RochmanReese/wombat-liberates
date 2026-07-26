@@ -125,8 +125,8 @@ object EpubWriter {
         body { margin: 5%; font-family: serif; line-height: 1.45; }
         h1 { margin: 2.5em 0 2em; text-align: center; font-size: 1.5em; font-variant: small-caps; page-break-before: always; break-before: page; }
         h1:first-child { page-break-before: avoid; break-before: avoid; }
-        p { margin: 0; text-align: justify; text-indent: 1.2em; orphans: 2; widows: 2; }
-        h1 + p { text-indent: 0; }
+        p { margin: 0 0 0.85em; text-align: justify; text-indent: 0; orphans: 2; widows: 2; }
+        
         .title-page { margin-top: 35%; text-align: center; }
         .title-page h1 { margin: 0 0 1em; page-break-before: avoid; break-before: avoid; font-variant: normal; }
         .author { text-align: center; text-indent: 0; }
