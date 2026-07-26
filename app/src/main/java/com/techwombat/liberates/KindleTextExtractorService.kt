@@ -98,6 +98,7 @@ class KindleTextExtractorService : AccessibilityService() {
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var autoSwipeRunnable: Runnable? = null
+    private var lastDismissTime = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -115,8 +116,8 @@ class KindleTextExtractorService : AccessibilityService() {
 
                     if (capturing && autoSwipe) {
                         dispatchSwipeGesture()
-                        // Humanized random delay between 1500ms and 2100ms
-                        nextDelay = 1500L + Random.nextLong(600)
+                        // Humanized random delay between 1600ms and 2200ms
+                        nextDelay = 1600L + Random.nextLong(600)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in auto-swipe loop", e)
@@ -160,7 +161,30 @@ class KindleTextExtractorService : AccessibilityService() {
 
         if (extractedLines.isEmpty()) return
 
-        val combinedContent = extractedLines.joinToString("\n")
+        // CHECK IF KINDLE MENU OVERLAY IS OPEN (e.g. "Table of Contents", "Reading Settings")
+        val isMenuOverlayVisible = extractedLines.any { line ->
+            line.equals("Table of Contents", ignoreCase = true) ||
+            line.equals("Reading Settings", ignoreCase = true) ||
+            line.equals("Add bookmark", ignoreCase = true) ||
+            line.equals("Close Book", ignoreCase = true)
+        }
+
+        if (isMenuOverlayVisible) {
+            // Dismiss Kindle menu overlay by tapping center of screen (throttled to once per 2s)
+            val now = System.currentTimeMillis()
+            if (now - lastDismissTime > 2000) {
+                lastDismissTime = now
+                Log.w(TAG, "Kindle Menu Overlay detected! Dismissing overlay with center tap.")
+                dismissMenuOverlay()
+            }
+            return
+        }
+
+        // Clean out remaining header/footer noise
+        val cleanBookLines = TextCleaner.cleanPageLines(extractedLines)
+        if (cleanBookLines.isEmpty()) return
+
+        val combinedContent = cleanBookLines.joinToString("\n")
         val contentHash = computeHash(combinedContent)
 
         val existingPages = getCapturedPages(this).toMutableList()
@@ -180,7 +204,7 @@ class KindleTextExtractorService : AccessibilityService() {
         val newPageNum = existingPages.size + 1
         val newPage = CapturedPage(
             pageNumber = newPageNum,
-            textLines = extractedLines,
+            textLines = cleanBookLines,
             contentHash = contentHash,
             packageName = packageName
         )
@@ -190,10 +214,10 @@ class KindleTextExtractorService : AccessibilityService() {
 
         getPrefs(this).edit()
             .putInt(PREF_PAGE_COUNT, newPageNum)
-            .putInt(PREF_LAST_LINE_COUNT, extractedLines.size)
+            .putInt(PREF_LAST_LINE_COUNT, cleanBookLines.size)
             .apply()
 
-        Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
+        Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${cleanBookLines.size} lines from $packageName)")
     }
 
     fun dispatchSwipeGesture() {
@@ -201,18 +225,19 @@ class KindleTextExtractorService : AccessibilityService() {
         val width = displayMetrics.widthPixels.toFloat()
         val height = displayMetrics.heightPixels.toFloat()
 
-        // Humanized dynamic coordinates with random Y-variation (45% to 55%)
-        val startX = width * (0.83f + Random.nextFloat() * 0.04f)
-        val endX = width * (0.13f + Random.nextFloat() * 0.04f)
-        val startY = height * (0.45f + Random.nextFloat() * 0.10f)
-        val endY = startY + (Random.nextFloat() * 20f - 10f)
+        // Crisp horizontal swipe across lower 65% of screen to avoid middle tap zone
+        val startX = width * (0.90f + Random.nextFloat() * 0.04f)
+        val endX = width * (0.08f + Random.nextFloat() * 0.04f)
+        val startY = height * (0.65f + Random.nextFloat() * 0.05f)
+        val endY = startY + (Random.nextFloat() * 10f - 5f)
 
         val swipePath = Path().apply {
             moveTo(startX, startY)
             lineTo(endX, endY)
         }
 
-        val strokeDuration = 200L + Random.nextLong(80)
+        // Crisp swipe duration (130ms to 170ms) to ensure Kindle reads it as a swipe, NOT a tap
+        val strokeDuration = 130L + Random.nextLong(40)
 
         val gestureBuilder = GestureDescription.Builder()
         val stroke = GestureDescription.StrokeDescription(swipePath, 0, strokeDuration)
@@ -231,6 +256,22 @@ class KindleTextExtractorService : AccessibilityService() {
             },
             mainHandler
         )
+    }
+
+    private fun dismissMenuOverlay() {
+        val displayMetrics = resources.displayMetrics
+        val centerX = displayMetrics.widthPixels.toFloat() * 0.5f
+        val centerY = displayMetrics.heightPixels.toFloat() * 0.5f
+
+        val tapPath = Path().apply {
+            moveTo(centerX, centerY)
+        }
+
+        val gestureBuilder = GestureDescription.Builder()
+        val stroke = GestureDescription.StrokeDescription(tapPath, 0, 50)
+        gestureBuilder.addStroke(stroke)
+
+        dispatchGesture(gestureBuilder.build(), null, mainHandler)
     }
 
     private fun savePages(pages: List<CapturedPage>) {

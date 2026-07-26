@@ -8,7 +8,18 @@ object TextCleaner {
         Regex("^\\d{1,3}%\\s*$"),
         Regex("^\\d+$"),
         Regex("(?i)^\\d+\\s+mins?\\s+left(?:\\s+in\\s+(?:book|chapter))?$"),
-        Regex("(?i)^kindle\\s+edition$")
+        Regex("(?i)^kindle\\s+edition$"),
+        Regex("(?i)^add\\s+bookmark$"),
+        Regex("(?i)^close\\s+book\\.?$"),
+        Regex("(?i)^table\\s+of\\s+contents$"),
+        Regex("(?i)^in-book\\s+search$"),
+        Regex("(?i)^annotations$"),
+        Regex("(?i)^reading\\s+settings$"),
+        Regex("(?i)^more\\s+options$"),
+        Regex("(?i)^birds\\s+eye\\s+view$"),
+        Regex("(?i)^reading\\s+progress\\s+bar$"),
+        Regex("(?i)^current\\s+location\\.?$"),
+        Regex("(?i)^back\\s+to.*$")
     )
 
     private val TERMINAL_PUNCTUATION = setOf('.', '!', '?', '"', '”', '’')
