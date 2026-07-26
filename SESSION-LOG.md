@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Fixed the Android launcher icon fallback by separating the adaptive icon foreground from the launcher resource, so Android 8+ devices use the wombat face rather than recursively resolving the icon resource.
+
 - Simplified the first-run flow: normal users now start a whole-book Kindle scan without choosing a count; the 1,000-screen safety limit moved to Advanced settings with an explanation. Added a Help page, moved technical status away from the header, and replaced user-facing “probe” wording with “scan,” including clear instructions to enable Wombat Liberates in Android Accessibility settings.
 
 - Redesigned the main UI around three steps (Capture/import, Clean text, Create EPUB), with technical settings and diagnostics collapsed by default. Added the supplied wombat artwork as a header banner and a focused adaptive launcher icon; starting capture now starts the probe automatically when accessibility is enabled.
