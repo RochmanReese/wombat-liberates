@@ -14,6 +14,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.security.MessageDigest
+import kotlin.random.Random
 
 data class CapturedPage(
     val pageNumber: Int,
@@ -107,17 +108,20 @@ class KindleTextExtractorService : AccessibilityService() {
     private fun startAutoSwipeLoop() {
         autoSwipeRunnable = object : Runnable {
             override fun run() {
+                var nextDelay = 1800L
                 try {
                     val capturing = isCapturing(this@KindleTextExtractorService)
                     val autoSwipe = isAutoSwipe(this@KindleTextExtractorService)
 
                     if (capturing && autoSwipe) {
                         dispatchSwipeGesture()
+                        // Humanized random delay between 1500ms and 2100ms
+                        nextDelay = 1500L + Random.nextLong(600)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error in auto-swipe loop", e)
                 } finally {
-                    mainHandler.postDelayed(this, 1800) // Continuous swipe every 1.8 seconds
+                    mainHandler.postDelayed(this, nextDelay)
                 }
             }
         }
@@ -188,27 +192,32 @@ class KindleTextExtractorService : AccessibilityService() {
         val width = displayMetrics.widthPixels.toFloat()
         val height = displayMetrics.heightPixels.toFloat()
 
-        val startX = width * 0.85f
-        val endX = width * 0.15f
-        val startY = height * 0.5f
+        // Humanized dynamic coordinates with random Y-variation (45% to 55%)
+        val startX = width * (0.83f + Random.nextFloat() * 0.04f) // ~83% to 87%
+        val endX = width * (0.13f + Random.nextFloat() * 0.04f)   // ~13% to 17%
+        val startY = height * (0.45f + Random.nextFloat() * 0.10f) // ~45% to 55%
+        val endY = startY + (Random.nextFloat() * 20f - 10f)       // Natural slight vertical curve
 
         val swipePath = Path().apply {
             moveTo(startX, startY)
-            lineTo(endX, startY)
+            lineTo(endX, endY)
         }
 
+        // Humanized duration (200ms to 280ms)
+        val strokeDuration = 200L + Random.nextLong(80)
+
         val gestureBuilder = GestureDescription.Builder()
-        val stroke = GestureDescription.StrokeDescription(swipePath, 0, 250)
+        val stroke = GestureDescription.StrokeDescription(swipePath, 0, strokeDuration)
         gestureBuilder.addStroke(stroke)
 
-        Log.d(TAG, "Executing continuous auto-swipe gesture (X: $startX -> $endX)")
+        Log.d(TAG, "Executing humanized auto-swipe gesture (X: ${startX.toInt()} -> ${endX.toInt()}, Y: ${startY.toInt()}, ${strokeDuration}ms)")
 
         dispatchGesture(
             gestureBuilder.build(),
             object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                     super.onCompleted(gestureDescription)
-                    Log.d(TAG, "Swipe gesture completed.")
+                    Log.d(TAG, "Humanized swipe completed.")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription?) {
