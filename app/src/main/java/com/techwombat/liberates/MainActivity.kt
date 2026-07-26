@@ -55,7 +55,10 @@ class MainActivity : AppCompatActivity() {
                         ?: error("Could not open the selected file.")
                 }.onSuccess { text ->
                     runCatching { OcrTextStore.replaceRawText(text) }
-                        .onSuccess { binding.statusText.text = "Raw text imported; corrected text cleared." }
+                        .onSuccess {
+                            binding.statusText.text = "Raw text imported; corrected text cleared."
+                            Toast.makeText(this, "Imported ${text.length} characters; corrected text cleared.", Toast.LENGTH_LONG).show()
+                        }
                         .onFailure { binding.statusText.text = "Import failed: ${it.message ?: "invalid text file"}" }
                 }.onFailure {
                     binding.statusText.text = "Import failed: ${it.message ?: "could not read file"}"
