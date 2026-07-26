@@ -199,10 +199,31 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         ProbeLog.appendDiagnostic("BATCH OCR", message)
     }
 
-    private fun cleanRecognizedText(result: com.google.mlkit.vision.text.Text): String = result.textBlocks
-        .map { block -> block.lines.map { line -> line.text.trim() }.filter { it.isNotBlank() } }
-        .filter { it.isNotEmpty() }
-        .joinToString("\n\n") { lines -> joinVisualLines(lines) }
+    private fun cleanRecognizedText(result: com.google.mlkit.vision.text.Text): String {
+        val blocks = result.textBlocks
+            .map { block -> block.lines.map { line -> line.text.trim() }.filter { it.isNotBlank() } }
+            .filter { it.isNotEmpty() }
+            .map(::joinVisualLines)
+
+        return buildString {
+            blocks.forEach { block ->
+                if (isNotEmpty()) {
+                    if (shouldJoinBlocks(toString(), block)) {
+                        if (endsWith("-")) deleteCharAt(length - 1) else append(' ')
+                    } else {
+                        append("\n\n")
+                    }
+                }
+                append(block)
+            }
+        }
+    }
+
+    private fun shouldJoinBlocks(previous: String, next: String): Boolean {
+        if (previous.endsWith("-")) return true
+        val previousLast = previous.lastOrNull() ?: return false
+        return next.firstOrNull()?.isLowerCase() == true && previousLast !in ".!?\"”"
+    }
 
     private fun joinVisualLines(lines: List<String>): String = buildString {
         lines.forEachIndexed { index, line ->

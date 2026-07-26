@@ -26,12 +26,18 @@ object OcrTextStore {
             return
         }
 
-        val nextStartsWithLowercase = nextPage.firstOrNull()?.isLowerCase() == true
-        if (nextStartsWithLowercase) {
-            ocrFile.writeText(existing + " " + nextPage + "\n")
-        } else {
-            ocrFile.writeText(existing + "\n\n" + nextPage + "\n")
+        when {
+            existing.endsWith("-") -> ocrFile.writeText(existing.dropLast(1) + nextPage + "\n")
+            !endsSentence(existing) || nextPage.firstOrNull()?.isLowerCase() == true -> {
+                ocrFile.writeText(existing + " " + nextPage + "\n")
+            }
+            else -> ocrFile.writeText(existing + "\n\n" + nextPage + "\n")
         }
+    }
+
+    private fun endsSentence(text: String): Boolean {
+        val finalCharacter = text.trimEnd().trimEnd('"', '”', '’', ')', ']').lastOrNull()
+        return finalCharacter != null && finalCharacter in ".!?…"
     }
 
     @Synchronized
