@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.TextCleanerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:19:28.547Z" hostname="wombat-server" time="0.02">
+<testsuite name="com.techwombat.liberates.TextCleanerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:21:03.181Z" hostname="wombat-server" time="0.006">
   <properties/>
-  <testcase name="testSentenceBoundaryStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.019"/>
+  <testcase name="testSentenceBoundaryStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.005"/>
   <testcase name="testHyphenatedWordStitchingAcrossPages" classname="com.techwombat.liberates.TextCleanerTest" time="0.0"/>
   <testcase name="testCleanPageLinesStripsNoise" classname="com.techwombat.liberates.TextCleanerTest" time="0.001"/>
   <testcase name="testHeaderFooterDetection" classname="com.techwombat.liberates.TextCleanerTest" time="0.0"/>
