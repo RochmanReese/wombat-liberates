@@ -178,6 +178,13 @@ class KindleTextExtractorService : AccessibilityService() {
 
         val pkg = event.packageName?.toString() ?: ""
 
+        if (pkg == "com.amazon.kindle" &&
+            isDumpLogEnabled(this) &&
+            isTalkBackProbeEvent(event.eventType)
+        ) {
+            logKindleAccessibilityProbe(event)
+        }
+
         if (pkg.isNotEmpty() &&
             pkg != "com.techwombat.liberates" &&
             pkg != "com.android.systemui" &&
@@ -189,6 +196,52 @@ class KindleTextExtractorService : AccessibilityService() {
             currentPackageName = pkg
             getPrefs(this).edit().putString(PREF_LAST_PACKAGE, currentPackageName).apply()
         }
+    }
+
+    /**
+     * Kindle can expose reading text as transient accessibility-focus events even
+     * when it is absent from rootInActiveWindow(). This probe records those
+     * events while TalkBack moves through a book, so we can verify which field
+     * contains the prose before treating it as extractable text.
+     */
+    private fun logKindleAccessibilityProbe(event: AccessibilityEvent) {
+        var source: AccessibilityNodeInfo? = null
+        try {
+            source = event.source
+            val bounds = Rect()
+            source?.getBoundsInScreen(bounds)
+
+            val eventText = event.text.joinToString(" ").normalizeForLog()
+            val sourceText = source?.text?.toString().orEmpty().normalizeForLog()
+            val sourceDescription = source?.contentDescription?.toString().orEmpty().normalizeForLog()
+            val sourceClass = source?.className?.toString().orEmpty()
+
+            logToFile(
+                this,
+                "KINDLE_TALKBACK_PROBE " +
+                    "event=${AccessibilityEvent.eventTypeToString(event.eventType)} " +
+                    "eventText=[$eventText] " +
+                    "sourceText=[$sourceText] " +
+                    "desc=[$sourceDescription] " +
+                    "class=[$sourceClass] bounds=$bounds"
+            )
+        } catch (e: Exception) {
+            logToFile(this, "KINDLE_TALKBACK_PROBE error: ${e.message}")
+        } finally {
+            source?.recycle()
+        }
+    }
+
+    private fun isTalkBackProbeEvent(eventType: Int): Boolean {
+        return eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED ||
+            eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED ||
+            eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED ||
+            eventType == AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY ||
+            eventType == AccessibilityEvent.TYPE_ANNOUNCEMENT
+    }
+
+    private fun String.normalizeForLog(): String {
+        return replace(Regex("\\s+"), " ").trim()
     }
 
     private fun captureScreenOcr() {
