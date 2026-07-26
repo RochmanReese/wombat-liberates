@@ -18,9 +18,20 @@ object OcrTextStore {
     @Synchronized
     fun appendPage(text: String) {
         if (!::ocrFile.isInitialized) return
-        if (ocrFile.length() > 0L) ocrFile.appendText("\n\n")
-        ocrFile.appendText(text.trim())
-        ocrFile.appendText("\n")
+        val nextPage = text.trim()
+        if (nextPage.isBlank()) return
+        val existing = ocrFile.readText().trimEnd()
+        if (existing.isBlank()) {
+            ocrFile.writeText("$nextPage\n")
+            return
+        }
+
+        val nextStartsWithLowercase = nextPage.firstOrNull()?.isLowerCase() == true
+        if (nextStartsWithLowercase) {
+            ocrFile.writeText(existing + " " + nextPage + "\n")
+        } else {
+            ocrFile.writeText(existing + "\n\n" + nextPage + "\n")
+        }
     }
 
     @Synchronized
