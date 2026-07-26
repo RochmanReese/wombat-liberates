@@ -1,6 +1,8 @@
 package com.techwombat.liberates
 
 import java.io.OutputStream
+import java.time.Instant
+import java.util.UUID
 import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -11,13 +13,15 @@ object EpubWriter {
     fun write(output: OutputStream, sourceText: String, title: String, author: String) {
         val chapters = chaptersFrom(sourceText)
         ZipOutputStream(output.buffered()).use { zip ->
+            // EPUB requires this exact first entry to be uncompressed.
             putStored(zip, "mimetype", "application/epub+zip")
             putText(zip, "META-INF/container.xml", containerXml())
             putText(zip, "OEBPS/styles/book.css", stylesheet())
+            putText(zip, "OEBPS/title.xhtml", titlePage(title, author))
             putText(zip, "OEBPS/nav.xhtml", navigation(title, chapters))
             putText(zip, "OEBPS/content.opf", packageDocument(title, author, chapters))
             chapters.forEachIndexed { index, chapter ->
-                putText(zip, chapterPath(index), chapterDocument(title, chapter))
+                putText(zip, "OEBPS/${chapterPath(index)}", chapterDocument(title, chapter))
             }
         }
     }
@@ -50,34 +54,71 @@ object EpubWriter {
     private fun isChapterHeading(value: String): Boolean =
         value.length <= 100 && value.matches(Regex("(?i)^chapter\\s+(?:[0-9]+|[ivxlcdm]+|[a-z][a-z -]*)[.!: -]*$"))
 
-    private fun chapterDocument(bookTitle: String, chapter: Chapter): String = """
+    private fun titlePage(title: String, author: String): String = xhtml("$title — Title page", """
+        <section class="title-page" epub:type="titlepage" xmlns:epub="http://www.idpf.org/2007/ops">
+          <h1>${escape(title)}</h1><p class="author">${escape(author)}</p>
+        </section>
+    """)
+
+    private fun chapterDocument(bookTitle: String, chapter: Chapter): String = xhtml("$bookTitle — ${chapter.title}", """
+        <section epub:type="chapter" xmlns:epub="http://www.idpf.org/2007/ops">
+          <h1>${escape(chapter.title)}</h1>
+          ${chapter.paragraphs.joinToString("\n") { "<p>${escape(it).replace("\n", "<br />")}</p>" }}
+        </section>
+    """)
+
+    private fun xhtml(documentTitle: String, body: String): String = """
         <?xml version="1.0" encoding="utf-8"?>
         <!DOCTYPE html>
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-        <head><title>${escape(bookTitle)} — ${escape(chapter.title)}</title><link rel="stylesheet" type="text/css" href="../styles/book.css" /></head>
-        <body><section epub:type="chapter" xmlns:epub="http://www.idpf.org/2007/ops"><h1>${escape(chapter.title)}</h1>
-        ${chapter.paragraphs.joinToString("\n") { "<p>${escape(it).replace("\n", "<br />")}</p>" }}
-        </section></body></html>
+          <head><title>${escape(documentTitle)}</title><link rel="stylesheet" type="text/css" href="${if (documentTitle.endsWith("Title page")) "styles/book.css" else "../styles/book.css"}" /></head>
+          <body>${body.trimIndent()}</body>
+        </html>
     """.trimIndent()
 
     private fun navigation(bookTitle: String, chapters: List<Chapter>): String = """
         <?xml version="1.0" encoding="utf-8"?>
         <!DOCTYPE html>
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-        <head><title>${escape(bookTitle)} — Contents</title></head>
-        <body><nav epub:type="toc" id="toc" xmlns:epub="http://www.idpf.org/2007/ops"><h1>Contents</h1><ol>
+          <head><title>${escape(bookTitle)} — Contents</title><link rel="stylesheet" type="text/css" href="styles/book.css" /></head>
+          <body><nav epub:type="toc" id="toc" xmlns:epub="http://www.idpf.org/2007/ops"><h1>Contents</h1><ol>
         ${chapters.mapIndexed { index, chapter -> "<li><a href=\"${chapterPath(index)}\">${escape(chapter.title)}</a></li>" }.joinToString("\n")}
-        </ol></nav></body></html>
+          </ol></nav></body>
+        </html>
     """.trimIndent()
 
-    private fun packageDocument(title: String, author: String, chapters: List<Chapter>): String = """
-        <?xml version="1.0" encoding="utf-8"?>
-        <package xmlns="http://www.idpf.org/2007/opf" prefix="dcterms: http://purl.org/dc/terms/" unique-identifier="book-id" version="3.0" xml:lang="en">
-        <metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:uuid:${java.util.UUID.randomUUID()}</dc:identifier><dc:title>${escape(title)}</dc:title><dc:creator>${escape(author)}</dc:creator><dc:language>en</dc:language><meta property="dcterms:modified">${java.time.Instant.now().toString().replace(Regex("\\.\\d+Z$"), "Z")}</meta></metadata>
-        <manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="styles/book.css" media-type="text/css"/>
-        ${chapters.indices.joinToString("\n") { index -> "<item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>" }}
-        </manifest><spine>${chapters.indices.joinToString("") { index -> "<itemref idref=\"chapter-${index + 1}\"/>" }}</spine></package>
-    """.trimIndent()
+    private fun packageDocument(title: String, author: String, chapters: List<Chapter>): String {
+        val manifest = buildString {
+            appendLine("    <item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>")
+            appendLine("    <item id=\"title-page\" href=\"title.xhtml\" media-type=\"application/xhtml+xml\"/>")
+            appendLine("    <item id=\"style\" href=\"styles/book.css\" media-type=\"text/css\"/>")
+            chapters.indices.forEach { index ->
+                appendLine("    <item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>")
+            }
+        }.trimEnd()
+        val spine = buildString {
+            appendLine("    <itemref idref=\"title-page\"/>")
+            chapters.indices.forEach { index -> appendLine("    <itemref idref=\"chapter-${index + 1}\"/>") }
+        }.trimEnd()
+        return """
+            <?xml version="1.0" encoding="utf-8"?>
+            <package xmlns="http://www.idpf.org/2007/opf" prefix="dcterms: http://purl.org/dc/terms/" unique-identifier="book-id" version="3.0" xml:lang="en">
+              <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+                <dc:identifier id="book-id">urn:uuid:${UUID.randomUUID()}</dc:identifier>
+                <dc:title>${escape(title)}</dc:title>
+                <dc:creator>${escape(author)}</dc:creator>
+                <dc:language>en</dc:language>
+                <meta property="dcterms:modified">${Instant.now().toString().replace(Regex("\\.\\d+Z$"), "Z")}</meta>
+              </metadata>
+              <manifest>
+            $manifest
+              </manifest>
+              <spine>
+            $spine
+              </spine>
+            </package>
+        """.trimIndent()
+    }
 
     private fun stylesheet(): String = """
         @charset "UTF-8";
@@ -86,6 +127,9 @@ object EpubWriter {
         h1:first-child { page-break-before: avoid; break-before: avoid; }
         p { margin: 0; text-align: justify; text-indent: 1.2em; orphans: 2; widows: 2; }
         h1 + p { text-indent: 0; }
+        .title-page { margin-top: 35%; text-align: center; }
+        .title-page h1 { margin: 0 0 1em; page-break-before: avoid; break-before: avoid; font-variant: normal; }
+        .author { text-align: center; text-indent: 0; }
     """.trimIndent()
 
     private fun containerXml(): String = """
