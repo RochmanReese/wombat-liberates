@@ -31,6 +31,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private var batchPageCount = 0
     private var batchPagesCompleted = 0
     private var batchStatus = "No batch running."
+    private var lastBatchFingerprint: IntArray? = null
+    private var unchangedPageAttempts = 0
     private val mainHandler = Handler(Looper.getMainLooper())
     private val ocrExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -86,10 +88,10 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         }
     }
 
-    private fun captureOnePageForOcr(onComplete: ((Boolean) -> Unit)? = null) {
+    private fun captureOnePageForOcr(onComplete: ((OcrCapture?) -> Unit)? = null) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", "Screenshot capture requires Android 11 or later.")
-            onComplete?.invoke(false)
+            onComplete?.invoke(null)
             return
         }
         ProbeLog.appendDiagnostic("ONE-PAGE OCR", "Taking one accessibility screenshot; it will not be saved.")
@@ -101,17 +103,17 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                 }
                 if (bitmap == null) {
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", "Screenshot returned no readable bitmap.")
-                    onComplete?.invoke(false)
+                    onComplete?.invoke(null)
                     return
                 }
                 val readingBitmap = cropToReadingArea(bitmap)
                 bitmap.recycle()
-                recognizeScreenshot(readingBitmap, onComplete)
+                recognizeScreenshot(readingBitmap, readingFingerprint(readingBitmap), onComplete)
             }
 
             override fun onFailure(errorCode: Int) {
                 ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", screenshotError(errorCode))
-                onComplete?.invoke(false)
+                onComplete?.invoke(null)
             }
         })
     }
@@ -122,7 +124,32 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         return Bitmap.createBitmap(bitmap, 0, top, bitmap.width, bitmap.height - top - bottom)
     }
 
-    private fun recognizeScreenshot(bitmap: Bitmap, onComplete: ((Boolean) -> Unit)? = null) {
+    private fun readingFingerprint(bitmap: Bitmap): IntArray {
+        val fingerprint = IntArray(FINGERPRINT_WIDTH * FINGERPRINT_HEIGHT)
+        var index = 0
+        for (y in 0 until FINGERPRINT_HEIGHT) {
+            val sourceY = y * (bitmap.height - 1) / (FINGERPRINT_HEIGHT - 1)
+            for (x in 0 until FINGERPRINT_WIDTH) {
+                val sourceX = x * (bitmap.width - 1) / (FINGERPRINT_WIDTH - 1)
+                val pixel = bitmap.getPixel(sourceX, sourceY)
+                fingerprint[index++] = ((pixel shr 16 and 0xff) * 30 + (pixel shr 8 and 0xff) * 59 + (pixel and 0xff) * 11) / 100
+            }
+        }
+        return fingerprint
+    }
+
+    private fun isSameReadingScreen(first: IntArray, second: IntArray): Boolean {
+        if (first.size != second.size) return false
+        var totalDifference = 0L
+        first.indices.forEach { index -> totalDifference += kotlin.math.abs(first[index] - second[index]) }
+        return totalDifference.toDouble() / first.size < MAX_FINGERPRINT_AVERAGE_DIFFERENCE
+    }
+
+    private fun recognizeScreenshot(
+        bitmap: Bitmap,
+        fingerprint: IntArray,
+        onComplete: ((OcrCapture?) -> Unit)? = null,
+    ) {
         val image = InputImage.fromBitmap(bitmap, 0)
         textRecognizer.process(image)
             .addOnSuccessListener(ocrExecutor) { result ->
@@ -130,11 +157,12 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                 val text = cleanRecognizedText(result)
                 if (text.isBlank()) {
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "No text recognized.")
-                    onComplete?.invoke(false)
-                } else {
+                    onComplete?.invoke(null)
+                } else if (onComplete == null) {
                     OcrTextStore.appendPage(text)
                     ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "Clean text saved for export:\n$text")
-                    onComplete?.invoke(true)
+                } else {
+                    onComplete(OcrCapture(text, fingerprint))
                 }
             }
             .addOnFailureListener(ocrExecutor) { error ->
@@ -143,23 +171,39 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                     "ONE-PAGE OCR ERROR",
                     "Recognition failed: ${error.message ?: error.javaClass.simpleName}",
                 )
-                onComplete?.invoke(false)
+                onComplete?.invoke(null)
             }
     }
 
     private fun captureBatchPage() {
-        val pageNumber = batchPagesCompleted + 1
-        ProbeLog.appendDiagnostic("BATCH OCR", "Capturing page $pageNumber of $batchPageCount.")
-        captureOnePageForOcr { succeeded ->
+        val screenNumber = batchPagesCompleted + 1
+        ProbeLog.appendDiagnostic("BATCH OCR", "Capturing screen $screenNumber of $batchPageCount.")
+        captureOnePageForOcr { capture ->
             mainHandler.post {
                 if (!batchActive) return@post
-                if (!succeeded) {
-                    finishBatch("Batch stopped: OCR failed on page $pageNumber of $batchPageCount.")
+                if (capture == null) {
+                    finishBatch("Batch stopped: OCR failed on screen $screenNumber of $batchPageCount.")
                     return@post
                 }
+                val previousFingerprint = lastBatchFingerprint
+                if (previousFingerprint != null && isSameReadingScreen(previousFingerprint, capture.fingerprint)) {
+                    unchangedPageAttempts += 1
+                    if (unchangedPageAttempts >= MAX_UNCHANGED_PAGE_ATTEMPTS) {
+                        finishBatch("Batch complete: Kindle did not advance after $batchPagesCompleted captured screens (end of book detected).")
+                    } else {
+                        ProbeLog.appendDiagnostic("BATCH OCR", "Kindle screen did not advance; retrying the page turn once.")
+                        turnToNextPage()
+                    }
+                    return@post
+                }
+
+                unchangedPageAttempts = 0
+                lastBatchFingerprint = capture.fingerprint
+                OcrTextStore.appendPage(capture.text)
+                ProbeLog.appendDiagnostic("ONE-PAGE OCR RESULT", "Clean text saved for export:\n${capture.text}")
                 batchPagesCompleted += 1
                 if (batchPagesCompleted >= batchPageCount) {
-                    finishBatch("Batch complete: captured $batchPagesCompleted pages.")
+                    finishBatch("Batch complete: captured $batchPagesCompleted screens.")
                 } else {
                     turnToNextPage()
                 }
@@ -289,6 +333,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private fun timestamp(): String =
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
 
+    private data class OcrCapture(val text: String, val fingerprint: IntArray)
+
     companion object {
         private const val KINDLE_PACKAGE = "com.amazon.kindle"
         private const val MAX_TREE_NODES = 400
@@ -298,6 +344,10 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         private const val NEXT_PAGE_X_FRACTION = 0.86f
         private const val NEXT_PAGE_Y_FRACTION = 0.50f
         private const val NEXT_PAGE_TAP_DURATION_MS = 50L
+        private const val FINGERPRINT_WIDTH = 32
+        private const val FINGERPRINT_HEIGHT = 32
+        private const val MAX_FINGERPRINT_AVERAGE_DIFFERENCE = 1.0
+        private const val MAX_UNCHANGED_PAGE_ATTEMPTS = 2
 
         @Volatile
         private var activeService: KindleAccessibilityProbeService? = null
@@ -322,16 +372,18 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             service.mainHandler.removeCallbacks(service.batchRunnable)
             service.batchPageCount = pageCount
             service.batchPagesCompleted = 0
+            service.lastBatchFingerprint = null
+            service.unchangedPageAttempts = 0
             service.batchActive = true
             service.batchStatus = "Batch armed: waiting for Kindle to be foreground."
-            ProbeLog.appendDiagnostic("BATCH OCR", "Batch armed for $pageCount pages; waiting for Kindle.")
+            ProbeLog.appendDiagnostic("BATCH OCR", "Batch armed for $pageCount screens; waiting for Kindle.")
             service.mainHandler.post(service.batchRunnable)
             return true
         }
 
         fun stopBatch() {
             activeService?.let { service ->
-                if (service.batchActive) service.finishBatch("Batch stopped by user after ${service.batchPagesCompleted} pages.")
+                if (service.batchActive) service.finishBatch("Batch stopped by user after ${service.batchPagesCompleted} screens.")
             }
         }
 

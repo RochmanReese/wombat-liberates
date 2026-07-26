@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         binding.startBookCaptureButton.setOnClickListener {
             val pageCount = binding.pageCount.text.toString().toIntOrNull()
             if (pageCount == null || pageCount !in 1..1_000) {
-                binding.statusText.text = "Enter a page count between 1 and 1,000."
+                binding.statusText.text = "Enter a screen count between 1 and 1,000."
             } else {
                 startBatch(pageCount)
             }
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startBatch(pageCount: Int) {
         if (KindleAccessibilityProbeService.startBatch(pageCount)) {
-            binding.statusText.text = "Book capture armed for $pageCount pages; open Kindle at the starting page."
+            binding.statusText.text = "Book capture armed for $pageCount screens; open Kindle at the starting page."
         } else {
             binding.statusText.text = "Start the probe and enable accessibility first."
         }
