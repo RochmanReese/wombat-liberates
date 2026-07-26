@@ -168,11 +168,14 @@ class KindleTextExtractorService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: ""
 
-        // EXCLUDE system UI, launchers, and our own app from capture
+        // EXCLUDE system UI, keyboards, launchers, and our own app from capture
         if (packageName.isEmpty() ||
             packageName == "com.techwombat.liberates" ||
             packageName == "com.android.systemui" ||
             packageName.contains("launcher", ignoreCase = true) ||
+            packageName.contains("inputmethod", ignoreCase = true) ||
+            packageName.contains("keyboard", ignoreCase = true) ||
+            packageName.contains("gboard", ignoreCase = true) ||
             packageName == "android"
         ) {
             return
