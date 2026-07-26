@@ -1,5 +1,9 @@
 [
     {
+        "merged": "/home/wombat/.gradle/daemon/8.14.3/com.techwombat.liberates.app-debug-32:/layout_activity_main.xml.flat",
+        "source": "/home/wombat/.gradle/daemon/8.14.3/com.techwombat.liberates.app-main-34:/layout/activity_main.xml"
+    },
+    {
         "merged": "com.techwombat.liberates.app-debug-32:/layout_activity_main.xml.flat",
         "source": "com.techwombat.liberates.app-main-34:/layout/activity_main.xml"
     },

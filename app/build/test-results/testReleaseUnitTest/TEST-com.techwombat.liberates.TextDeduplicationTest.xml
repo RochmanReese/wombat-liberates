@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.TextDeduplicationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:21:03.188Z" hostname="wombat-server" time="0.004">
+<testsuite name="com.techwombat.liberates.TextDeduplicationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:22:52.164Z" hostname="wombat-server" time="0.006">
   <properties/>
-  <testcase name="testDistinctPagesHaveDifferentHashes" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.002"/>
-  <testcase name="testExactHashMatchDeduplication" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.001"/>
-  <testcase name="testSimilarityDetectionOnMinorRedraw" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.001"/>
+  <testcase name="testDistinctPagesHaveDifferentHashes" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.004"/>
+  <testcase name="testExactHashMatchDeduplication" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.002"/>
+  <testcase name="testSimilarityDetectionOnMinorRedraw" classname="com.techwombat.liberates.TextDeduplicationTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -3209,6 +3209,7 @@ id bounceEnd
 id bounceStart
 id btnAutoSwipe
 id btnClear
+id btnExportEpub
 id btnSettings
 id btnStart
 id btnStop
@@ -3294,6 +3295,8 @@ id endToStart
 id enterAlways
 id enterAlwaysCollapsed
 id escape
+id etBookAuthor
+id etBookTitle
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu

@@ -3,9 +3,12 @@ local
 id autoSwipeTv
 id btnAutoSwipe
 id btnClear
+id btnExportEpub
 id btnSettings
 id btnStart
 id btnStop
+id etBookAuthor
+id etBookTitle
 id lastPkgTv
 id pageCountTv
 id statusTv

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.ChapterSegmenterTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:21:02.704Z" hostname="wombat-server" time="0.016">
+<testsuite name="com.techwombat.liberates.ChapterSegmenterTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-07-26T02:22:51.747Z" hostname="wombat-server" time="0.018">
   <properties/>
-  <testcase name="testChapterHeadingPatterns" classname="com.techwombat.liberates.ChapterSegmenterTest" time="0.014"/>
+  <testcase name="testChapterHeadingPatterns" classname="com.techwombat.liberates.ChapterSegmenterTest" time="0.016"/>
   <testcase name="testSegmentingMultiChapterText" classname="com.techwombat.liberates.ChapterSegmenterTest" time="0.001"/>
   <testcase name="testFallbackSingleChapterWhenNoHeadingsExist" classname="com.techwombat.liberates.ChapterSegmenterTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
