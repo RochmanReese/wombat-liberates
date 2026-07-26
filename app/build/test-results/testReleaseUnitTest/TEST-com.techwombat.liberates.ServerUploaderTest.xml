@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.techwombat.liberates.ServerUploaderTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-07-26T03:49:15.351Z" hostname="wombat-server" time="0.0">
-  <properties/>
-  <testcase name="testUrlFormatting" classname="com.techwombat.liberates.ServerUploaderTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
