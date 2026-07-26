@@ -40,6 +40,15 @@ object OcrTextStore {
     }
 
     @Synchronized
+    fun replaceRawText(text: String) {
+        check(::rawOcrFile.isInitialized) { "OcrTextStore must be initialized before use." }
+        val rawText = text.trim()
+        require(rawText.isNotBlank()) { "The selected text file is empty." }
+        rawOcrFile.writeText("$rawText\n")
+        correctedOcrFile.writeText("")
+    }
+
+    @Synchronized
     fun rawText(): String = rawOcrFile.readText().trim()
 
     @Synchronized

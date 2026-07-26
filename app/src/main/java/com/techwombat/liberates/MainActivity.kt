@@ -48,6 +48,20 @@ class MainActivity : AppCompatActivity() {
         val saveCorrectedText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             if (uri != null) writeTextTo(uri, OcrTextStore.correctedFile(), "Corrected OCR text saved")
         }
+        val importRawText = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) {
+                runCatching {
+                    contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                        ?: error("Could not open the selected file.")
+                }.onSuccess { text ->
+                    runCatching { OcrTextStore.replaceRawText(text) }
+                        .onSuccess { binding.statusText.text = "Raw text imported; corrected text cleared." }
+                        .onFailure { binding.statusText.text = "Import failed: ${it.message ?: "invalid text file"}" }
+                }.onFailure {
+                    binding.statusText.text = "Import failed: ${it.message ?: "could not read file"}"
+                }
+            }
+        }
 
         binding.startButton.setOnClickListener {
             ProbeLog.start()
@@ -71,6 +85,9 @@ class MainActivity : AppCompatActivity() {
             KindleAccessibilityProbeService.stopBatch()
             renderState()
         }
+        binding.importRawTextButton.setOnClickListener {
+            importRawText.launch(arrayOf("text/plain", "text/*"))
+        }
         binding.correctOnDeviceButton.setOnClickListener { startOnDeviceCorrection() }
         binding.correctOllamaButton.setOnClickListener { startOllamaCorrection() }
         binding.saveRawTextButton.setOnClickListener { saveRawText.launch(exportFileName("kindle-ocr")) }
@@ -86,20 +103,6 @@ class MainActivity : AppCompatActivity() {
             OcrTextStore.clear()
             binding.statusText.text = "Raw OCR, corrected OCR, and diagnostics cleared."
             Toast.makeText(this, "Captured text and diagnostics cleared", Toast.LENGTH_SHORT).show()
-        }
-        binding.armTreeSnapshotButton.setOnClickListener {
-            if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
-                binding.statusText.text = "Tree snapshot armed; switch to Kindle."
-            } else {
-                binding.statusText.text = "Start the probe and enable accessibility first."
-            }
-        }
-        binding.armOcrButton.setOnClickListener {
-            if (KindleAccessibilityProbeService.armOnePageOcrCapture()) {
-                binding.statusText.text = "One-page OCR armed; switch to Kindle."
-            } else {
-                binding.statusText.text = "Start the probe and enable accessibility first."
-            }
         }
     }
 

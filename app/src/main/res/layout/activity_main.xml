@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="First collect a user-authorized Kindle range as raw local OCR. Return here afterward to correct the saved text; raw OCR is always retained separately. Screenshots are discarded."
+            android:text="Capture user-authorized reading screens as raw local OCR, or import an existing text file. Correction always creates a separate file; raw OCR remains unchanged. Screenshots are discarded."
             android:textSize="16sp" />
 
         <TextView
@@ -69,6 +69,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Stop automatic capture" />
+
+        <Button
+            android:id="@+id/importRawTextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Import raw text file" />
 
         <Button
             android:id="@+id/correctOnDeviceButton"
@@ -136,24 +143,10 @@
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/armTreeSnapshotButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Arm next Kindle tree snapshot" />
-
-        <Button
-            android:id="@+id/armOcrButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Arm one-page OCR capture" />
-
-        <Button
             android:id="@+id/clearLogButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="Clear raw OCR, corrected OCR, and diagnostics" />
 
         <EditText
