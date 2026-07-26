@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             renderState()
         }
         binding.saveLogButton.setOnClickListener {
-            saveLog.launch("kindle-accessibility-probe.log")
+            saveLog.launch(exportFileName())
         }
         binding.clearLogButton.setOnClickListener {
             ProbeLog.clear()
@@ -75,6 +75,14 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
         binding.logText.text = ProbeLog.snapshot()
+    }
+
+    private fun exportFileName(): String {
+        val entered = binding.exportFileName.text.toString().trim().ifBlank { "kindle-ocr" }
+        val safeName = entered.map { character ->
+            if (character.isLetterOrDigit() || character == '.' || character == '_' || character == '-') character else '_'
+        }.joinToString("")
+        return if (safeName.endsWith(".txt", ignoreCase = true)) safeName else "$safeName.txt"
     }
 
     private fun writeLogTo(destination: Uri) {

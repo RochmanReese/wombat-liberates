@@ -68,12 +68,22 @@
             android:layout_marginTop="8dp"
             android:text="Clear log from phone" />
 
+        <EditText
+            android:id="@+id/exportFileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Export filename"
+            android:inputType="text"
+            android:singleLine="true"
+            android:text="kindle-ocr.txt" />
+
         <Button
             android:id="@+id/saveLogButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Save log file" />
+            android:text="Save log to filename" />
 
         <TextView
             android:id="@+id/logText"
