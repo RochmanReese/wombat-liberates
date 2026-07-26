@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Finalised and user-tested the app: the streamlined Kindle scan → Ollama cleanup → EPUB workflow, Help guidance, whole-book safety limit, Calibre-compatible EPUB output with paragraph spacing, wombat banner/adaptive launcher icon, and clearer accessibility instructions are all working as intended.
+
 - Expanded Help with clear scan-time requirements: Kindle must remain open in the foreground, the phone should not be used for anything else, and long books may take five to ten minutes; charging and scanning during idle time are recommended.
 
 - Fixed the Android launcher icon fallback by separating the adaptive icon foreground from the launcher resource, so Android 8+ devices use the wombat face rather than recursively resolving the icon resource.
