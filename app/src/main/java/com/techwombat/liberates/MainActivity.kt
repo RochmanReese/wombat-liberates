@@ -192,12 +192,26 @@ class MainActivity : AppCompatActivity() {
         }
         correctionJob = lifecycleScope.launch {
             runCorrection(rawText, cleanupProgressLabel()) { chunk ->
-                chunk.mapIndexed { index, character ->
-                    val isStandalonePipe = character == '|' &&
-                        (index == 0 || chunk[index - 1].isWhitespace()) &&
-                        (index == chunk.lastIndex || chunk[index + 1].isWhitespace())
-                    if (isStandalonePipe) 'I' else character
+                var cleaned = chunk
+                    .replace("4| ", "“I ")
+                    .replace("|I ", "“I ")
+                    .replace("yOu", "you")
+                    .replace("yOur", "your")
+                    .replace("YOu", "You")
+                    .replace("YOur", "Your")
+                    .replace(" 1...", " I...")
+                    .replace("\n1...", "\nI...")
+                cleaned = cleaned.mapIndexed { index, character ->
+                    if (character.code != 124) return@mapIndexed character
+                    val previous = cleaned.getOrNull(index - 1)
+                    val next = cleaned.getOrNull(index + 1)
+                    when {
+                        previous?.isLetter() == true || previous?.code == 39 -> 108.toChar()
+                        next?.isLetter() == true -> 73.toChar()
+                        else -> character
+                    }
                 }.joinToString("")
+                cleaned
             }
         }
     }
