@@ -37,6 +37,14 @@ class MainActivity : AppCompatActivity() {
         binding.saveLogButton.setOnClickListener {
             saveLog.launch("kindle-accessibility-probe.log")
         }
+        binding.armTreeSnapshotButton.setOnClickListener {
+            val message = if (KindleAccessibilityProbeService.armNextTreeSnapshot()) {
+                "Snapshot armed. Switch to Kindle; its next event will be logged once."
+            } else {
+                "Accessibility service is not connected. Enable it in Android settings first."
+            }
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onStart() {
