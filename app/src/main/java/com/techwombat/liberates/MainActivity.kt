@@ -1,8 +1,11 @@
 package com.techwombat.liberates
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.techwombat.liberates.databinding.ActivityMainBinding
@@ -18,6 +21,9 @@ class MainActivity : AppCompatActivity() {
         PersistentProbeLog.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val saveLog = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+            if (uri != null) writeLogTo(uri)
+        }
 
         binding.startButton.setOnClickListener {
             ProbeLog.start()
@@ -27,6 +33,9 @@ class MainActivity : AppCompatActivity() {
         binding.stopButton.setOnClickListener {
             ProbeLog.stop()
             renderState()
+        }
+        binding.saveLogButton.setOnClickListener {
+            saveLog.launch("kindle-accessibility-probe.log")
         }
     }
 
@@ -46,6 +55,13 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
         binding.logText.text = ProbeLog.snapshot()
+    }
+
+    private fun writeLogTo(destination: Uri) {
+        contentResolver.openOutputStream(destination)?.use { output ->
+            PersistentProbeLog.file().inputStream().use { input -> input.copyTo(output) }
+        } ?: return
+        Toast.makeText(this, "Log file saved", Toast.LENGTH_SHORT).show()
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {
