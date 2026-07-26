@@ -23,6 +23,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.Executor
 import kotlin.random.Random
 
 data class CapturedPage(
@@ -129,6 +130,7 @@ class KindleTextExtractorService : AccessibilityService() {
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val mainExecutor = Executor { command -> mainHandler.post(command) }
     private var autoSwipeRunnable: Runnable? = null
     private var currentPackageName = ""
     private var isOcrPending = false
@@ -152,7 +154,6 @@ class KindleTextExtractorService : AccessibilityService() {
                         dispatchSwipeGesture()
                         nextDelay = 2000L + Random.nextLong(600)
 
-                        // Schedule screenshot OCR after swipe animation finishes (~500ms)
                         mainHandler.postDelayed({
                             captureScreenOcr()
                         }, 500)
@@ -200,47 +201,51 @@ class KindleTextExtractorService : AccessibilityService() {
             try {
                 takeScreenshot(
                     Display.DEFAULT_DISPLAY,
-                    mainHandler::post,
+                    mainExecutor,
                     object : TakeScreenshotCallback {
                         override fun onSuccess(screenshotResult: ScreenshotResult) {
                             try {
                                 val hwBuffer = screenshotResult.hardwareBuffer
                                 val colorSpace = screenshotResult.colorSpace
                                 val bitmap = Bitmap.wrapHardwareBuffer(hwBuffer, colorSpace)
-                                hwBuffer.close() // CRITICAL: Close hardware buffer immediately to avoid OOM
+                                hwBuffer.close()
 
                                 if (bitmap != null) {
                                     val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                    bitmap.recycle() // Recycle original hardware bitmap
+                                    bitmap.recycle()
 
                                     OcrExtractor.extractTextFromBitmap(softwareBitmap) { cleanLines ->
                                         isOcrPending = false
                                         processExtractedPage(cleanLines)
                                     }
                                 } else {
+                                    logToFile(this@KindleTextExtractorService, "takeScreenshot onSuccess: bitmap was null")
                                     isOcrPending = false
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error processing screenshot bitmap", e)
+                                logToFile(this@KindleTextExtractorService, "takeScreenshot onSuccess Exception: ${e.message}")
                                 isOcrPending = false
                             }
                         }
 
                         override fun onFailure(errorCode: Int) {
-                            Log.e(TAG, "takeScreenshot failed code: $errorCode")
+                            logToFile(this@KindleTextExtractorService, "takeScreenshot onFailure code: $errorCode")
                             isOcrPending = false
                         }
                     }
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "takeScreenshot exception", e)
+                logToFile(this@KindleTextExtractorService, "takeScreenshot Exception: ${e.message}")
                 isOcrPending = false
             }
         }
     }
 
     private fun processExtractedPage(cleanLines: List<String>) {
-        if (cleanLines.isEmpty()) return
+        if (cleanLines.isEmpty()) {
+            logToFile(this, "OCR processExtractedPage: cleanLines was empty")
+            return
+        }
 
         val combinedContent = cleanLines.joinToString("\n")
         val contentHash = computeHash(combinedContent)
@@ -249,10 +254,12 @@ class KindleTextExtractorService : AccessibilityService() {
         val lastPage = existingPages.lastOrNull()
 
         if (lastPage != null && lastPage.contentHash == contentHash) {
+            logToFile(this, "OCR processExtractedPage: skipped exact hash duplicate")
             return
         }
 
         if (lastPage != null && isSimilarContent(lastPage.textLines.joinToString("\n"), combinedContent)) {
+            logToFile(this, "OCR processExtractedPage: skipped similar content duplicate")
             return
         }
 
