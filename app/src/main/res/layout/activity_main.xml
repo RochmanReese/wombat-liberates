@@ -47,6 +47,38 @@
             android:text="Stop probe and capture" />
 
         <EditText
+            android:id="@+id/epubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="EPUB title"
+            android:inputType="textCapSentences"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/epubAuthor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="EPUB author"
+            android:inputType="textCapWords"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/exportEpubButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Create EPUB from corrected text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Uses corrected text when available, otherwise raw OCR. Chapter headings such as CHAPTER SIX become the table of contents."
+            android:textSize="12sp" />
+
+        <EditText
             android:id="@+id/pageCount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Added a local EPUB 3 exporter with title/author fields, Kobo-compatible ZIP structure, clean reflowable typography, escaped XHTML, and an automatic contents list from CHAPTER headings. It uses corrected OCR when available and never sends book text to a server.
+
 - Added a persistent, determinate correction progress bar with a per-chunk completed/remaining counter and clear connection, sending, completion, or failure text.
 
 

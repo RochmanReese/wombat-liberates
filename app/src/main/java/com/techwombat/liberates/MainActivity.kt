@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
         val saveRawText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             if (uri != null) writeTextTo(uri, OcrTextStore.rawFile(), "Raw OCR text saved")
         }
+        val saveEpub = registerForActivityResult(ActivityResultContracts.CreateDocument("application/epub+zip")) { uri ->
+            if (uri != null) exportEpub(uri)
+        }
+
         val saveCorrectedText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             if (uri != null) writeTextTo(uri, OcrTextStore.correctedFile(), "Corrected OCR text saved")
         }
@@ -95,6 +99,11 @@ class MainActivity : AppCompatActivity() {
         binding.correctOnDeviceButton.setOnClickListener { startOnDeviceCorrection() }
         binding.correctOllamaButton.setOnClickListener { startOllamaCorrection() }
         binding.saveRawTextButton.setOnClickListener { saveRawText.launch(exportFileName("kindle-ocr")) }
+        binding.exportEpubButton.setOnClickListener {
+            val title = binding.epubTitle.text.toString().trim().ifBlank { "Untitled" }
+            saveEpub.launch(epubFileName(title))
+        }
+
         binding.saveCorrectedTextButton.setOnClickListener {
             if (OcrTextStore.hasCorrectedText()) {
                 saveCorrectedText.launch(exportFileName("kindle-ocr-corrected"))
@@ -332,6 +341,30 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
         binding.logText.text = ProbeLog.snapshot()
+    }
+
+    private fun exportEpub(destination: Uri) {
+        val hasCorrectedText = OcrTextStore.hasCorrectedText()
+        val source = if (hasCorrectedText) OcrTextStore.correctedFile().readText() else OcrTextStore.rawText()
+        val title = binding.epubTitle.text.toString().trim().ifBlank { "Untitled" }
+        val author = binding.epubAuthor.text.toString().trim().ifBlank { "Unknown author" }
+        runCatching {
+            contentResolver.openOutputStream(destination)?.use { EpubWriter.write(it, source, title, author) }
+                ?: error("Could not create the EPUB file.")
+        }.onSuccess {
+            binding.statusText.text = "EPUB saved using ${if (hasCorrectedText) "corrected" else "raw"} text."
+            Toast.makeText(this, "EPUB saved", Toast.LENGTH_LONG).show()
+        }.onFailure { exception ->
+            binding.statusText.text = "EPUB export failed: ${exception.message ?: "unknown error"}"
+            Toast.makeText(this, "EPUB export failed", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun epubFileName(title: String): String {
+        val safe = title.map { character ->
+            if (character.isLetterOrDigit() || character == '_' || character == '-') character else '_'
+        }.joinToString("")
+        return "${safe.ifBlank { "book" }}.epub"
     }
 
     private fun exportFileName(defaultName: String): String {
