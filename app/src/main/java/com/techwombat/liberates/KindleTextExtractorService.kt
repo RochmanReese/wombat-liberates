@@ -30,11 +30,13 @@ class KindleTextExtractorService : AccessibilityService() {
         
         const val EXTRA_PAGE_COUNT = "extra_page_count"
         const val EXTRA_LAST_LINE_COUNT = "extra_last_line_count"
+        const val EXTRA_LAST_PACKAGE = "extra_last_package"
         
         @Volatile var isCapturing: Boolean = false
             private set
 
         val capturedPages = mutableListOf<CapturedPage>()
+        var lastDetectedPackage: String = "None"
     }
 
     private val controlReceiver = object : BroadcastReceiver() {
@@ -82,12 +84,14 @@ class KindleTextExtractorService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null || !isCapturing) return
+        if (event == null) return
 
         val packageName = event.packageName?.toString() ?: ""
-        if (!packageName.contains("kindle") && !packageName.contains("reading")) {
-            return
+        if (packageName.isNotEmpty() && packageName != "com.techwombat.liberates") {
+            lastDetectedPackage = packageName
         }
+
+        if (!isCapturing) return
 
         val rootNode = rootInActiveWindow ?: return
 
@@ -121,13 +125,14 @@ class KindleTextExtractorService : AccessibilityService() {
             )
 
             capturedPages.add(newPage)
-            Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines, Hash: ${contentHash.take(8)})")
+            Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${extractedLines.size} lines from $packageName)")
 
             // Broadcast page update to MainActivity
             val updateIntent = Intent(ACTION_PAGE_CAPTURED).apply {
                 putExtra(EXTRA_PAGE_COUNT, newPageNum)
                 putExtra(EXTRA_LAST_LINE_COUNT, extractedLines.size)
-                setPackage(packageName)
+                putExtra(EXTRA_LAST_PACKAGE, packageName)
+                setPackage("com.techwombat.liberates")
             }
             sendBroadcast(updateIntent)
         }

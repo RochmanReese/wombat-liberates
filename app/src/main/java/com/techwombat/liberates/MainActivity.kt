@@ -17,13 +17,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var statusTv: TextView
     private lateinit var pageCountTv: TextView
+    private lateinit var lastPkgTv: TextView
 
     private val pageUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == KindleTextExtractorService.ACTION_PAGE_CAPTURED) {
                 val pageCount = intent.getIntExtra(KindleTextExtractorService.EXTRA_PAGE_COUNT, 0)
                 val lineCount = intent.getIntExtra(KindleTextExtractorService.EXTRA_LAST_LINE_COUNT, 0)
-                updateUI(pageCount, lineCount)
+                val lastPkg = intent.getStringExtra(KindleTextExtractorService.EXTRA_LAST_PACKAGE) ?: ""
+                updateUI(pageCount, lineCount, lastPkg)
             }
         }
     }
@@ -44,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         layout.addView(titleView)
 
         val descView = TextView(this).apply {
-            text = "Kindle Accessibility Text Extractor"
+            text = "Universal Accessibility Text Extractor"
             textSize = 16f
             setPadding(0, 0, 0, 36)
         }
@@ -62,9 +64,17 @@ class MainActivity : AppCompatActivity() {
         pageCountTv = TextView(this).apply {
             text = "Pages Captured: 0"
             textSize = 18f
-            setPadding(0, 0, 0, 36)
+            setPadding(0, 0, 0, 12)
         }
         layout.addView(pageCountTv)
+
+        lastPkgTv = TextView(this).apply {
+            text = "Last App: ${KindleTextExtractorService.lastDetectedPackage}"
+            textSize = 14f
+            setTextColor(Color.GRAY)
+            setPadding(0, 0, 0, 36)
+        }
+        layout.addView(lastPkgTv)
 
         // Buttons
         val startBtn = Button(this).apply {
@@ -98,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             textSize = 16f
             setOnClickListener {
                 sendBroadcast(Intent(KindleTextExtractorService.ACTION_CLEAR_BUFFER))
-                updateUI(0, 0)
+                updateUI(0, 0, "None")
             }
         }
         layout.addView(clearBtn)
@@ -130,6 +140,7 @@ class MainActivity : AppCompatActivity() {
         statusTv.text = if (isRunning) "Capture Status: RUNNING" else "Capture Status: STOPPED"
         statusTv.setTextColor(if (isRunning) Color.parseColor("#2E7D32") else Color.RED)
         pageCountTv.text = "Pages Captured: $count"
+        lastPkgTv.text = "Last App: ${KindleTextExtractorService.lastDetectedPackage}"
     }
 
     override fun onPause() {
@@ -141,9 +152,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUI(pageCount: Int, lineCount: Int) {
+    private fun updateUI(pageCount: Int, lineCount: Int, lastPkg: String) {
         runOnUiThread {
             pageCountTv.text = "Pages Captured: $pageCount (Last page: $lineCount lines)"
+            if (lastPkg.isNotEmpty()) {
+                lastPkgTv.text = "Last App: $lastPkg"
+            }
         }
     }
 }
