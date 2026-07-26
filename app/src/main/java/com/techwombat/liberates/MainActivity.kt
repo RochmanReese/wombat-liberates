@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Base64
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -179,6 +180,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
         binding.statusText.text = "Connecting to Ollama…"
+        binding.correctionProgressBar.visibility = View.VISIBLE
+        binding.correctionProgressText.text = "Connecting to Ollama…"
         Toast.makeText(this, "Connecting to Ollama…", Toast.LENGTH_SHORT).show()
         OllamaCredentialsStore.save(applicationContext, OllamaCredentialsStore.Credentials(baseUrl, model, username, password))
         correctionJob = lifecycleScope.launch {
@@ -216,20 +219,29 @@ class MainActivity : AppCompatActivity() {
         correctChunk: suspend (String) -> String,
     ) {
         val chunks = chunkForCorrection(rawText)
+        binding.correctionProgressBar.visibility = View.VISIBLE
+        binding.correctionProgressBar.max = chunks.size
+        binding.correctionProgressBar.progress = 0
+        binding.correctionProgressText.text = "$source correction: 0 of ${chunks.size} chunks complete; ${chunks.size} remaining."
         OcrTextStore.beginCorrectedText()
         binding.correctOnDeviceButton.isEnabled = false
         binding.correctOllamaButton.isEnabled = false
         try {
             chunks.forEachIndexed { index, chunk ->
                 binding.statusText.text = "$source correction: chunk ${index + 1} of ${chunks.size}."
+                binding.correctionProgressText.text = "$source correction: sending chunk ${index + 1} of ${chunks.size}; ${chunks.size - index} remaining."
                 val corrected = correctChunk(chunk)
                 if (corrected.isBlank()) error("The correction model returned no text.")
                 OcrTextStore.appendCorrectedChunk(corrected)
+                binding.correctionProgressBar.progress = index + 1
+                binding.correctionProgressText.text = "$source correction: ${index + 1} of ${chunks.size} chunks complete; ${chunks.size - index - 1} remaining."
             }
             binding.statusText.text = "$source correction complete: ${chunks.size} chunks saved separately."
+            binding.correctionProgressText.text = "$source correction complete: ${chunks.size} of ${chunks.size} chunks saved."
             Toast.makeText(this, "$source correction complete.", Toast.LENGTH_LONG).show()
         } catch (error: Exception) {
             binding.statusText.text = "$source correction stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
+            binding.correctionProgressText.text = "$source correction stopped after ${binding.correctionProgressBar.progress} of ${chunks.size} chunks: ${error.message ?: error.javaClass.simpleName}"
             Toast.makeText(this, "$source correction failed: ${error.message ?: error.javaClass.simpleName}", Toast.LENGTH_LONG).show()
         } finally {
             binding.correctOnDeviceButton.isEnabled = true

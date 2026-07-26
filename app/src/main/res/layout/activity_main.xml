@@ -142,6 +142,22 @@
             android:text="Connection settings stay on this phone; the password is encrypted with Android Keystore and is never committed."
             android:textSize="12sp" />
 
+        <ProgressBar
+            android:id="@+id/correctionProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/correctionProgressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="No correction running."
+            android:textSize="12sp" />
+
         <Button
             android:id="@+id/clearLogButton"
             android:layout_width="match_parent"

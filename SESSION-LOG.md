@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Added a persistent, determinate correction progress bar with a per-chunk completed/remaining counter and clear connection, sending, completion, or failure text.
+
 
 ## 2026-07-26 — Raw book capture and on-device correction
 
