@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Base64
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -12,9 +13,14 @@ import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
 import com.techwombat.liberates.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -30,6 +36,12 @@ class MainActivity : AppCompatActivity() {
         OcrTextStore.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        OllamaCredentialsStore.load(applicationContext)?.let { credentials ->
+            binding.ollamaBaseUrl.setText(credentials.baseUrl)
+            binding.ollamaModel.setText(credentials.model)
+            binding.ollamaUsername.setText(credentials.username)
+            binding.ollamaPassword.setText(credentials.password)
+        }
         val saveRawText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             if (uri != null) writeTextTo(uri, OcrTextStore.rawFile(), "Raw OCR text saved")
         }
@@ -60,6 +72,7 @@ class MainActivity : AppCompatActivity() {
             renderState()
         }
         binding.correctOnDeviceButton.setOnClickListener { startOnDeviceCorrection() }
+        binding.correctOllamaButton.setOnClickListener { startOllamaCorrection() }
         binding.saveRawTextButton.setOnClickListener { saveRawText.launch(exportFileName("kindle-ocr")) }
         binding.saveCorrectedTextButton.setOnClickListener {
             if (OcrTextStore.hasCorrectedText()) {
@@ -129,30 +142,117 @@ class MainActivity : AppCompatActivity() {
                 FeatureStatus.DOWNLOADABLE -> {
                     binding.statusText.text = "Downloading the on-device correction model; keep this app open."
                     correctionModel.download().collect { }
-                    runCorrection(rawText)
+                    runOnDeviceCorrection(rawText)
                 }
-                FeatureStatus.AVAILABLE -> runCorrection(rawText)
+                FeatureStatus.AVAILABLE -> runOnDeviceCorrection(rawText)
                 else -> binding.statusText.text = "On-device correction is not ready yet."
             }
         }
     }
 
-    private suspend fun runCorrection(rawText: String) {
+    private fun startOllamaCorrection() {
+        if (correctionJob?.isActive == true) return
+        val rawText = OcrTextStore.rawText()
+        val baseUrl = binding.ollamaBaseUrl.text.toString().trim().trimEnd('/')
+        val model = binding.ollamaModel.text.toString().trim()
+        val username = binding.ollamaUsername.text.toString().trim()
+        val password = binding.ollamaPassword.text.toString()
+        if (rawText.isBlank()) {
+            binding.statusText.text = "Capture raw OCR text before correcting it."
+            return
+        }
+        if (!baseUrl.startsWith("https://") || model.isBlank() || username.isBlank() || password.isBlank()) {
+            binding.statusText.text = "Enter an HTTPS Ollama URL, model, username, and password."
+            return
+        }
+        OllamaCredentialsStore.save(applicationContext, OllamaCredentialsStore.Credentials(baseUrl, model, username, password))
+        correctionJob = lifecycleScope.launch {
+            runOllamaCorrection(rawText, baseUrl, model, username, password)
+        }
+    }
+
+    private suspend fun runOnDeviceCorrection(rawText: String) {
+        runCorrection(rawText, "on-device") { chunk ->
+            correctionModel.generateContent(correctionPrompt(chunk)).candidates.firstOrNull()?.text.orEmpty()
+        }
+    }
+
+    private suspend fun runOllamaCorrection(
+        rawText: String,
+        baseUrl: String,
+        model: String,
+        username: String,
+        password: String,
+    ) {
+        try {
+            runCorrection(rawText, "Ollama") { chunk ->
+                withContext(Dispatchers.IO) {
+                    requestOllamaCorrection(baseUrl, model, username, password, correctionPrompt(chunk))
+                }
+            }
+        } finally {
+            // Password is held in activity memory only; its persisted copy is Android Keystore-encrypted.
+        }
+    }
+
+    private suspend fun runCorrection(
+        rawText: String,
+        source: String,
+        correctChunk: suspend (String) -> String,
+    ) {
         val chunks = chunkForCorrection(rawText)
         OcrTextStore.beginCorrectedText()
         binding.correctOnDeviceButton.isEnabled = false
+        binding.correctOllamaButton.isEnabled = false
         try {
             chunks.forEachIndexed { index, chunk ->
-                binding.statusText.text = "Correcting chunk ${index + 1} of ${chunks.size}; keep this app open."
-                val corrected = correctionModel.generateContent(correctionPrompt(chunk)).candidates.firstOrNull()?.text.orEmpty()
-                if (corrected.isBlank()) error("The on-device model returned no corrected text.")
+                binding.statusText.text = "$source correction: chunk ${index + 1} of ${chunks.size}."
+                val corrected = correctChunk(chunk)
+                if (corrected.isBlank()) error("The correction model returned no text.")
                 OcrTextStore.appendCorrectedChunk(corrected)
             }
-            binding.statusText.text = "On-device correction complete: ${chunks.size} chunks saved separately."
+            binding.statusText.text = "$source correction complete: ${chunks.size} chunks saved separately."
         } catch (error: Exception) {
-            binding.statusText.text = "Correction stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
+            binding.statusText.text = "$source correction stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
         } finally {
             binding.correctOnDeviceButton.isEnabled = true
+            binding.correctOllamaButton.isEnabled = true
+        }
+    }
+
+    private fun requestOllamaCorrection(
+        baseUrl: String,
+        model: String,
+        username: String,
+        password: String,
+        prompt: String,
+    ): String {
+        val connection = (URL("$baseUrl/api/generate").openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = OLLAMA_CONNECT_TIMEOUT_MS
+            readTimeout = OLLAMA_READ_TIMEOUT_MS
+            doOutput = true
+            setRequestProperty("Content-Type", "application/json")
+            val credentials = "$username:$password".toByteArray(Charsets.UTF_8)
+            setRequestProperty("Authorization", "Basic ${Base64.encodeToString(credentials, Base64.NO_WRAP)}")
+        }
+        return try {
+            val body = JSONObject()
+                .put("model", model)
+                .put("prompt", prompt)
+                .put("stream", false)
+                .put("options", JSONObject().put("temperature", 0.1))
+                .toString()
+            connection.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(body) }
+            val responseBody = if (connection.responseCode in 200..299) {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } else {
+                connection.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            }
+            if (connection.responseCode !in 200..299) error("Ollama HTTP ${connection.responseCode}: ${responseBody.take(300)}")
+            JSONObject(responseBody).optString("response").trim()
+        } finally {
+            connection.disconnect()
         }
     }
 
@@ -181,12 +281,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun correctionPrompt(chunk: String): String = """
-        Correct only obvious OCR character, capitalization, punctuation, and word-break errors.
-        Preserve every sentence, paragraph break, dialogue mark, chapter heading, proper name, and the author's wording.
-        Do not summarize, rewrite, explain, add, or remove content. Return only the corrected text.
+        You are a conservative OCR proofreader.
 
-        OCR TEXT:
+        Correct only unmistakable OCR mistakes: confused characters, capitalization errors, broken words, stray punctuation, and word-break errors.
+        Preserve the author's exact wording, sentence order, paragraph breaks, dialogue, chapter headings, names, formatting, and meaning.
+        Do not rewrite for style. Do not summarize. Do not explain your edits. Do not add or remove sentences.
+        If a possible correction is uncertain, leave it unchanged.
+        Return only the corrected text, with no heading, commentary, Markdown, or quotes around the response.
+
+        OCR TEXT START
         $chunk
+        OCR TEXT END
     """.trimIndent()
 
     private fun renderState() {
@@ -231,5 +336,7 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val CORRECTION_CHUNK_CHAR_LIMIT = 2_500
+        const val OLLAMA_CONNECT_TIMEOUT_MS = 15_000
+        const val OLLAMA_READ_TIMEOUT_MS = 120_000
     }
 }
