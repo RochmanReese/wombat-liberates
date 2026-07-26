@@ -18,33 +18,34 @@
             android:scaleType="centerCrop"
             android:src="@drawable/wombat_banner" />
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            >
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:gravity="center"
                 android:text="Wombat Liberates"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/helpButton"
+                android:layout_gravity="end|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Help" />
-        </LinearLayout>
+        </FrameLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Scan your reading text, clean it, and create an EPUB."
+            android:gravity="center"
+            android:text="Read Your Books, Your Way."
             android:textSize="16sp" />
 
         <TextView
@@ -98,6 +99,13 @@
             android:text="2. Clean text"
             android:textSize="20sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/quickLocalCleanupButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Quick local cleanup" />
 
         <Button
             android:id="@+id/correctOllamaButton"

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Base64
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
             binding.ollamaUsername.setText(credentials.username)
             binding.ollamaPassword.setText(credentials.password)
         }
+
         val saveRawText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             if (uri != null) writeTextTo(uri, OcrTextStore.rawFile(), "Raw OCR text saved")
         }
@@ -86,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             if (pageCount == null || pageCount !in 1..1_000) {
                 binding.statusText.text = "Enter a screen count between 1 and 1,000."
             } else {
-                startBatch(pageCount)
+                promptForBookTitle(pageCount)
             }
         }
         binding.stopBatchButton.setOnClickListener {
@@ -105,6 +107,7 @@ class MainActivity : AppCompatActivity() {
             importRawText.launch(arrayOf("text/plain", "text/*"))
         }
         binding.correctOnDeviceButton.setOnClickListener { startOnDeviceCorrection() }
+        binding.quickLocalCleanupButton.setOnClickListener { startLocalCleanup() }
         binding.correctOllamaButton.setOnClickListener { startOllamaCorrection() }
         binding.saveRawTextButton.setOnClickListener { saveRawText.launch(exportFileName("kindle-ocr")) }
         binding.exportEpubButton.setOnClickListener {
@@ -156,6 +159,49 @@ class MainActivity : AppCompatActivity() {
             binding.statusText.text = "Enable Wombat Liberates in Accessibility settings first."
         }
     }
+
+    private fun promptForBookTitle(pageCount: Int) {
+        val titleInput = EditText(this).apply {
+            hint = "Book title"
+            setText(binding.epubTitle.text)
+            selectAll()
+        }
+        AlertDialog.Builder(this)
+            .setTitle("What book are you scanning?")
+            .setMessage("This name is shown during cleanup and used for the EPUB. You can change it later.")
+            .setView(titleInput)
+            .setPositiveButton("Start scan") { _, _ ->
+                binding.epubTitle.setText(titleInput.text.toString().trim())
+                startBatch(pageCount)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun cleanupProgressLabel(): String {
+        val title = binding.epubTitle.text.toString().trim()
+        return if (title.isBlank()) "AI text cleanup" else "AI text cleanup — $title"
+    }
+
+    private fun startLocalCleanup() {
+        if (correctionJob?.isActive == true) return
+        val rawText = OcrTextStore.rawText()
+        if (rawText.isBlank()) {
+            binding.statusText.text = "Scan or import text before cleaning it."
+            return
+        }
+        correctionJob = lifecycleScope.launch {
+            runCorrection(rawText, cleanupProgressLabel()) { chunk ->
+                chunk.mapIndexed { index, character ->
+                    val isStandalonePipe = character == '|' &&
+                        (index == 0 || chunk[index - 1].isWhitespace()) &&
+                        (index == chunk.lastIndex || chunk[index + 1].isWhitespace())
+                    if (isStandalonePipe) 'I' else character
+                }.joinToString("")
+            }
+        }
+    }
+
 
     private fun startOnDeviceCorrection() {
         if (correctionJob?.isActive == true) return
@@ -213,7 +259,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun runOnDeviceCorrection(rawText: String) {
-        runCorrection(rawText, "on-device") { chunk ->
+        runCorrection(rawText, cleanupProgressLabel()) { chunk ->
             correctionModel.generateContent(correctionPrompt(chunk)).candidates.firstOrNull()?.text.orEmpty()
         }
     }
@@ -226,7 +272,7 @@ class MainActivity : AppCompatActivity() {
         password: String,
     ) {
         try {
-            runCorrection(rawText, "Ollama") { chunk ->
+            runCorrection(rawText, cleanupProgressLabel()) { chunk ->
                 withContext(Dispatchers.IO) {
                     requestOllamaCorrection(baseUrl, model, username, password, correctionPrompt(chunk))
                 }
@@ -245,30 +291,32 @@ class MainActivity : AppCompatActivity() {
         binding.correctionProgressBar.visibility = View.VISIBLE
         binding.correctionProgressBar.max = chunks.size
         binding.correctionProgressBar.progress = 0
-        binding.correctionProgressText.text = "$source correction: 0 of ${chunks.size} chunks complete; ${chunks.size} remaining."
+        binding.correctionProgressText.text = "$source: 0 of ${chunks.size} chunks complete; ${chunks.size} remaining."
         OcrTextStore.beginCorrectedText()
         binding.correctOnDeviceButton.isEnabled = false
         binding.correctOllamaButton.isEnabled = false
+        binding.quickLocalCleanupButton.isEnabled = false
         try {
             chunks.forEachIndexed { index, chunk ->
-                binding.statusText.text = "$source correction: chunk ${index + 1} of ${chunks.size}."
-                binding.correctionProgressText.text = "$source correction: sending chunk ${index + 1} of ${chunks.size}; ${chunks.size - index} remaining."
+                binding.statusText.text = "$source: chunk ${index + 1} of ${chunks.size}."
+                binding.correctionProgressText.text = "$source: sending chunk ${index + 1} of ${chunks.size}; ${chunks.size - index} remaining."
                 val corrected = correctChunk(chunk)
                 if (corrected.isBlank()) error("The correction model returned no text.")
                 OcrTextStore.appendCorrectedChunk(corrected)
                 binding.correctionProgressBar.progress = index + 1
-                binding.correctionProgressText.text = "$source correction: ${index + 1} of ${chunks.size} chunks complete; ${chunks.size - index - 1} remaining."
+                binding.correctionProgressText.text = "$source: ${index + 1} of ${chunks.size} chunks complete; ${chunks.size - index - 1} remaining."
             }
-            binding.statusText.text = "$source correction complete: ${chunks.size} chunks saved separately."
-            binding.correctionProgressText.text = "$source correction complete: ${chunks.size} of ${chunks.size} chunks saved."
-            Toast.makeText(this, "$source correction complete.", Toast.LENGTH_LONG).show()
+            binding.statusText.text = "$source complete: ${chunks.size} chunks saved separately."
+            binding.correctionProgressText.text = "$source complete: ${chunks.size} of ${chunks.size} chunks saved."
+            Toast.makeText(this, "$source complete.", Toast.LENGTH_LONG).show()
         } catch (error: Exception) {
-            binding.statusText.text = "$source correction stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
-            binding.correctionProgressText.text = "$source correction stopped after ${binding.correctionProgressBar.progress} of ${chunks.size} chunks: ${error.message ?: error.javaClass.simpleName}"
-            Toast.makeText(this, "$source correction failed: ${error.message ?: error.javaClass.simpleName}", Toast.LENGTH_LONG).show()
+            binding.statusText.text = "$source stopped: ${error.message ?: error.javaClass.simpleName}. Raw OCR is unchanged."
+            binding.correctionProgressText.text = "$source stopped after ${binding.correctionProgressBar.progress} of ${chunks.size} chunks: ${error.message ?: error.javaClass.simpleName}"
+            Toast.makeText(this, "$source failed: ${error.message ?: error.javaClass.simpleName}", Toast.LENGTH_LONG).show()
         } finally {
             binding.correctOnDeviceButton.isEnabled = true
             binding.correctOllamaButton.isEnabled = true
+            binding.quickLocalCleanupButton.isEnabled = true
         }
     }
 
