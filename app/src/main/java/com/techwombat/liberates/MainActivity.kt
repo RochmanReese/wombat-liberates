@@ -5,8 +5,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -19,119 +17,37 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        val scrollView = ScrollView(this)
+        statusTv = findViewById(R.id.statusTv)
+        pageCountTv = findViewById(R.id.pageCountTv)
+        autoSwipeTv = findViewById(R.id.autoSwipeTv)
+        lastPkgTv = findViewById(R.id.lastPkgTv)
 
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 48, 48, 48)
+        findViewById<Button>(R.id.btnStart).setOnClickListener {
+            KindleTextExtractorService.setCapturing(this, true)
+            syncStateUI()
         }
 
-        val titleView = TextView(this).apply {
-            text = "Wombat-Liberates"
-            textSize = 26f
-            setPadding(0, 0, 0, 12)
+        findViewById<Button>(R.id.btnAutoSwipe).setOnClickListener {
+            val current = KindleTextExtractorService.isAutoSwipe(this)
+            KindleTextExtractorService.setAutoSwipe(this, !current)
+            syncStateUI()
         }
-        layout.addView(titleView)
 
-        val descView = TextView(this).apply {
-            text = "Universal Accessibility Text Extractor"
-            textSize = 14f
-            setPadding(0, 0, 0, 24)
+        findViewById<Button>(R.id.btnStop).setOnClickListener {
+            KindleTextExtractorService.setCapturing(this, false)
+            syncStateUI()
         }
-        layout.addView(descView)
 
-        // Status Indicators
-        statusTv = TextView(this).apply {
-            text = "Capture Status: DISABLED"
-            textSize = 16f
-            setTextColor(Color.RED)
-            setPadding(0, 0, 0, 8)
+        findViewById<Button>(R.id.btnClear).setOnClickListener {
+            KindleTextExtractorService.clearPages(this)
+            syncStateUI()
         }
-        layout.addView(statusTv)
 
-        autoSwipeTv = TextView(this).apply {
-            text = "Auto-Swipe: OFF"
-            textSize = 16f
-            setTextColor(Color.GRAY)
-            setPadding(0, 0, 0, 8)
+        findViewById<Button>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
-        layout.addView(autoSwipeTv)
-
-        pageCountTv = TextView(this).apply {
-            text = "Pages Captured: 0"
-            textSize = 16f
-            setPadding(0, 0, 0, 8)
-        }
-        layout.addView(pageCountTv)
-
-        lastPkgTv = TextView(this).apply {
-            text = "Last App: None"
-            textSize = 13f
-            setTextColor(Color.GRAY)
-            setPadding(0, 0, 0, 24)
-        }
-        layout.addView(lastPkgTv)
-
-        // Buttons
-        val startBtn = Button(this).apply {
-            text = "▶ START CAPTURE"
-            setBackgroundColor(Color.parseColor("#2E7D32"))
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            setOnClickListener {
-                KindleTextExtractorService.setCapturing(this@MainActivity, true)
-                syncStateUI()
-            }
-        }
-        layout.addView(startBtn)
-
-        val autoSwipeBtn = Button(this).apply {
-            text = "🔄 TOGGLE AUTO-SWIPE"
-            setBackgroundColor(Color.parseColor("#1565C0"))
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            setOnClickListener {
-                val current = KindleTextExtractorService.isAutoSwipe(this@MainActivity)
-                KindleTextExtractorService.setAutoSwipe(this@MainActivity, !current)
-                syncStateUI()
-            }
-        }
-        layout.addView(autoSwipeBtn)
-
-        val stopBtn = Button(this).apply {
-            text = "⏹ STOP CAPTURE"
-            setBackgroundColor(Color.parseColor("#C62828"))
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            setOnClickListener {
-                KindleTextExtractorService.setCapturing(this@MainActivity, false)
-                syncStateUI()
-            }
-        }
-        layout.addView(stopBtn)
-
-        val clearBtn = Button(this).apply {
-            text = "🗑 CLEAR BUFFER"
-            textSize = 15f
-            setOnClickListener {
-                KindleTextExtractorService.clearPages(this@MainActivity)
-                syncStateUI()
-            }
-        }
-        layout.addView(clearBtn)
-
-        val settingsBtn = Button(this).apply {
-            text = "⚙ Open Accessibility Settings"
-            textSize = 13f
-            setOnClickListener {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-            }
-        }
-        layout.addView(settingsBtn)
-
-        scrollView.addView(layout)
-        setContentView(scrollView)
     }
 
     override fun onResume() {

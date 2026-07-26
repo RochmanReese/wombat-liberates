@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Wombat-Liberates"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Universal Accessibility Text Extractor"
+            android:textSize="14sp"
+            android:paddingBottom="20dp" />
+
+        <TextView
+            android:id="@+id/statusTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Capture Status: DISABLED"
+            android:textColor="#FF0000"
+            android:textSize="16sp"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/autoSwipeTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Auto-Swipe: OFF"
+            android:textColor="#888888"
+            android:textSize="16sp"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/pageCountTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pages Captured: 0"
+            android:textSize="16sp"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/lastPkgTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Last App: None"
+            android:textColor="#888888"
+            android:textSize="13sp"
+            android:paddingBottom="24dp" />
+
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="#2E7D32"
+            android:text="▶ START CAPTURE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnAutoSwipe"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="#1565C0"
+            android:text="🔄 TOGGLE AUTO-SWIPE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnStop"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="#C62828"
+            android:text="⏹ STOP CAPTURE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="🗑 CLEAR BUFFER"
+            android:textSize="15sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="⚙ Open Accessibility Settings"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+</ScrollView>
