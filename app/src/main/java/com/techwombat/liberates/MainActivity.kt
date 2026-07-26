@@ -93,6 +93,12 @@ class MainActivity : AppCompatActivity() {
             KindleAccessibilityProbeService.stopBatch()
             renderState()
         }
+        binding.advancedControlsButton.setOnClickListener {
+            val showAdvanced = binding.advancedControls.visibility != View.VISIBLE
+            binding.advancedControls.visibility = if (showAdvanced) View.VISIBLE else View.GONE
+            binding.advancedControlsButton.text = if (showAdvanced) "Hide advanced settings and diagnostics" else "Show advanced settings and diagnostics"
+        }
+
         binding.importRawTextButton.setOnClickListener {
             importRawText.launch(arrayOf("text/plain", "text/*"))
         }
@@ -136,6 +142,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startBatch(pageCount: Int) {
+        if (!ProbeLog.isActive) ProbeLog.start()
+        if (!isAccessibilityServiceEnabled()) {
+            binding.statusText.text = "Enable the Wombat Liberates accessibility service, then start capture again."
+            showAccessibilitySetupDialog()
+            return
+        }
         if (KindleAccessibilityProbeService.startBatch(pageCount)) {
             binding.statusText.text = "Book capture armed for $pageCount screens; open Kindle at the starting page."
         } else {

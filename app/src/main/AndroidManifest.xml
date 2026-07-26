@@ -4,6 +4,8 @@
 
     <application
         android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher_wombat"
+        android:roundIcon="@mipmap/ic_launcher_wombat"
         android:label="Wombat Liberates"
         android:theme="@style/Theme.WombatLiberates">
         <activity

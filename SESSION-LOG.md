@@ -1,6 +1,8 @@
 # Session log
 
 Add each session summary immediately below this heading so the newest entry remains first.
+- Redesigned the main UI around three steps (Capture/import, Clean text, Create EPUB), with technical settings and diagnostics collapsed by default. Added the supplied wombat artwork as a header banner and a focused adaptive launcher icon; starting capture now starts the probe automatically when accessibility is enabled.
+
 ## 2026-07-26 — Consolidated session summary
 
 - Analysed and evolved the Kindle OCR app from a diagnostic/manual collector into a bounded whole-book capture workflow, with user-selected screen limits, Stop controls, foreground checks, duplicate-final-screen/end-of-book detection, and discarded screenshots after OCR.

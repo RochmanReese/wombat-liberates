@@ -8,20 +8,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="Wombat Liberates"
+            android:scaleType="centerCrop"
+            android:src="@drawable/wombat_banner" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Kindle accessibility probe"
-            android:textSize="24sp"
+            android:layout_marginTop="16dp"
+            android:text="Wombat Liberates"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Capture user-authorized reading screens as raw local OCR, or import an existing text file. Correction always creates a separate file; raw OCR remains unchanged. Screenshots are discarded."
+            android:layout_marginTop="4dp"
+            android:text="Capture your reading text, clean it, and create an EPUB."
             android:textSize="16sp" />
 
         <TextView
@@ -29,60 +38,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Probe: stopped"
+            android:text="Ready"
             android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Start accessibility probe" />
-
-        <Button
-            android:id="@+id/stopButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Stop probe and capture" />
-
-        <EditText
-            android:id="@+id/epubTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="EPUB title"
-            android:inputType="textCapSentences"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/epubAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="EPUB author"
-            android:inputType="textCapWords"
-            android:singleLine="true" />
-
-        <Button
-            android:id="@+id/exportEpubButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Create EPUB from corrected text" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Uses corrected text when available, otherwise raw OCR. Chapter headings such as CHAPTER SIX become the table of contents."
-            android:textSize="12sp" />
+            android:layout_marginTop="24dp"
+            android:text="1. Capture or import"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/pageCount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="Screens to capture (1–1,000)"
             android:inputType="number"
             android:singleLine="true"
@@ -93,86 +64,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Start automatic raw book capture" />
+            android:text="Start Kindle capture" />
 
         <Button
             android:id="@+id/stopBatchButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Stop automatic capture" />
+            android:text="Stop capture" />
 
         <Button
             android:id="@+id/importRawTextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Import raw text file" />
-
-        <Button
-            android:id="@+id/correctOnDeviceButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Correct saved OCR on this device" />
+            android:layout_marginTop="8dp"
+            android:text="Import text file" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="On-device correction requires a compatible Gemini Nano device."
+            android:text="Kindle screenshots are OCRed locally then discarded."
             android:textSize="12sp" />
 
-        <EditText
-            android:id="@+id/ollamaBaseUrl"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Ollama HTTPS base URL"
-            android:inputType="textUri"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/ollamaModel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Ollama model"
-            android:inputType="text"
-            android:singleLine="true"
-            android:text="mistral-nemo:latest" />
-
-        <EditText
-            android:id="@+id/ollamaUsername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Ollama username"
-            android:inputType="text"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/ollamaPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Ollama password"
-            android:inputType="textPassword"
-            android:singleLine="true" />
+            android:layout_marginTop="24dp"
+            android:text="2. Clean text"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/correctOllamaButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Correct saved OCR via Ollama" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Connection settings stay on this phone; the password is encrypted with Android Keystore and is never committed."
-            android:textSize="12sp" />
+            android:text="Clean OCR with Ollama" />
 
         <ProgressBar
             android:id="@+id/correctionProgressBar"
@@ -190,45 +118,189 @@
             android:text="No correction running."
             android:textSize="12sp" />
 
-        <Button
-            android:id="@+id/clearLogButton"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Clear raw OCR, corrected OCR, and diagnostics" />
+            android:layout_marginTop="24dp"
+            android:text="3. Create EPUB"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/exportFileName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Export filename"
-            android:inputType="text"
-            android:singleLine="true"
-            android:text="kindle-ocr.txt" />
-
-        <Button
-            android:id="@+id/saveRawTextButton"
+            android:id="@+id/epubTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Save raw OCR text" />
+            android:hint="Book title"
+            android:inputType="textCapSentences"
+            android:singleLine="true" />
 
-        <Button
-            android:id="@+id/saveCorrectedTextButton"
+        <EditText
+            android:id="@+id/epubAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Save corrected OCR text" />
+            android:hint="Author"
+            android:inputType="textCapWords"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/exportEpubButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Create EPUB" />
 
         <TextView
-            android:id="@+id/logText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="monospace"
-            android:text="No events logged."
-            android:textIsSelectable="true"
+            android:layout_marginTop="4dp"
+            android:text="Uses cleaned text when available; chapter headings become the contents list."
             android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/advancedControlsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Show advanced settings and diagnostics" />
+
+        <LinearLayout
+            android:id="@+id/advancedControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Ollama connection"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/ollamaBaseUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Ollama HTTPS base URL"
+                android:inputType="textUri"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/ollamaModel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Ollama model"
+                android:inputType="text"
+                android:singleLine="true"
+                android:text="mistral-nemo:latest" />
+
+            <EditText
+                android:id="@+id/ollamaUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Ollama username"
+                android:inputType="text"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/ollamaPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Ollama password"
+                android:inputType="textPassword"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/correctOnDeviceButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Try on-device correction" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="On-device correction needs a compatible Gemini Nano phone. Ollama settings remain encrypted on this phone."
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Capture and files"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/startButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Start accessibility probe" />
+
+            <Button
+                android:id="@+id/stopButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Stop probe and capture" />
+
+            <EditText
+                android:id="@+id/exportFileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Text export filename"
+                android:inputType="text"
+                android:singleLine="true"
+                android:text="kindle-ocr.txt" />
+
+            <Button
+                android:id="@+id/saveRawTextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Save raw OCR text" />
+
+            <Button
+                android:id="@+id/saveCorrectedTextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Save cleaned OCR text" />
+
+            <Button
+                android:id="@+id/clearLogButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Clear all saved text and diagnostics" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Diagnostics"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/logText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:text="No events logged."
+                android:textIsSelectable="true"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
