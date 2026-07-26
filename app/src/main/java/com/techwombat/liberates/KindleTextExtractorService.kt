@@ -5,6 +5,8 @@ import android.accessibilityservice.GestureDescription
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Path
+import android.graphics.Rect
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -13,7 +15,11 @@ import android.view.accessibility.AccessibilityNodeInfo
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileWriter
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 data class CapturedPage(
@@ -35,6 +41,7 @@ class KindleTextExtractorService : AccessibilityService() {
         const val PREF_PAGE_COUNT = "page_count"
         const val PREF_LAST_PACKAGE = "last_package"
         const val PREF_LAST_LINE_COUNT = "last_line_count"
+        const val PREF_DUMP_LOG_ENABLED = "dump_log_enabled"
 
         fun getPrefs(context: Context): SharedPreferences {
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -54,6 +61,14 @@ class KindleTextExtractorService : AccessibilityService() {
 
         fun setAutoSwipe(context: Context, enabled: Boolean) {
             getPrefs(context).edit().putBoolean(PREF_AUTO_SWIPE, enabled).apply()
+        }
+
+        fun isDumpLogEnabled(context: Context): Boolean {
+            return getPrefs(context).getBoolean(PREF_DUMP_LOG_ENABLED, false)
+        }
+
+        fun setDumpLogEnabled(context: Context, enabled: Boolean) {
+            getPrefs(context).edit().putBoolean(PREF_DUMP_LOG_ENABLED, enabled).apply()
         }
 
         fun clearPages(context: Context) {
@@ -94,6 +109,20 @@ class KindleTextExtractorService : AccessibilityService() {
             }
             return pages
         }
+
+        fun logToFile(context: Context, message: String) {
+            try {
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (!downloadsDir.exists()) downloadsDir.mkdirs()
+                val logFile = File(downloadsDir, "wombat_debug.log")
+                val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
+                FileWriter(logFile, true).use { writer ->
+                    writer.append("[$timestamp] $message\n")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error writing to wombat_debug.log", e)
+            }
+        }
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -103,6 +132,7 @@ class KindleTextExtractorService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         Log.i(TAG, "Wombat-Liberates Kindle Accessibility Service Connected!")
+        logToFile(this, "SERVICE CONNECTED")
         startAutoSwipeLoop()
     }
 
@@ -116,7 +146,6 @@ class KindleTextExtractorService : AccessibilityService() {
 
                     if (capturing && autoSwipe) {
                         dispatchSwipeGesture()
-                        // Humanized random delay between 1600ms and 2200ms
                         nextDelay = 1600L + Random.nextLong(600)
                     }
                 } catch (e: Exception) {
@@ -152,16 +181,26 @@ class KindleTextExtractorService : AccessibilityService() {
         getPrefs(this).edit().putString(PREF_LAST_PACKAGE, packageName).apply()
 
         val capturing = isCapturing(this)
-        if (!capturing) return
+        val dumpLogEnabled = isDumpLogEnabled(this)
 
         val rootNode = rootInActiveWindow ?: return
+
+        if (dumpLogEnabled) {
+            val sb = StringBuilder()
+            sb.append("\n=== ACCESSIBILITY NODE DUMP (Pkg: $packageName, Event: ${AccessibilityEvent.eventTypeToString(event.eventType)}) ===\n")
+            dumpNodeHierarchy(rootNode, 0, sb)
+            sb.append("================================================================================\n")
+            logToFile(this, sb.toString())
+        }
+
+        if (!capturing) return
 
         val extractedLines = mutableListOf<String>()
         traverseNodeTree(rootNode, extractedLines)
 
         if (extractedLines.isEmpty()) return
 
-        // CHECK IF KINDLE MENU OVERLAY IS OPEN (e.g. "Table of Contents", "Reading Settings")
+        // CHECK IF KINDLE MENU OVERLAY IS OPEN
         val isMenuOverlayVisible = extractedLines.any { line ->
             line.equals("Table of Contents", ignoreCase = true) ||
             line.equals("Reading Settings", ignoreCase = true) ||
@@ -170,17 +209,15 @@ class KindleTextExtractorService : AccessibilityService() {
         }
 
         if (isMenuOverlayVisible) {
-            // Dismiss Kindle menu overlay by tapping center of screen (throttled to once per 2s)
             val now = System.currentTimeMillis()
             if (now - lastDismissTime > 2000) {
                 lastDismissTime = now
-                Log.w(TAG, "Kindle Menu Overlay detected! Dismissing overlay with center tap.")
+                logToFile(this, "Kindle Menu Overlay detected! Dismissing with center tap.")
                 dismissMenuOverlay()
             }
             return
         }
 
-        // Clean out remaining header/footer noise
         val cleanBookLines = TextCleaner.cleanPageLines(extractedLines)
         if (cleanBookLines.isEmpty()) return
 
@@ -190,14 +227,11 @@ class KindleTextExtractorService : AccessibilityService() {
         val existingPages = getCapturedPages(this).toMutableList()
         val lastPage = existingPages.lastOrNull()
 
-        // Deduplication Check 1: Exact Hash Match
         if (lastPage != null && lastPage.contentHash == contentHash) {
             return
         }
 
-        // Deduplication Check 2: High Content Similarity (>85% character overlap)
         if (lastPage != null && isSimilarContent(lastPage.textLines.joinToString("\n"), combinedContent)) {
-            Log.d(TAG, "Skipped duplicate/similar page redraw.")
             return
         }
 
@@ -217,7 +251,27 @@ class KindleTextExtractorService : AccessibilityService() {
             .putInt(PREF_LAST_LINE_COUNT, cleanBookLines.size)
             .apply()
 
-        Log.i(TAG, "[PAGE_CAPTURED] Added Page #$newPageNum (${cleanBookLines.size} lines from $packageName)")
+        logToFile(this, "CAPTURED PAGE #$newPageNum (${cleanBookLines.size} lines from $packageName)")
+    }
+
+    private fun dumpNodeHierarchy(node: AccessibilityNodeInfo?, depth: Int, sb: StringBuilder) {
+        if (node == null) return
+        val indent = "  ".repeat(depth)
+        val bounds = Rect()
+        node.getBoundsInScreen(bounds)
+
+        val className = node.className?.toString() ?: "UnknownClass"
+        val viewId = node.viewIdResourceName ?: "NoId"
+        val text = node.text?.toString()?.replace("\n", "\\n") ?: ""
+        val contentDesc = node.contentDescription?.toString()?.replace("\n", "\\n") ?: ""
+
+        sb.append("$indent- [$className] id=$viewId bounds=$bounds text=\"$text\" desc=\"$contentDesc\" clickable=${node.isClickable} visible=${node.isVisibleToUser}\n")
+
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i)
+            dumpNodeHierarchy(child, depth + 1, sb)
+            child?.recycle()
+        }
     }
 
     fun dispatchSwipeGesture() {
@@ -225,7 +279,6 @@ class KindleTextExtractorService : AccessibilityService() {
         val width = displayMetrics.widthPixels.toFloat()
         val height = displayMetrics.heightPixels.toFloat()
 
-        // Crisp horizontal swipe across lower 65% of screen to avoid middle tap zone
         val startX = width * (0.90f + Random.nextFloat() * 0.04f)
         val endX = width * (0.08f + Random.nextFloat() * 0.04f)
         val startY = height * (0.65f + Random.nextFloat() * 0.05f)
@@ -236,7 +289,6 @@ class KindleTextExtractorService : AccessibilityService() {
             lineTo(endX, endY)
         }
 
-        // Crisp swipe duration (130ms to 170ms) to ensure Kindle reads it as a swipe, NOT a tap
         val strokeDuration = 130L + Random.nextLong(40)
 
         val gestureBuilder = GestureDescription.Builder()

@@ -3209,6 +3209,7 @@ id bounceEnd
 id bounceStart
 id btnAutoSwipe
 id btnClear
+id btnDumpLog
 id btnExportEpub
 id btnSettings
 id btnStart
@@ -3282,6 +3283,7 @@ id dragRight
 id dragStart
 id dragUp
 id dropdown_menu
+id dumpLogTv
 id easeIn
 id easeInOut
 id easeOut

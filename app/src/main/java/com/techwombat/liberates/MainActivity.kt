@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusTv: TextView
     private lateinit var pageCountTv: TextView
     private lateinit var autoSwipeTv: TextView
+    private lateinit var dumpLogTv: TextView
     private lateinit var lastPkgTv: TextView
     private lateinit var etBookTitle: EditText
     private lateinit var etBookAuthor: EditText
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         statusTv = findViewById(R.id.statusTv)
         pageCountTv = findViewById(R.id.pageCountTv)
         autoSwipeTv = findViewById(R.id.autoSwipeTv)
+        dumpLogTv = findViewById(R.id.dumpLogTv)
         lastPkgTv = findViewById(R.id.lastPkgTv)
         etBookTitle = findViewById(R.id.etBookTitle)
         etBookAuthor = findViewById(R.id.etBookAuthor)
@@ -42,6 +44,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnAutoSwipe).setOnClickListener {
             val current = KindleTextExtractorService.isAutoSwipe(this)
             KindleTextExtractorService.setAutoSwipe(this, !current)
+            syncStateUI()
+        }
+
+        findViewById<Button>(R.id.btnDumpLog).setOnClickListener {
+            val current = KindleTextExtractorService.isDumpLogEnabled(this)
+            KindleTextExtractorService.setDumpLogEnabled(this, !current)
             syncStateUI()
         }
 
@@ -60,12 +68,21 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnClear).setOnClickListener {
             KindleTextExtractorService.clearPages(this)
+            clearLogFile()
             syncStateUI()
         }
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
+    }
+
+    private fun clearLogFile() {
+        try {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val logFile = File(downloadsDir, "wombat_debug.log")
+            if (logFile.exists()) logFile.delete()
+        } catch (_: Exception) {}
     }
 
     private fun exportEpub(silent: Boolean = false): File? {
@@ -139,6 +156,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = KindleTextExtractorService.getPrefs(this)
         val isRunning = prefs.getBoolean(KindleTextExtractorService.PREF_IS_CAPTURING, false)
         val isAutoSwipe = prefs.getBoolean(KindleTextExtractorService.PREF_AUTO_SWIPE, false)
+        val isDumpLog = prefs.getBoolean(KindleTextExtractorService.PREF_DUMP_LOG_ENABLED, false)
         val pageCount = prefs.getInt(KindleTextExtractorService.PREF_PAGE_COUNT, 0)
         val lineCount = prefs.getInt(KindleTextExtractorService.PREF_LAST_LINE_COUNT, 0)
         val lastPkg = prefs.getString(KindleTextExtractorService.PREF_LAST_PACKAGE, "None") ?: "None"
@@ -149,6 +167,9 @@ class MainActivity : AppCompatActivity() {
             
             autoSwipeTv.text = if (isAutoSwipe) "Auto-Swipe: ON (1.5s-2.1s delay)" else "Auto-Swipe: OFF"
             autoSwipeTv.setTextColor(if (isAutoSwipe) Color.parseColor("#1565C0") else Color.GRAY)
+
+            dumpLogTv.text = if (isDumpLog) "Diagnostic Node Logging: ON" else "Diagnostic Node Logging: OFF"
+            dumpLogTv.setTextColor(if (isDumpLog) Color.parseColor("#00838F") else Color.GRAY)
 
             pageCountTv.text = "Pages Captured: $pageCount (Last page: $lineCount lines)"
             lastPkgTv.text = "Last App Detected: $lastPkg"

@@ -3,11 +3,13 @@ local
 id autoSwipeTv
 id btnAutoSwipe
 id btnClear
+id btnDumpLog
 id btnExportEpub
 id btnSettings
 id btnStart
 id btnStop
 id btnUploadServer
+id dumpLogTv
 id etBookAuthor
 id etBookTitle
 id etServerUrl
