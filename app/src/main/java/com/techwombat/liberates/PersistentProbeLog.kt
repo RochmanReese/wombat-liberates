@@ -11,6 +11,7 @@ object PersistentProbeLog {
     fun initialize(context: Context) {
         if (::logFile.isInitialized) return
         logFile = File(context.filesDir, LOG_FILE_NAME)
+        if (!logFile.exists()) logFile.writeText("")
     }
 
     @Synchronized
