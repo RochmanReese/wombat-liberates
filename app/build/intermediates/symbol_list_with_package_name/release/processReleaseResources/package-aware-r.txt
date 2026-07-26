@@ -3193,6 +3193,7 @@ id auto
 id autoComplete
 id autoCompleteToEnd
 id autoCompleteToStart
+id autoSwipeTv
 id axisRelative
 id barrier
 id baseline
@@ -3206,6 +3207,11 @@ id bounce
 id bounceBoth
 id bounceEnd
 id bounceStart
+id btnAutoSwipe
+id btnClear
+id btnSettings
+id btnStart
+id btnStop
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3341,6 +3347,7 @@ id item_touch_helper_previous_elevation
 id jumpToEnd
 id jumpToStart
 id labeled
+id lastPkgTv
 id layout
 id left
 id leftToRight
@@ -3449,6 +3456,7 @@ id outline
 id outward
 id overshoot
 id packed
+id pageCountTv
 id parallax
 id parent
 id parentPanel
@@ -3532,6 +3540,7 @@ id startToEnd
 id startVertical
 id staticLayout
 id staticPostLayout
+id statusTv
 id stop
 id stretch
 id submenuarrow
@@ -3586,6 +3595,8 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvSubtitle
+id tvTitle
 id unchecked
 id uniform
 id unlabeled
@@ -3724,6 +3735,7 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_main
 layout custom_dialog
 layout design_bottom_navigation_item
 layout design_bottom_sheet_dialog
