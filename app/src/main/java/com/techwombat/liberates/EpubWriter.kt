@@ -54,70 +54,75 @@ object EpubWriter {
     private fun isChapterHeading(value: String): Boolean =
         value.length <= 100 && value.matches(Regex("(?i)^chapter\\s+(?:[0-9]+|[ivxlcdm]+|[a-z][a-z -]*)[.!: -]*$"))
 
-    private fun titlePage(title: String, author: String): String = xhtml("$title — Title page", """
+    private fun titlePage(title: String, author: String): String = xhtml(
+        "$title — Title page",
+        """
         <section class="title-page" epub:type="titlepage" xmlns:epub="http://www.idpf.org/2007/ops">
           <h1>${escape(title)}</h1><p class="author">${escape(author)}</p>
         </section>
-    """)
+        """.trimIndent(),
+    )
 
-    private fun chapterDocument(bookTitle: String, chapter: Chapter): String = xhtml("$bookTitle — ${chapter.title}", """
-        <section epub:type="chapter" xmlns:epub="http://www.idpf.org/2007/ops">
-          <h1>${escape(chapter.title)}</h1>
-          ${chapter.paragraphs.joinToString("\n") { "<p>${escape(it).replace("\n", "<br />")}</p>" }}
-        </section>
-    """)
-
-    private fun xhtml(documentTitle: String, body: String): String = """
-        <?xml version="1.0" encoding="utf-8"?>
-        <!DOCTYPE html>
-        <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-          <head><title>${escape(documentTitle)}</title><link rel="stylesheet" type="text/css" href="${if (documentTitle.endsWith("Title page")) "styles/book.css" else "../styles/book.css"}" /></head>
-          <body>${body.trimIndent()}</body>
-        </html>
-    """.trimIndent()
-
-    private fun navigation(bookTitle: String, chapters: List<Chapter>): String = """
-        <?xml version="1.0" encoding="utf-8"?>
-        <!DOCTYPE html>
-        <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-          <head><title>${escape(bookTitle)} — Contents</title><link rel="stylesheet" type="text/css" href="styles/book.css" /></head>
-          <body><nav epub:type="toc" id="toc" xmlns:epub="http://www.idpf.org/2007/ops"><h1>Contents</h1><ol>
-        ${chapters.mapIndexed { index, chapter -> "<li><a href=\"${chapterPath(index)}\">${escape(chapter.title)}</a></li>" }.joinToString("\n")}
-          </ol></nav></body>
-        </html>
-    """.trimIndent()
-
-    private fun packageDocument(title: String, author: String, chapters: List<Chapter>): String {
-        val manifest = buildString {
-            appendLine("    <item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>")
-            appendLine("    <item id=\"title-page\" href=\"title.xhtml\" media-type=\"application/xhtml+xml\"/>")
-            appendLine("    <item id=\"style\" href=\"styles/book.css\" media-type=\"text/css\"/>")
-            chapters.indices.forEach { index ->
-                appendLine("    <item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>")
+    private fun chapterDocument(bookTitle: String, chapter: Chapter): String = xhtml(
+        "$bookTitle — ${chapter.title}",
+        buildString {
+            appendLine("<section epub:type=\"chapter\" xmlns:epub=\"http://www.idpf.org/2007/ops\">")
+            appendLine("  <h1>${escape(chapter.title)}</h1>")
+            chapter.paragraphs.forEach { paragraph ->
+                appendLine("  <p>${escape(paragraph).replace("\n", "<br />")}</p>")
             }
-        }.trimEnd()
-        val spine = buildString {
-            appendLine("    <itemref idref=\"title-page\"/>")
-            chapters.indices.forEach { index -> appendLine("    <itemref idref=\"chapter-${index + 1}\"/>") }
-        }.trimEnd()
-        return """
-            <?xml version="1.0" encoding="utf-8"?>
-            <package xmlns="http://www.idpf.org/2007/opf" prefix="dcterms: http://purl.org/dc/terms/" unique-identifier="book-id" version="3.0" xml:lang="en">
-              <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-                <dc:identifier id="book-id">urn:uuid:${UUID.randomUUID()}</dc:identifier>
-                <dc:title>${escape(title)}</dc:title>
-                <dc:creator>${escape(author)}</dc:creator>
-                <dc:language>en</dc:language>
-                <meta property="dcterms:modified">${Instant.now().toString().replace(Regex("\\.\\d+Z$"), "Z")}</meta>
-              </metadata>
-              <manifest>
-            $manifest
-              </manifest>
-              <spine>
-            $spine
-              </spine>
-            </package>
-        """.trimIndent()
+            append("</section>")
+        },
+    )
+
+    /** Returns XML whose declaration is the very first byte, as required by EPUB/XHTML readers. */
+    private fun xhtml(documentTitle: String, body: String): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        append("<!DOCTYPE html>\n")
+        append("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n")
+        append("  <head><title>${escape(documentTitle)}</title><link rel=\"stylesheet\" type=\"text/css\" href=\"")
+        append(if (documentTitle.endsWith("Title page")) "styles/book.css" else "../styles/book.css")
+        append("\" /></head>\n")
+        append("  <body>").append(body.trim()).append("</body>\n")
+        append("</html>\n")
+    }
+
+    private fun navigation(bookTitle: String, chapters: List<Chapter>): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        append("<!DOCTYPE html>\n")
+        append("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n")
+        append("  <head><title>${escape(bookTitle)} — Contents</title><link rel=\"stylesheet\" type=\"text/css\" href=\"styles/book.css\" /></head>\n")
+        append("  <body><nav epub:type=\"toc\" id=\"toc\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><h1>Contents</h1><ol>\n")
+        chapters.forEachIndexed { index, chapter ->
+            append("      <li><a href=\"${chapterPath(index)}\">${escape(chapter.title)}</a></li>\n")
+        }
+        append("    </ol></nav></body>\n")
+        append("</html>\n")
+    }
+
+    private fun packageDocument(title: String, author: String, chapters: List<Chapter>): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        append("<package xmlns=\"http://www.idpf.org/2007/opf\" prefix=\"dcterms: http://purl.org/dc/terms/\" unique-identifier=\"book-id\" version=\"3.0\" xml:lang=\"en\">\n")
+        append("  <metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n")
+        append("    <dc:identifier id=\"book-id\">urn:uuid:${UUID.randomUUID()}</dc:identifier>\n")
+        append("    <dc:title>${escape(title)}</dc:title>\n")
+        append("    <dc:creator>${escape(author)}</dc:creator>\n")
+        append("    <dc:language>en</dc:language>\n")
+        append("    <meta property=\"dcterms:modified\">${Instant.now().toString().replace(Regex("\\.\\d+Z$"), "Z")}</meta>\n")
+        append("  </metadata>\n")
+        append("  <manifest>\n")
+        append("    <item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>\n")
+        append("    <item id=\"title-page\" href=\"title.xhtml\" media-type=\"application/xhtml+xml\"/>\n")
+        append("    <item id=\"style\" href=\"styles/book.css\" media-type=\"text/css\"/>\n")
+        chapters.indices.forEach { index ->
+            append("    <item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>\n")
+        }
+        append("  </manifest>\n")
+        append("  <spine>\n")
+        append("    <itemref idref=\"title-page\"/>\n")
+        chapters.indices.forEach { index -> append("    <itemref idref=\"chapter-${index + 1}\"/>\n") }
+        append("  </spine>\n")
+        append("</package>\n")
     }
 
     private fun stylesheet(): String = """
@@ -126,7 +131,7 @@ object EpubWriter {
         h1 { margin: 2.5em 0 2em; text-align: center; font-size: 1.5em; font-variant: small-caps; page-break-before: always; break-before: page; }
         h1:first-child { page-break-before: avoid; break-before: avoid; }
         p { margin: 0 0 0.85em; text-align: justify; text-indent: 0; orphans: 2; widows: 2; }
-        
+
         .title-page { margin-top: 35%; text-align: center; }
         .title-page h1 { margin: 0 0 1em; page-break-before: avoid; break-before: avoid; font-variant: normal; }
         .author { text-align: center; text-indent: 0; }
@@ -158,5 +163,9 @@ object EpubWriter {
         zip.closeEntry()
     }
 
-    private fun escape(value: String): String = value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+    private fun escape(value: String): String = value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
 }
