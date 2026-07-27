@@ -32,6 +32,7 @@
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
+
         </FrameLayout>
 
         <TextView
@@ -41,6 +42,7 @@
             android:gravity="center"
             android:text="Read Your Books, Your Way."
             android:textSize="16sp" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,6 +58,7 @@
                 android:text="1. Scan or import"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
 
             <Button
                 android:id="@+id/helpButton"
@@ -93,12 +96,14 @@
             android:text="Ready to scan or import."
             android:textSize="12sp" />
 
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Scans until Kindle reaches the end of the book. Screenshots are OCRed locally, then discarded."
             android:textSize="12sp" />
+
 
         <TextView
             android:layout_width="match_parent"
@@ -107,6 +112,7 @@
             android:text="2. Clean text"
             android:textSize="20sp"
             android:textStyle="bold" />
+
 
         <Button
             android:id="@+id/quickLocalCleanupButton"
@@ -138,6 +144,7 @@
             android:text="No correction running."
             android:textSize="12sp" />
 
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,6 +152,7 @@
             android:text="3. Create EPUB"
             android:textSize="20sp"
             android:textStyle="bold" />
+
 
         <EditText
             android:id="@+id/epubTitle"
@@ -178,6 +186,7 @@
             android:text="Uses cleaned text when available; chapter headings become the contents list."
             android:textSize="12sp" />
 
+
         <Button
             android:id="@+id/advancedControlsButton"
             android:layout_width="match_parent"
@@ -200,6 +209,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+
             <EditText
                 android:id="@+id/pageCount"
                 android:layout_width="match_parent"
@@ -217,11 +227,67 @@
                 android:text="The app normally stops at the end of a book. Leave this at 1,000 unless you want to capture only part of one."
                 android:textSize="12sp" />
 
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="OCR corrections"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Added corrections are literal and case-sensitive. They run after the built-in fixes and default corrections on the next Quick local cleanup."
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/ocrCorrectionsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+            <EditText
+                android:id="@+id/ocrCorrectionFind"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Find"
+                android:inputType="text"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/ocrCorrectionReplace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Replace (may be empty)"
+                android:inputType="text"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/addOcrCorrectionButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Add correction" />
+
+            <Button
+                android:id="@+id/resetOcrCorrectionsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Reset custom corrections" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="Ollama connection"
+
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -276,6 +342,7 @@
                 android:text="On-device correction needs a compatible Gemini Nano phone. Ollama settings remain encrypted on this phone."
                 android:textSize="12sp" />
 
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -283,6 +350,7 @@
                 android:text="Accessibility and files"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
 
             <Button
                 android:id="@+id/startButton"
@@ -337,6 +405,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+
             <TextView
                 android:id="@+id/logText"
                 android:layout_width="match_parent"
@@ -346,6 +415,7 @@
                 android:text="No events logged."
                 android:textIsSelectable="true"
                 android:textSize="12sp" />
+
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,49 @@
+# Wombat Liberates OCR rules
+#
+# One literal correction per line: find => replace
+# Lines beginning with # are notes. Apply these after the built-in contextual pipe rules.
+
+# Pipe / capital-I OCR errors
+# Built-in contextual handling:
+#   pipe after a letter or apostrophe => lowercase l
+#   pipe before a letter or apostrophe => uppercase I
+#   pipe followed by a space and then a letter => uppercase I
+#   standalone space-pipe-space => uppercase I
+#   4| followed by a space => opening quote + I
+#   |I at dialogue start => opening quote + I
+
+4| => “I
+|I => “I
+I'l => I'll
+1'Il => I'll
+l'Il => I'll
+
+# First-person contractions
+l'm => I'm
+l'd => I'd
+l'll => I'll
+l've => I've
+I'Il => I'll
+I'lI => I'll
+T'm => I'm
+T'Il => I'll
+P'm => I'm
+
+# High-confidence character and capitalisation fixes from rawtext1.txt
+yOu => you
+yOur => your
+YOu => You
+YOur => Your
+mne => me
+alI => all
+Iying => lying
+thOught => thought
+amoment => a moment
+dida => did a
+canmp => camp
+camne => came
+comne => come
+painfull => painful
+seCure => secure
+SOon => Soon
+Supposed => supposed

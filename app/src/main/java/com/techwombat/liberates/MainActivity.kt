@@ -7,6 +7,9 @@ import android.provider.Settings
 import android.util.Base64
 import android.view.View
 import android.widget.EditText
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -36,8 +39,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         PersistentProbeLog.initialize(applicationContext)
         OcrTextStore.initialize(applicationContext)
+        OcrRulesStore.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        renderOcrCorrections()
         OllamaCredentialsStore.load(applicationContext)?.let { credentials ->
             binding.ollamaBaseUrl.setText(credentials.baseUrl)
             binding.ollamaModel.setText(credentials.model)
@@ -102,6 +107,9 @@ class MainActivity : AppCompatActivity() {
             binding.advancedControls.visibility = if (showAdvanced) View.VISIBLE else View.GONE
             binding.advancedControlsButton.text = if (showAdvanced) "Hide advanced settings and diagnostics" else "Show advanced settings and diagnostics"
         }
+
+        binding.addOcrCorrectionButton.setOnClickListener { addOcrCorrection() }
+        binding.resetOcrCorrectionsButton.setOnClickListener { confirmResetOcrCorrections() }
 
         binding.importRawTextButton.setOnClickListener {
             importRawText.launch(arrayOf("text/plain", "text/*"))
@@ -183,6 +191,72 @@ class MainActivity : AppCompatActivity() {
         return if (title.isBlank()) "AI text cleanup" else "AI text cleanup — $title"
     }
 
+    private fun renderOcrCorrections() {
+        val rules = OcrRulesStore.customRules(applicationContext)
+        binding.ocrCorrectionsList.removeAllViews()
+        if (rules.isEmpty()) {
+            binding.ocrCorrectionsList.addView(TextView(this).apply {
+                text = "No custom corrections added. Default corrections are active."
+                textSize = 12f
+            })
+            return
+        }
+
+        rules.forEachIndexed { index, rule ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 4, 0, 4)
+            }
+            row.addView(TextView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                text = "${rule.find} → ${rule.replace.ifEmpty { "(empty)" }}"
+                textSize = 14f
+            })
+            row.addView(Button(this).apply {
+                text = "Delete"
+                setOnClickListener {
+                    OcrRulesStore.removeCustomRule(applicationContext, index)
+                    renderOcrCorrections()
+                    binding.statusText.text = "Custom OCR correction removed."
+                }
+            })
+            binding.ocrCorrectionsList.addView(row)
+        }
+    }
+
+    private fun addOcrCorrection() {
+        val find = binding.ocrCorrectionFind.text.toString().trim()
+        val replace = binding.ocrCorrectionReplace.text.toString().trim()
+        if (find.isEmpty()) {
+            binding.statusText.text = "Find text cannot be empty."
+            return
+        }
+        val existingRules = OcrRulesParser.parse(OcrRulesStore.readRules(applicationContext)).rules
+        if (existingRules.any { it.find == find }) {
+            binding.statusText.text = "A correction for '$find' already exists."
+            return
+        }
+
+        OcrRulesStore.addCustomRule(applicationContext, OcrLiteralRule(find, replace))
+        binding.ocrCorrectionFind.text?.clear()
+        binding.ocrCorrectionReplace.text?.clear()
+        renderOcrCorrections()
+        binding.statusText.text = "Custom OCR correction added."
+    }
+
+    private fun confirmResetOcrCorrections() {
+        AlertDialog.Builder(this)
+            .setTitle("Reset custom corrections?")
+            .setMessage("This removes only your added OCR corrections and restores the defaults. Raw OCR, cleaned OCR, diagnostics, and Ollama settings are unchanged.")
+            .setPositiveButton("Reset") { _, _ ->
+                OcrRulesStore.resetToDefaults(applicationContext)
+                renderOcrCorrections()
+                binding.statusText.text = "OCR corrections restored to defaults."
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun startLocalCleanup() {
         if (correctionJob?.isActive == true) return
         val rawText = OcrTextStore.rawText()
@@ -190,32 +264,17 @@ class MainActivity : AppCompatActivity() {
             binding.statusText.text = "Scan or import text before cleaning it."
             return
         }
+        val parsedRules = OcrRulesParser.parse(OcrRulesStore.readRules(applicationContext))
+        if (!parsedRules.isValid) {
+            binding.statusText.text = "OCR rules file has an invalid entry: ${parsedRules.errors.first().message}"
+            return
+        }
         correctionJob = lifecycleScope.launch {
             runCorrection(rawText, cleanupProgressLabel()) { chunk ->
-                var cleaned = chunk
-                    .replace("4| ", "“I ")
-                    .replace("|I ", "“I ")
-                    .replace("yOu", "you")
-                    .replace("yOur", "your")
-                    .replace("YOu", "You")
-                    .replace("YOur", "Your")
-                    .replace(" 1...", " I...")
-                    .replace("\n1...", "\nI...")
-                cleaned = cleaned.mapIndexed { index, character ->
-                    if (character.code != 124) return@mapIndexed character
-                    val previous = cleaned.getOrNull(index - 1)
-                    val next = cleaned.getOrNull(index + 1)
-                    when {
-                        previous?.isLetter() == true || previous?.code == 39 -> 108.toChar()
-                        next?.isLetter() == true -> 73.toChar()
-                        else -> character
-                    }
-                }.joinToString("")
-                cleaned
+                OcrCleanup.clean(chunk, parsedRules.rules)
             }
         }
     }
-
 
     private fun startOnDeviceCorrection() {
         if (correctionJob?.isActive == true) return

@@ -34,5 +34,6 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-}
 
+    testImplementation("junit:junit:4.13.2")
+}
