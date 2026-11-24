@@ -77,6 +77,11 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
     "Chapter 4 –" prefixes).
   - EPUBs now have a visible Contents page (nav.xhtml in the spine) after the title page.
 
+### First thing next session
+- Remind Rocky to check **Resizable BAR / Above 4G decoding** in the BIOS at the next server reboot
+  (`vis_vram_total` is 0.25 GB; Ollama sees 3 GB of about 18 GB free VRAM). After the reboot, confirm
+  gemma loads 49/49 layers without `num_gpu`. If not, consider upgrading Ollama (0.12.9).
+
 ### Watch out for
 - **Wombat Reader incident**: this server's wombat-reader clone was 5 commits behind GitHub
   (DB schema 6 vs 2). A build from the stale clone crashed the installed app on launch ("A
