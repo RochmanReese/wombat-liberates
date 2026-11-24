@@ -25,6 +25,7 @@ object EpubWriter {
         val cover = coverId?.takeIf { it in images }
         val text = Illustrations.removeMarkers(sourceText) { id -> id in images && id != cover }
         val chapters = chaptersFrom(text)
+        val bookId = "urn:uuid:${UUID.randomUUID()}"
         val usedImages = (Illustrations.ids(text) + listOfNotNull(cover)).distinct().associateWith { images.getValue(it) }
         ZipOutputStream(output.buffered()).use { zip ->
             // EPUB requires this exact first entry to be uncompressed.
@@ -33,7 +34,10 @@ object EpubWriter {
             putText(zip, "OEBPS/styles/book.css", stylesheet())
             putText(zip, "OEBPS/title.xhtml", titlePage(title, author))
             putText(zip, "OEBPS/nav.xhtml", navigation(title, chapters))
-            putText(zip, "OEBPS/content.opf", packageDocument(title, author, chapters, usedImages.keys, cover))
+            // EPUB 2 table of contents alongside the EPUB 3 one: older readers and tools
+            // (including Wombat Converts before 25 Nov 2026) only understand toc.ncx.
+            putText(zip, "OEBPS/toc.ncx", ncx(title, chapters, bookId))
+            putText(zip, "OEBPS/content.opf", packageDocument(title, author, chapters, usedImages.keys, cover, bookId))
             usedImages.forEach { (id, bytes) -> putBytes(zip, "OEBPS/images/$id", bytes) }
             chapters.forEachIndexed { index, chapter ->
                 putText(zip, "OEBPS/${chapterPath(index)}", chapterDocument(title, chapter))
@@ -120,11 +124,18 @@ object EpubWriter {
         append("</html>\n")
     }
 
-    private fun packageDocument(title: String, author: String, chapters: List<Chapter>, imageIds: Set<String>, coverId: String?): String = buildString {
+    private fun packageDocument(
+        title: String,
+        author: String,
+        chapters: List<Chapter>,
+        imageIds: Set<String>,
+        coverId: String?,
+        bookId: String,
+    ): String = buildString {
         append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
         append("<package xmlns=\"http://www.idpf.org/2007/opf\" prefix=\"dcterms: http://purl.org/dc/terms/\" unique-identifier=\"book-id\" version=\"3.0\" xml:lang=\"en\">\n")
         append("  <metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n")
-        append("    <dc:identifier id=\"book-id\">urn:uuid:${UUID.randomUUID()}</dc:identifier>\n")
+        append("    <dc:identifier id=\"book-id\">$bookId</dc:identifier>\n")
         append("    <dc:title>${escape(title)}</dc:title>\n")
         append("    <dc:creator>${escape(author)}</dc:creator>\n")
         append("    <dc:language>en</dc:language>\n")
@@ -135,6 +146,7 @@ object EpubWriter {
         append("    <item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>\n")
         append("    <item id=\"title-page\" href=\"title.xhtml\" media-type=\"application/xhtml+xml\"/>\n")
         append("    <item id=\"style\" href=\"styles/book.css\" media-type=\"text/css\"/>\n")
+        append("    <item id=\"ncx\" href=\"toc.ncx\" media-type=\"application/x-dtbncx+xml\"/>\n")
         chapters.indices.forEach { index ->
             append("    <item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>\n")
         }
@@ -143,11 +155,26 @@ object EpubWriter {
             append("    <item id=\"${imageItemId(id)}\" href=\"images/${escape(id)}\" media-type=\"${imageMediaType(id)}\"$coverProperty/>\n")
         }
         append("  </manifest>\n")
-        append("  <spine>\n")
+        append("  <spine toc=\"ncx\">\n")
         append("    <itemref idref=\"title-page\"/>\n")
         chapters.indices.forEach { index -> append("    <itemref idref=\"chapter-${index + 1}\"/>\n") }
         append("  </spine>\n")
         append("</package>\n")
+    }
+
+    private fun ncx(bookTitle: String, chapters: List<Chapter>, bookId: String): String = buildString {
+        append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        append("<ncx xmlns=\"http://www.daisy.org/z3986/2005/ncx/\" version=\"2005-1\">\n")
+        append("  <head><meta name=\"dtb:uid\" content=\"${escape(bookId)}\"/></head>\n")
+        append("  <docTitle><text>${escape(bookTitle)}</text></docTitle>\n")
+        append("  <navMap>\n")
+        chapters.forEachIndexed { index, chapter ->
+            append("    <navPoint id=\"navpoint-${index + 1}\" playOrder=\"${index + 1}\">")
+            append("<navLabel><text>${escape(chapter.title)}</text></navLabel>")
+            append("<content src=\"${chapterPath(index)}\"/></navPoint>\n")
+        }
+        append("  </navMap>\n")
+        append("</ncx>\n")
     }
 
     private fun stylesheet(): String = """

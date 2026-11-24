@@ -23,7 +23,10 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
 - Created the project scaffolding: `agentstart.md`, `agentexit.md`, this log (renamed from
   `SESSION-LOG.md`), `docs/MASTER.md`, `docs/PROJECT-ARCHITECTURE.md`, `docs/PROJECT-ROADMAP.md`
   (includes the parked v2 Reading mode write-up), `docs/PROJECT-DECISIONS.md`.
-- Commits on master: `6468d01`, `03df1bb`, plus the docs + call/notification commit (all pushed).
+- **EPUB compatibility**: Liberates EPUBs now also carry an EPUB 2 `toc.ncx` (Wombat Converts
+  rejected nav.xhtml-only books; Converts was fixed too). Same session also fixed Converts/Narrates
+  sign-in ("signed in but nothing works") — see those projects' logs.
+- Commits on master: `6468d01`, `03df1bb`, `1cad3f6`, plus the toc.ncx commit (all pushed).
 
 ### Where we left off
 - Rocky confirmed on the phone: 20-screen test scan works well; swipe page turns; and a full-book

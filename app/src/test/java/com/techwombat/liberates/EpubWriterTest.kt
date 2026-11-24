@@ -20,7 +20,11 @@ class EpubWriterTest {
             )
         }.toByteArray()
         val entries = zipEntries(epub)
-        val xmlPaths = entries.keys.filter { it.endsWith(".xhtml") || it.endsWith(".opf") || it.endsWith(".xml") }
+        val xmlPaths = entries.keys.filter { it.endsWith(".xhtml") || it.endsWith(".opf") || it.endsWith(".xml") || it.endsWith(".ncx") }
+        val ncx = String(requireNotNull(entries["OEBPS/toc.ncx"]))
+        assertTrue(ncx.contains("<text>CHAPTER ONE</text>") && ncx.contains("chapters/chapter-002.xhtml"))
+        val opf = String(requireNotNull(entries["OEBPS/content.opf"]))
+        assertTrue(opf.contains("media-type=\"application/x-dtbncx+xml\"") && opf.contains("<spine toc=\"ncx\">"))
 
         assertTrue(xmlPaths.isNotEmpty())
         xmlPaths.forEach { path ->
