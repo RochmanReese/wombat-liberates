@@ -25,6 +25,8 @@ object ChapterDetector {
     private const val MIN_CONTENTS_MATCHES = 3
     private const val MIN_PATTERN_CHAPTERS = 2
     private const val NAME_MIN_COUNT = 3
+    private const val MAX_STRAY_LINES = 3
+    private const val MAX_GLUED_LINE_WORDS = 5
     private const val OPENER_WEIGHT = 4
 
     private val NUMBER_WORDS = listOf(
@@ -57,13 +59,71 @@ object ChapterDetector {
                     listed.chapters.none { kotlin.math.abs(it.paragraph - heading.paragraph) <= 2 } &&
                     heading.paragraph > listed.chapters.first().paragraph
             }
-            return listed.copy(chapters = (listed.chapters + extra).sortedBy { it.paragraph })
+            return removeStrayNumbers(listed.copy(chapters = (listed.chapters + extra).sortedBy { it.paragraph }))
         }
         return if (headings.size >= MIN_PATTERN_CHAPTERS) {
-            Result(headings, null, Source.HEADINGS, paragraphs)
+            removeStrayNumbers(Result(headings, null, Source.HEADINGS, paragraphs))
         } else {
             Result(emptyList(), null, Source.NONE, paragraphs)
         }
+    }
+
+    /** "16", "57", "I7" (OCR for 17), "1O": a printed chapter number. Or a lone letter: a lost decorative capital. */
+    private fun isStrayNumber(paragraph: String): Boolean {
+        val text = paragraph.trim()
+        if (text.isEmpty() || text.length > 4) return false
+        if (text.length == 1 && text[0].isLetter()) return true
+        return text.any { it.isDigit() } && text.all { it.isDigit() || it in "IlOoSZ." } && text.count { it != '.' } <= 3
+    }
+
+    /** "FRIENDS & FOES 19" → "FRIENDS & FOES", "43 tan" → "tan": a short line with a chapter number glued on. */
+    private fun withoutGluedNumber(paragraph: String): String {
+        val words = paragraph.trim().split(' ').filter { it.isNotEmpty() }
+        if (words.size < 2 || words.size > MAX_GLUED_LINE_WORDS) return paragraph
+        return when {
+            isStrayNumber(words.last()) && words.last().length > 1 -> words.dropLast(1).joinToString(" ")
+            isStrayNumber(words.first()) && words.first().length > 1 -> words.drop(1).joinToString(" ")
+            else -> paragraph
+        }
+    }
+
+    /**
+     * The chapter number printed above each title ends up as the last line of the previous chapter
+     * ("…knowing it never could." / "4" / "HOME"). Such lines are removed from the end of every
+     * section, including the front matter and the end of the book. Titles stay as printed.
+     */
+    private fun removeStrayNumbers(result: Result): Result {
+        if (result.chapters.isEmpty()) return result
+        val headingLines = result.chapters.flatMap { chapter -> (chapter.paragraph until chapter.paragraph + chapter.headingParagraphs).toList() }.toSet()
+        val dropped = HashSet<Int>()
+        (result.chapters.map { it.paragraph } + result.paragraphs.size).forEach { end ->
+            var k = end - 1
+            while (k >= 0 && end - k <= MAX_STRAY_LINES && k !in headingLines && result.contentsPage?.contains(k) != true &&
+                isStrayNumber(result.paragraphs[k])
+            ) {
+                dropped += k
+                k--
+            }
+        }
+        // The line left at the end of each section may still have the number glued on.
+        val trimmed = result.paragraphs.toMutableList()
+        (result.chapters.map { it.paragraph } + result.paragraphs.size).forEach { end ->
+            val last = (end - 1 downTo 0).firstOrNull { it !in dropped } ?: return@forEach
+            if (last in headingLines || result.contentsPage?.contains(last) == true) return@forEach
+            trimmed[last] = withoutGluedNumber(trimmed[last])
+        }
+        if (dropped.isEmpty() && trimmed == result.paragraphs) return result
+        val newIndex = IntArray(result.paragraphs.size + 1)
+        var next = 0
+        for (i in 0..result.paragraphs.size) {
+            newIndex[i] = next
+            if (i < result.paragraphs.size && i !in dropped) next++
+        }
+        return result.copy(
+            chapters = result.chapters.map { it.copy(paragraph = newIndex[it.paragraph]) },
+            contentsPage = result.contentsPage?.let { newIndex[it.first]..newIndex[it.last] },
+            paragraphs = trimmed.filterIndexed { i, _ -> i !in dropped },
+        )
     }
 
     /** "CHAPTER" and "TWELVE" in separate paragraphs (as OCR often leaves them) read as one heading. */

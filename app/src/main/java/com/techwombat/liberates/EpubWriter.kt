@@ -114,7 +114,7 @@ object EpubWriter {
         append("<!DOCTYPE html>\n")
         append("<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">\n")
         append("  <head><title>${escape(bookTitle)} — Contents</title><link rel=\"stylesheet\" type=\"text/css\" href=\"styles/book.css\" /></head>\n")
-        append("  <body><nav epub:type=\"toc\" id=\"toc\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><h1>Contents</h1><ol>\n")
+        append("  <body><nav epub:type=\"toc\" id=\"toc\" class=\"toc\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><h1>Contents</h1><ol>\n")
         chapters.forEachIndexed { index, chapter ->
             append("      <li><a href=\"${chapterPath(index)}\">${escape(chapter.title)}</a></li>\n")
         }
@@ -155,6 +155,8 @@ object EpubWriter {
         append("  </manifest>\n")
         append("  <spine toc=\"ncx\">\n")
         append("    <itemref idref=\"title-page\"/>\n")
+        // A visible Contents page after the title page (the same page readers use for their own menu).
+        if (chapters.size > 1) append("    <itemref idref=\"nav\"/>\n")
         chapters.indices.forEach { index -> append("    <itemref idref=\"chapter-${index + 1}\"/>\n") }
         append("  </spine>\n")
         append("</package>\n")
@@ -185,6 +187,10 @@ object EpubWriter {
         .title-page { margin-top: 35%; text-align: center; }
         .title-page h1 { margin: 0 0 1em; page-break-before: avoid; break-before: avoid; font-variant: normal; }
         .author { text-align: center; text-indent: 0; }
+        nav.toc h1 { page-break-before: avoid; break-before: avoid; }
+        nav.toc ol { list-style: none; margin: 0; padding: 0; }
+        nav.toc li { margin: 0 0 0.6em; text-align: left; }
+        nav.toc a { text-decoration: none; }
         figure.illustration { margin: 1em 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
         figure.illustration img { max-width: 100%; height: auto; }
     """.trimIndent()

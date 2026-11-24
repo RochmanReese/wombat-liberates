@@ -71,6 +71,11 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
       or upgrade Ollama.
   - A debug-only freeze watchdog was used to find the hang and has been removed.
   - Device cleanup version is now 5.
+  - Chapter numbers printed above titles ("4" / "HOME") were left at the end of the previous
+    chapter: number-only lines (incl. OCR "I7", "2.6"), lone letters and numbers glued onto a
+    short last line are now removed at every section end. Titles stay plain (Rocky's choice: no
+    "Chapter 4 –" prefixes).
+  - EPUBs now have a visible Contents page (nav.xhtml in the spine) after the title page.
 
 ### Watch out for
 - **Wombat Reader incident**: this server's wombat-reader clone was 5 commits behind GitHub

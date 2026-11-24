@@ -46,6 +46,10 @@ class ChapterDetectorTest {
         }
         listOf("Arrival", "Departure", "Return").forEach { assert(nav.contains(">$it<")) { "missing $it in $nav" } }
         assert(!nav.contains("Front matter")) { "contents page should not become front matter: $nav" }
+        val opf = java.util.zip.ZipInputStream(epub.inputStream()).use { zip ->
+            generateSequence { zip.nextEntry }.first { it.name == "OEBPS/content.opf" }.let { String(zip.readBytes()) }
+        }
+        assert(opf.indexOf("<itemref idref=\"title-page\"/>") < opf.indexOf("<itemref idref=\"nav\"/>")) { "visible Contents page after the title page: $opf" }
     }
 
     @Test
@@ -92,5 +96,21 @@ class ChapterDetectorTest {
         val result = ChapterDetector.detect(paragraphs, dictionary)
         val openings = result.chapters.map { result.paragraphs[it.paragraph + 1] }
         assertEquals(listOf("As the sun set, she rode.", "Leiyn rode hard.", "It wasn't long.", "We don't have long."), openings)
+    }
+
+    @Test
+    fun `printed chapter numbers left at the end of the previous chapter are removed`() {
+        val contents = listOf("Contents", "Home 4", "Treachery 16", "From Below 17")
+        val paragraphs = contents + body(30) + listOf("4", "HOME At dusk, they withdrew.") + body(3) +
+            listOf("S", "16", "TREACHERY She heard them.") + body(3) +
+            listOf("Then the chaos began.", "I7", "FROM BELOW As the soldiers charged.") + body(2) + listOf("FRIENDS & FOES 19")
+        val result = ChapterDetector.detect(paragraphs, dictionary = null)
+        assertEquals(listOf("Home", "Treachery", "From Below"), result.chapters.map { it.title })
+        val strays = setOf("4", "S", "16", "I7")
+        assertEquals("FRIENDS & FOES", result.paragraphs.last())
+        assertEquals(emptyList<String>(), result.paragraphs.drop(result.contentsPage!!.last + 1).filter { it in strays })
+        // Each chapter still starts at its heading, and the text before it is intact.
+        assertEquals("HOME", result.paragraphs[result.chapters[0].paragraph])
+        assertEquals("Then the chaos began.", result.paragraphs[result.chapters[2].paragraph - 1])
     }
 }
