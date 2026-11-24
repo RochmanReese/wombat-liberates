@@ -108,6 +108,12 @@ class MainActivity : AppCompatActivity() {
         }
         binding.saveIllustrationsCheck.isChecked = ScanSettings.saveIllustrations(this)
         binding.saveIllustrationsCheck.setOnCheckedChangeListener { _, checked -> ScanSettings.setSaveIllustrations(this, checked) }
+        binding.doNotDisturbCheck.isChecked = ScanSettings.doNotDisturbWhileScanning(this)
+        binding.doNotDisturbCheck.setOnCheckedChangeListener { _, checked ->
+            ScanSettings.setDoNotDisturbWhileScanning(this, checked)
+            if (checked && !ScanDoNotDisturb.hasPermission(this)) askForDoNotDisturbPermission()
+            renderDoNotDisturbStatus()
+        }
         binding.clearLogButton.setOnClickListener {
             ProbeLog.clear()
             binding.statusText.text = "Diagnostics cleared."
@@ -119,6 +125,25 @@ class MainActivity : AppCompatActivity() {
         ProbeLog.addListener(logListener)
         renderState()
         renderLibrary()
+        renderDoNotDisturbStatus()
+    }
+
+    private fun askForDoNotDisturbPermission() {
+        AlertDialog.Builder(this)
+            .setTitle("Allow Do Not Disturb access")
+            .setMessage("Android will open the Do Not Disturb access page. Find Wombat Liberates and turn it on, then come back.")
+            .setPositiveButton("Open settings") { _, _ -> startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)) }
+            .setNegativeButton("Not now", null)
+            .show()
+    }
+
+    private fun renderDoNotDisturbStatus() {
+        val base = "Silences notification banners during a scan and turns back off when it ends. Your own Do Not Disturb rules decide which calls still ring. Calls and banners are handled either way: the scan pauses for a call and waits for banners to clear."
+        binding.doNotDisturbStatusText.text = if (ScanSettings.doNotDisturbWhileScanning(this) && !ScanDoNotDisturb.hasPermission(this)) {
+            "Permission needed: untick and tick the box again to open Android's Do Not Disturb access page. $base"
+        } else {
+            base
+        }
     }
 
     override fun onStop() {

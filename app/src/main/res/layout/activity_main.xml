@@ -228,6 +228,21 @@
                 android:text="Pictures are cropped from the screen and added to the EPUB. In the first 10 screens of a new scan you are asked whether a picture is the cover."
                 android:textSize="12sp" />
 
+            <CheckBox
+                android:id="@+id/doNotDisturbCheck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Turn on Do Not Disturb while scanning" />
+
+            <TextView
+                android:id="@+id/doNotDisturbStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Silences notification banners during a scan and turns back off when it ends. Your own Do Not Disturb rules decide which calls still ring. Calls and banners are handled either way: the scan pauses for a call and waits for banners to clear."
+                android:textSize="12sp" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

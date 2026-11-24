@@ -1,28 +1,61 @@
-# Session log
+# Wombat Liberates — Session Log
+
+_Newest entries go at the top of this file, not the bottom. Format: see `agentexit.md`._
+
+## Session 3: 24 November 2026 — Whole-book scanning, library, illustrations, project docs
+
+### What we did
+- **Whole books**: removed the 1,000-screen cap (scan logs showed the "table book" simply hit it at
+  87%); blank pages skipped; clean Continue; raw OCR appended instead of rewritten each page.
+- **Kindle chrome removed** at capture and in device cleanup ("mins left in book", "Page X of Y",
+  "Location…", percentages, toolbar leftovers) — ~3,800 fragments down to 8 on a 5,233-page log.
+- **Ending and recovery**: Kindle's end-of-book screen detected; stuck pages get swipe → margin
+  taps → finish at ≥99% or an over-Kindle question. **Swipe page turns** after Rocky found taps
+  opening links (Facebook); Back recovery if another app still opens.
+- **Tables** read row by row with Ask / Keep / Skip; **illustrations** cropped and saved, cover
+  question in the first 10 screens, thumbnails with delete/cover in Review, pictures + cover in EPUBs.
+- **Versions + Review screen** (quality rating, viewer, red/green comparison, save/open);
+  **Ollama made optional**, run only from Review. **Library of books** with EPUBs auto-saved to
+  `Documents/Wombat Liberates`; test scans separate; old single book migrates automatically.
+- **Calls and notifications**: a call pauses the scan (no swipes, no Back presses) and resumes when
+  it ends; notification banners are waited out and captures they spoiled are retaken; optional
+  Do Not Disturb while scanning (permission flow, restored after the scan or a crash).
+- Created the project scaffolding: `agentstart.md`, `agentexit.md`, this log (renamed from
+  `SESSION-LOG.md`), `docs/MASTER.md`, `docs/PROJECT-ARCHITECTURE.md`, `docs/PROJECT-ROADMAP.md`
+  (includes the parked v2 Reading mode write-up), `docs/PROJECT-DECISIONS.md`.
+- Commits on master: `6468d01`, `03df1bb`, plus the docs + call/notification commit (all pushed).
+
+### Where we left off
+- Rocky confirmed on the phone: 20-screen test scan works well; swipe page turns; and a full-book
+  scan that finished correctly with the cover used and maps in place, readable with occasional
+  OCR slips ("er"/"her", missing "l").
+- Agreed next: server AI cleanup as a **separate container** beside Ollama (shared key, no Zitadel
+  yet), replacing phone→Ollama. Discussed and declined: reading KFX directly (would mean DRM
+  removal). v2 Reading mode parked in the Roadmap.
+- Next: test call/notification handling and DND on the phone (after installing, toggle the
+  accessibility service off/on if scanning doesn't start — its config changed); then the brief for
+  the server cleanup service.
+
+### Watch out for
+- **Wombat Reader incident**: this server's wombat-reader clone was 5 commits behind GitHub
+  (DB schema 6 vs 2). A build from the stale clone crashed the installed app on launch ("A
+  migration from 6 to 2 was required"); fixed by installing GitHub's latest. The server clone now
+  matches GitHub. Always `git fetch` before building either app; never uninstall to "fix" a crash.
+- The phone is on Rocky's PC, not this server: give adb/scp commands (`scp wombat-server:…`).
+- Untracked, never commit: `scan-log.txt`, `crash.txt`, `rawtext1.txt` (book text). Older loose
+  notes (`HANDOVER.md`, `handover.md`, `build.md`, `briefs/`) are historical; consider moving them
+  under `docs/legacy/` with Rocky's OK.
+- Thresholds (pictures, tables, quality, chrome bands) are first guesses; tune from real logs.
+
+---
+
+## Earlier entries (original log format, preserved as written)
+
 - Prepared `handover.md` for the next agent: integrate the standalone `OCR-rules` template into an editable, app-private OCR rules system; preserve raw OCR, keep contextual pipe handling built in, add user add/delete/reset controls, and validate against synthetic cases plus the untracked `rawtext1.txt` sample.
 - Working rule: do not use complex shell-inline edits for Kotlin or XML. Make one validated file change at a time, inspect its diff, build immediately, and restore promptly on any failure.
 
-Add each session summary immediately below this heading so the newest entry remains first.
+## Undated entries (July 2026)
 
-## 2026-11-24 (later) — Library, link-safe page turns, illustrations
-
-- Library: every scan is its own book under files/books (the old single book migrates in automatically); main screen lists Your books with author, screens, pictures, quality and EPUB status. Book actions: Review, Continue scanning, Save/Update EPUB in Documents, Open in EPUB reader, Edit title and author, Delete. Test scans stay separate. Import creates a new book.
-- EPUBs auto-save to Documents/Wombat Liberates via MediaStore, replacing the previous file for that book; Review shows where/when and flags when the text, pictures or cover changed since.
-- Page turns are swipes (never follow links or footnotes), with right-margin taps as fallbacks; if a link still takes the screen away from Kindle the scan presses Back up to 3 times, then pauses with a Continue prompt.
-- Illustrations: large text-free areas with detail are cropped from each screen and saved as JPEGs with markers in the text; picture-only pages are kept. In the first 10 screens of a new scan the user is asked Use as cover / Not the cover. Review shows thumbnails (view larger, use as cover, delete). EPUBs include pictures in place and mark the cover (not repeated inside). AI cleanup preserves markers. Setting: Save illustrations into the book (default on).
-- Wombat Reader note: the server clone was behind GitHub (DB v6); the stale build crashed on launch until GitHub's latest was installed. Always fetch before building.
-- Unit tests: 58 passing. Not yet confirmed on device: library migration, Documents saving, cover prompt, picture detection thresholds.
-
-## 2026-11-24 — Whole-book scanning, review screen, optional Ollama, tables
-
-- Removed the 1,000-screen cap: scans run until Kindle reaches the end (an optional screen limit remains). Scan logs confirmed the table book had simply hit the old cap at 87%.
-- Blank/picture pages are skipped instead of stopping the scan; Continue scan resumes without duplicating the last page; raw OCR is appended instead of rewriting the whole file.
-- Kindle footer/header text ("mins left in book", "Page X of Y", "Location…", percentages, "Back to", "Aa") is removed by screen position and patterns; device cleanup also strips it from existing scans (about 3,800 fragments down to 8 on the 5,233-page log).
-- Page-turn recovery: tap, swipe, lower tap, then finish if Kindle showed 99–100% or pause with an on-screen question. Kindle's end-of-book screen ends the scan without being saved. Interrupted gestures are retried.
-- Tables are detected from side-by-side OCR lines and read row by row; new Pages with tables setting (Ask / Keep / Skip) with a buzz and Keep/Skip panel over Kindle.
-- Every scan (book and separate test scan) now has versions: Raw, Device cleanup (automatic), and any Ollama or Gemini Nano runs, saved chunk by chunk so AI runs can be continued. New Review screen: OCR quality rating with most common suspect words, paged viewer, red/green comparison of any two versions with a rewrite warning, save as text/EPUB, Open in EPUB reader, choose the version used for Create EPUB.
-- Ollama is optional and only runs when chosen on the Review screen; settings have their own Save button. Help updated to match.
-- Unit tests: 49 passing (text store, workspace versions, quality scorer, diff, Kindle chrome, page layout).
 - Finalised and user-tested the app: the streamlined Kindle scan → Ollama cleanup → EPUB workflow, Help guidance, whole-book safety limit, Calibre-compatible EPUB output with paragraph spacing, wombat banner/adaptive launcher icon, and clearer accessibility instructions are all working as intended.
 
 - Expanded Help with clear scan-time requirements: Kindle must remain open in the foreground, the phone should not be used for anything else, and long books may take five to ten minutes; charging and scanning during idle time are recommended.

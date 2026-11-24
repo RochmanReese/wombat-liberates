@@ -12,7 +12,10 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.media.AudioManager
+import android.os.SystemClock
 import android.os.VibrationEffect
+import android.view.accessibility.AccessibilityWindowInfo
 import android.os.Vibrator
 import android.view.ContextThemeWrapper
 import android.view.Display
@@ -62,6 +65,22 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private var foregroundMisses = 0
     private var backPresses = 0
     private var savePictures = true
+
+    // ---- Calls and notifications ----
+    /** When the last notification was posted (uptime ms); a banner may be covering Kindle for a few seconds. */
+    @Volatile
+    private var lastNotificationAt = 0L
+    /** When the screenshot for the current capture was requested, to discard captures a banner or call spoiled. */
+    private var captureStartedAt = 0L
+    /** What the scan is currently waiting out, so the log and status are written once per pause. */
+    private var pausedFor: Interruption? = null
+    private var callEndedAt = 0L
+    private var callPromptShown = false
+    /** Height of the system window at the top of the screen when the scan started (status bar, no banner). */
+    private var baselineTopSystemHeight = 0
+    private var bannerWaitStartedAt = 0L
+
+    private enum class Interruption { CALL, NOTIFICATION }
     /** Set once the user picks a cover during this scan, so the cover question stops. */
     private var coverChosen = false
     private var promptView: View? = null
@@ -73,6 +92,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val batchRunnable: Runnable = Runnable {
         if (!batchActive || !ProbeLog.isActive) return@Runnable
+        // Calls and notification banners come first: never press Back during a call, never read a banner.
+        if (waitingOutInterruption()) return@Runnable
         if (!isKindleForeground()) {
             if (turnInFlight) handleLeftKindle() else mainHandler.postDelayed(batchRunnable, BATCH_FOREGROUND_CHECK_MS)
             return@Runnable
@@ -86,6 +107,8 @@ class KindleAccessibilityProbeService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        // If the app was stopped mid-scan, don't leave Do Not Disturb switched on.
+        ScanDoNotDisturb.restoreAfterScan(applicationContext)
         PersistentProbeLog.initialize(applicationContext)
         activeService = this
     }
@@ -94,12 +117,18 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         if (activeService === this) activeService = null
         mainHandler.removeCallbacks(batchRunnable)
         hidePrompt()
+        ScanDoNotDisturb.restoreAfterScan(applicationContext)
         textRecognizer.close()
         ocrExecutor.shutdown()
         super.onDestroy()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        if (event.eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
+            // A notification or toast from another app: its banner may cover Kindle for a few seconds.
+            if (event.packageName?.toString() != packageName) lastNotificationAt = SystemClock.uptimeMillis()
+            return
+        }
         if (!ProbeLog.isActive || event.packageName?.toString() != KINDLE_PACKAGE) return
 
         if (treeSnapshotArmed) {
@@ -223,6 +252,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
 
     private fun captureBatchPage() {
         hidePrompt()
+        captureStartedAt = SystemClock.uptimeMillis()
         val screenNumber = batchPagesCompleted + 1
         ProbeLog.appendDiagnostic("BATCH OCR", "Capturing ${screenLabel(screenNumber)}.")
         captureOnePageForOcr { capture -> mainHandler.post { handleBatchCapture(capture, screenNumber) } }
@@ -230,6 +260,12 @@ class KindleAccessibilityProbeService : AccessibilityService() {
 
     private fun handleBatchCapture(capture: OcrCapture?, screenNumber: Int) {
         if (!batchActive) return
+        // A call or a notification during the capture may have put its text on the screenshot: take it again.
+        if (isCallActive() || (lastNotificationAt >= captureStartedAt && !bannerWaitExpired())) {
+            ProbeLog.appendDiagnostic("BATCH OCR", "A call or notification appeared during ${screenLabel(screenNumber)}; capturing it again.")
+            mainHandler.postDelayed(batchRunnable, INTERRUPTION_CHECK_MS)
+            return
+        }
         if (capture == null) {
             finishBatch("Batch stopped: OCR failed on ${screenLabel(screenNumber)}.")
             return
@@ -387,6 +423,98 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         }
     }
 
+    /** True while the phone is ringing or a call (phone or internet call) is in progress. No permission needed. */
+    private fun isCallActive(): Boolean = when (getSystemService(AudioManager::class.java)?.mode) {
+        AudioManager.MODE_RINGTONE, AudioManager.MODE_IN_CALL, AudioManager.MODE_IN_COMMUNICATION -> true
+        else -> false
+    }
+
+    /** Height of the tallest system window touching the top of the screen (status bar, or status bar plus banner). */
+    private fun topSystemWindowHeight(): Int = runCatching {
+        windows.filter { it.type == AccessibilityWindowInfo.TYPE_SYSTEM }
+            .map { window -> Rect().also(window::getBoundsInScreen) }
+            .filter { it.top <= 0 }
+            .maxOfOrNull { it.height() } ?: 0
+    }.getOrDefault(0)
+
+    /** A notification banner (or the pulled-down shade) is covering the top of Kindle. */
+    private fun isBannerShowing(): Boolean {
+        val now = SystemClock.uptimeMillis()
+        val recentNotification = now - lastNotificationAt < BANNER_WAIT_MS
+        // The status bar window grows while a banner or the shade shows; compared with its size at the start.
+        val grown = baselineTopSystemHeight > 0 && topSystemWindowHeight() > baselineTopSystemHeight + resources.displayMetrics.density * 24
+        if (!recentNotification && !grown) {
+            bannerWaitStartedAt = 0L
+            return false
+        }
+        if (bannerWaitStartedAt == 0L) bannerWaitStartedAt = now
+        if (bannerWaitExpired()) {
+            // An app that keeps updating its notification, or an unusual phone layout, must never block the scan.
+            if (pausedFor == Interruption.NOTIFICATION) {
+                ProbeLog.appendDiagnostic("BATCH OCR", "Still seeing notification activity after ${MAX_BANNER_WAIT_MS / 1000}s; carrying on.")
+            }
+            return false
+        }
+        return true
+    }
+
+    private fun bannerWaitExpired(): Boolean =
+        bannerWaitStartedAt != 0L && SystemClock.uptimeMillis() - bannerWaitStartedAt >= MAX_BANNER_WAIT_MS
+
+    /**
+     * Pauses the scan while a call or notification banner is in the way. Returns true if it is waiting
+     * (and has scheduled the next check); false when the scan can carry on.
+     */
+    private fun waitingOutInterruption(): Boolean {
+        if (isCallActive()) {
+            if (pausedFor != Interruption.CALL) {
+                pausedFor = Interruption.CALL
+                batchStatus = "Paused for a phone call; the scan continues when the call ends."
+                ProbeLog.appendDiagnostic("BATCH OCR", "Phone call; scan paused.")
+            }
+            callEndedAt = 0L
+            mainHandler.postDelayed(batchRunnable, INTERRUPTION_CHECK_MS)
+            return true
+        }
+        if (pausedFor == Interruption.CALL) {
+            val now = SystemClock.uptimeMillis()
+            if (callEndedAt == 0L) callEndedAt = now
+            // Let the phone settle after the call (call screen closing, screen turning back on).
+            if (now - callEndedAt < CALL_SETTLE_MS) {
+                mainHandler.postDelayed(batchRunnable, INTERRUPTION_CHECK_MS)
+                return true
+            }
+            // The call screen, not a link, took Kindle away: never press Back for it.
+            turnInFlight = false
+            if (!isKindleForeground()) {
+                if (!callPromptShown) {
+                    callPromptShown = true
+                    ProbeLog.appendDiagnostic("BATCH OCR", "Call ended; waiting for Kindle to come back.")
+                    showPrompt(
+                        title = "Call finished",
+                        message = "Switch back to Kindle (it should still be on the same page) and the scan will carry on by itself.",
+                        rows = listOf(listOf("Stop scan" to { finishBatch("Batch stopped by user after $batchPagesCompleted screens.") })),
+                    )
+                }
+                mainHandler.postDelayed(batchRunnable, BATCH_FOREGROUND_CHECK_MS)
+                return true
+            }
+            pausedFor = null
+            callPromptShown = false
+            ProbeLog.appendDiagnostic("BATCH OCR", "Call ended; continuing the scan.")
+        }
+        if (isBannerShowing()) {
+            if (pausedFor != Interruption.NOTIFICATION) {
+                pausedFor = Interruption.NOTIFICATION
+                ProbeLog.appendDiagnostic("BATCH OCR", "Notification banner on screen; waiting for it to clear.")
+            }
+            mainHandler.postDelayed(batchRunnable, INTERRUPTION_CHECK_MS)
+            return true
+        }
+        if (pausedFor == Interruption.NOTIFICATION) pausedFor = null
+        return false
+    }
+
     /**
      * Something took the screen away from Kindle right after a page turn, usually a link that opened a
      * browser or another app. Press Back to return to Kindle; if that does not work, ask the user.
@@ -537,6 +665,20 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private enum class PageTurn { SWIPE, EDGE_TAP, EDGE_TAP_LOW }
 
     private fun turnToNextPage(kind: PageTurn = PageTurn.SWIPE) {
+        if (isCallActive()) {
+            // Don't swipe while the phone rings or a call is in progress; turn the page once it's over.
+            if (pausedFor != Interruption.CALL) {
+                pausedFor = Interruption.CALL
+                batchStatus = "Paused for a phone call; the scan continues when the call ends."
+                ProbeLog.appendDiagnostic("BATCH OCR", "Phone call; pausing before the page turn.")
+            }
+            mainHandler.postDelayed({ if (batchActive) turnToNextPage(kind) }, INTERRUPTION_CHECK_MS)
+            return
+        }
+        if (pausedFor == Interruption.CALL) {
+            pausedFor = null
+            ProbeLog.appendDiagnostic("BATCH OCR", "Call ended; continuing.")
+        }
         if (!isKindleForeground()) {
             finishBatch("Batch stopped: Kindle is no longer in the foreground.")
             return
@@ -588,6 +730,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         batchActive = false
         mainHandler.removeCallbacks(batchRunnable)
         hidePrompt()
+        ScanDoNotDisturb.restoreAfterScan(this)
         val tables = if (tablesSkipped > 0) " $tablesSkipped table pages skipped." else ""
         batchStatus = message + tables
         ProbeLog.appendDiagnostic("BATCH OCR", batchStatus)
@@ -768,6 +911,11 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         private const val GESTURE_RETRY_DELAY_MS = 1_000L
         private const val PROMPT_RESUME_DELAY_MS = 600L
         private const val TABLE_PREVIEW_LINES = 4
+        private const val INTERRUPTION_CHECK_MS = 1_000L
+        /** Notification banners usually stay up about 5 seconds. */
+        private const val BANNER_WAIT_MS = 6_000L
+        private const val MAX_BANNER_WAIT_MS = 30_000L
+        private const val CALL_SETTLE_MS = 2_000L
         private const val COVER_QUESTION_SCREENS = 10
         private const val DETECTION_WIDTH = 72
         private const val PICTURE_JPEG_QUALITY = 85
@@ -820,6 +968,12 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             service.backPresses = 0
             service.savePictures = ScanSettings.saveIllustrations(service)
             service.coverChosen = false
+            service.pausedFor = null
+            service.callEndedAt = 0L
+            service.callPromptShown = false
+            service.bannerWaitStartedAt = 0L
+            service.baselineTopSystemHeight = service.topSystemWindowHeight()
+            if (ScanDoNotDisturb.enableForScan(service)) ProbeLog.appendDiagnostic("BATCH OCR", "Do Not Disturb turned on for the scan.")
             service.hidePrompt()
             service.batchWorkspace = workspace
             service.batchActive = true

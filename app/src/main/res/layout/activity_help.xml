@@ -66,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Each screen takes about 1.5 seconds, so a long book can take 30 minutes or more. Connect your phone to power and leave Kindle on screen. If Kindle will not turn a page, or a page looks like a table, the phone buzzes and a small panel asks what to do. Set Pages with tables to Keep or Skip in Advanced settings for unattended scans."
+            android:text="Each screen takes about 1.5 seconds, so a long book can take 30 minutes or more. Connect your phone to power and leave Kindle on screen. If Kindle will not turn a page, or a page looks like a table, the phone buzzes and a small panel asks what to do. A phone call pauses the scan until the call ends and you are back in Kindle; notification banners are waited out so they never end up in the book. For fewer interruptions, turn on Do Not Disturb while scanning in Advanced settings. Set Pages with tables to Keep or Skip in Advanced settings for unattended scans."
             android:textSize="16sp" />
 
         <TextView

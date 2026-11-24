@@ -7,6 +7,15 @@ object ScanSettings {
     private const val PREFERENCES_NAME = "scan_settings"
     private const val TABLE_MODE = "table_mode"
     private const val SAVE_ILLUSTRATIONS = "save_illustrations"
+    private const val DND_WHILE_SCANNING = "dnd_while_scanning"
+
+    /** Turn on Do Not Disturb for the length of each scan (off by default; needs the user's permission). */
+    fun doNotDisturbWhileScanning(context: Context): Boolean =
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(DND_WHILE_SCANNING, false)
+
+    fun setDoNotDisturbWhileScanning(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().putBoolean(DND_WHILE_SCANNING, enabled).apply()
+    }
 
     /** Save pictures found while scanning into the book (on by default). */
     fun saveIllustrations(context: Context): Boolean =
