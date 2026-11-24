@@ -60,6 +60,11 @@ class ScanWorkspace(
 ) {
     private val metaFile = File(directory, "workspace.json")
 
+    val isTest: Boolean get() = key == Workspaces.TEST
+
+    /** Pictures saved from the scan, next to the versions folder. */
+    private val imagesDirectory = File(directory.parentFile ?: directory, "images")
+
     init {
         directory.mkdirs()
         importEarlierCleanup()
@@ -189,8 +194,50 @@ class ScanWorkspace(
     fun clearAll() {
         raw.clear()
         versions().forEach(::delete)
-        updateMeta { it.remove("scanSummary"); it.remove("preferredVersionId") }
+        imagesDirectory.deleteRecursively()
+        updateMeta { it.remove("scanSummary"); it.remove("preferredVersionId"); it.remove("coverImageId") }
     }
+
+    // ---- Illustrations ----
+
+    /** Saves a picture and returns its id for a text marker. Ids are never reused, even after a delete. */
+    @Synchronized
+    fun saveIllustration(jpeg: ByteArray): String {
+        imagesDirectory.mkdirs()
+        val number = readMeta().optInt("nextImageNumber", 1)
+        val id = "img-${number.toString().padStart(4, '0')}.jpg"
+        File(imagesDirectory, id).writeBytes(jpeg)
+        updateMeta { it.put("nextImageNumber", number + 1).put("imagesChangedAt", System.currentTimeMillis()) }
+        return id
+    }
+
+    fun illustrationIds(): List<String> =
+        imagesDirectory.listFiles { file -> file.isFile && file.extension.lowercase() in IMAGE_EXTENSIONS }.orEmpty().map { it.name }.sorted()
+
+    fun illustrationFile(id: String): File? =
+        File(imagesDirectory, id).takeIf { !id.contains('/') && it.isFile }
+
+    /** All saved pictures, for building an EPUB. */
+    fun illustrationImages(): Map<String, ByteArray> = illustrationIds().associateWith { File(imagesDirectory, it).readBytes() }
+
+    @Synchronized
+    fun deleteIllustration(id: String) {
+        illustrationFile(id)?.delete()
+        updateMeta { meta ->
+            if (meta.optString("coverImageId") == id) meta.remove("coverImageId")
+            meta.put("imagesChangedAt", System.currentTimeMillis())
+        }
+    }
+
+    /** The picture used as the EPUB cover (not repeated inside the book), if one was chosen. */
+    var coverImageId: String?
+        get() = readMeta().optString("coverImageId").ifBlank { null }?.takeIf { illustrationFile(it) != null }
+        set(value) = updateMeta { meta ->
+            if (value == null) meta.remove("coverImageId") else meta.put("coverImageId", value)
+            meta.put("imagesChangedAt", System.currentTimeMillis())
+        }
+
+    private fun imagesChangedAt(): Long = readMeta().optLong("imagesChangedAt")
 
     // ---- Workspace settings ----
 
@@ -205,6 +252,58 @@ class ScanWorkspace(
     var preferredVersionId: String?
         get() = readMeta().optString("preferredVersionId").ifBlank { null }
         set(value) = updateMeta { if (value == null) it.remove("preferredVersionId") else it.put("preferredVersionId", value) }
+
+    var createdAtMillis: Long
+        get() = readMeta().optLong("createdAtMillis").takeIf { it > 0 } ?: raw.rawFile().lastModified()
+        set(value) = updateMeta { it.put("createdAtMillis", value) }
+
+    /** Most recent scan, import or change, for sorting the library. */
+    fun lastActivityMillis(): Long = maxOf(
+        createdAtMillis,
+        if (hasText()) raw.rawFile().lastModified() else 0L,
+        scanSummary?.finishedAtMillis ?: 0L,
+    )
+
+    /** The EPUB last saved to Documents/Wombat Liberates, if any. */
+    data class SavedEpub(val uri: String, val fileName: String, val versionId: String, val versionLabel: String, val builtAtMillis: Long)
+
+    var savedEpub: SavedEpub?
+        get() = readMeta().optJSONObject("savedEpub")?.let {
+            SavedEpub(it.optString("uri"), it.optString("fileName"), it.optString("versionId"), it.optString("versionLabel"), it.optLong("builtAtMillis"))
+        }
+        set(value) = updateMeta { meta ->
+            if (value == null) {
+                meta.remove("savedEpub")
+            } else {
+                meta.put(
+                    "savedEpub",
+                    JSONObject()
+                        .put("uri", value.uri)
+                        .put("fileName", value.fileName)
+                        .put("versionId", value.versionId)
+                        .put("versionLabel", value.versionLabel)
+                        .put("builtAtMillis", value.builtAtMillis),
+                )
+            }
+        }
+
+    /** True when the saved EPUB no longer matches the version chosen for it, or that version changed since. */
+    fun isSavedEpubOutOfDate(rules: List<OcrLiteralRule>): Boolean {
+        val saved = savedEpub ?: return false
+        val preferred = preferredVersion(rules) ?: return false
+        val preferredChanged = if (preferred.id == TextVersion.RAW_ID) raw.rawFile().lastModified() else preferred.createdAtMillis
+        return saved.versionId != preferred.id || preferredChanged > saved.builtAtMillis || imagesChangedAt() > saved.builtAtMillis
+    }
+
+    /** One-line quality summary of the device-cleaned text, cached until that version changes. */
+    fun qualitySummary(rules: List<OcrLiteralRule>): String? {
+        val device = ensureDeviceVersion(rules) ?: return null
+        val cached = readMeta().optJSONObject("quality")
+        if (cached != null && cached.optLong("deviceCreatedAt") == device.createdAtMillis) return cached.optString("summary")
+        val summary = OcrQuality.describe(OcrQuality.assess(text(device))).lineSequence().first()
+        updateMeta { it.put("quality", JSONObject().put("deviceCreatedAt", device.createdAtMillis).put("summary", summary)) }
+        return summary
+    }
 
     /** The version the EPUB should use: the user's choice if still valid, otherwise device cleanup. */
     fun preferredVersion(rules: List<OcrLiteralRule>): TextVersion? {
@@ -308,30 +407,102 @@ class ScanWorkspace(
     private companion object {
         const val META_SUFFIX = ".meta.json"
         const val DEVICE_ID = "device"
+        val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
         // Bump when OcrCleanup's built-in fixes change, so device versions are regenerated.
         const val DEVICE_CLEANUP_VERSION = 2
     }
 }
 
-/** The two workspaces the app uses. */
+/**
+ * All saved book scans (one folder each under files/books) plus the separate test scan.
+ * Instances are cached so the scanning service and screens share one object per book.
+ */
+class Library(private val filesDir: File) {
+    private val booksDirectory = File(filesDir, "books")
+    private val cache = mutableMapOf<String, ScanWorkspace>()
+    private var migrated = false
+
+    @Synchronized
+    fun books(): List<ScanWorkspace> {
+        migrateSingleBook()
+        return booksDirectory.listFiles { file -> file.isDirectory }.orEmpty()
+            .mapNotNull { open(it.name) }
+            .sortedByDescending { it.lastActivityMillis() }
+    }
+
+    @Synchronized
+    fun open(id: String): ScanWorkspace? {
+        if (id == Workspaces.TEST) return test()
+        cache[id]?.let { return it }
+        val directory = File(booksDirectory, id)
+        if (!directory.isDirectory) return null
+        return ScanWorkspace(id, "Book", OcrTextFiles(directory, RAW_BASE_NAME), File(directory, VERSIONS)).also { cache[id] = it }
+    }
+
+    @Synchronized
+    fun create(title: String, author: String): ScanWorkspace {
+        val now = System.currentTimeMillis()
+        var id = "book-$now"
+        while (File(booksDirectory, id).exists()) id += "x"
+        File(booksDirectory, id).mkdirs()
+        return open(id)!!.also {
+            it.title = title
+            it.author = author
+            it.createdAtMillis = now
+        }
+    }
+
+    /** Deletes the scan and its versions. EPUBs already saved to Documents are kept. */
+    @Synchronized
+    fun delete(id: String) {
+        if (id == Workspaces.TEST || id.isBlank() || id.contains('/')) return
+        cache.remove(id)
+        File(booksDirectory, id).deleteRecursively()
+    }
+
+    @Synchronized
+    fun test(): ScanWorkspace = cache.getOrPut(Workspaces.TEST) {
+        val directory = File(filesDir, "test-scan")
+        ScanWorkspace(Workspaces.TEST, "Test scan", OcrTextFiles(directory, RAW_BASE_NAME), File(directory, VERSIONS))
+    }
+
+    /** Older app versions kept one book in files/ directly; move it into the library as its own book. */
+    private fun migrateSingleBook() {
+        if (migrated) return
+        migrated = true
+        val oldRaw = File(filesDir, "$RAW_BASE_NAME.txt")
+        val oldVersions = File(filesDir, "book-versions")
+        val hasOldBook = (oldRaw.exists() && oldRaw.length() > 0) || oldVersions.isDirectory
+        if (!hasOldBook) {
+            oldRaw.delete()
+            return
+        }
+        val directory = File(booksDirectory, "book-${oldRaw.takeIf { it.exists() }?.lastModified() ?: System.currentTimeMillis()}")
+        directory.mkdirs()
+        listOf("", "-corrected", "-last-page").forEach { suffix ->
+            val file = File(filesDir, "$RAW_BASE_NAME$suffix.txt")
+            if (file.exists()) file.renameTo(File(directory, file.name))
+        }
+        if (oldVersions.isDirectory) oldVersions.renameTo(File(directory, VERSIONS))
+    }
+
+    private companion object {
+        const val RAW_BASE_NAME = "kindle-ocr"
+        const val VERSIONS = "versions"
+    }
+}
+
+/** App-wide access to the library and the test scan. */
 object Workspaces {
-    private var book: ScanWorkspace? = null
-    private var test: ScanWorkspace? = null
-
-    const val BOOK = "book"
     const val TEST = "test"
+    private var library: Library? = null
 
     @Synchronized
-    fun book(context: Context): ScanWorkspace {
-        OcrTextStore.initialize(context.applicationContext)
-        return book ?: ScanWorkspace(BOOK, "Book scan", OcrTextStore.main, File(context.filesDir, "book-versions")).also { book = it }
-    }
+    fun library(context: Context): Library =
+        library ?: Library(context.applicationContext.filesDir).also { library = it }
 
-    @Synchronized
-    fun test(context: Context): ScanWorkspace {
-        OcrTextStore.initialize(context.applicationContext)
-        return test ?: ScanWorkspace(TEST, "Test scan", OcrTextStore.test, File(context.filesDir, "test-scan/versions")).also { test = it }
-    }
+    fun test(context: Context): ScanWorkspace = library(context).test()
 
-    fun byKey(context: Context, key: String?): ScanWorkspace = if (key == TEST) test(context) else book(context)
+    /** A book by id, or the test scan; null if the book was deleted. */
+    fun byKey(context: Context, key: String?): ScanWorkspace? = key?.let { library(context).open(it) }
 }

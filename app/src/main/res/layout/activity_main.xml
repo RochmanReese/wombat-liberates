@@ -101,7 +101,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Scans until Kindle reaches the end of the book. Screenshots are OCRed locally, then discarded."
+            android:text="Each scan becomes a new book below. Scans run until Kindle reaches the end of the book; screenshots are OCRed on your phone, then discarded."
             android:textSize="12sp" />
 
 
@@ -109,74 +109,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="2. Review and improve"
+            android:text="2. Your books"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/bookQualityText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Tap a book to review it, continue scanning, save its EPUB or open it in your reader. EPUBs are saved to Documents/Wombat Liberates."
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/emptyLibraryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="No book text yet."
+            android:text="No books yet. Start a Kindle scan or import a text file."
             android:textSize="14sp" />
 
-        <Button
-            android:id="@+id/reviewBookButton"
+        <LinearLayout
+            android:id="@+id/bookList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Review, compare and save" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Text is cleaned on your phone automatically. Ollama is optional and only needed if the quality check says the OCR is poor."
-            android:textSize="12sp" />
-
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="3. Create EPUB"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-
-        <EditText
-            android:id="@+id/epubTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Book title"
-            android:inputType="textCapSentences"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/epubAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Author"
-            android:inputType="textCapWords"
-            android:singleLine="true" />
-
-        <Button
-            android:id="@+id/exportEpubButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Create EPUB" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Uses the version chosen in Review (device cleanup unless you pick another). Chapter headings become the contents list."
-            android:textSize="12sp" />
-
+            android:orientation="vertical" />
 
         <Button
             android:id="@+id/advancedControlsButton"
@@ -255,6 +212,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Tables are read row by row. Choose Keep or Skip to leave a long scan running unattended."
+                android:textSize="12sp" />
+
+            <CheckBox
+                android:id="@+id/saveIllustrationsCheck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Save illustrations into the book" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Pictures are cropped from the screen and added to the EPUB. In the first 10 screens of a new scan you are asked whether a picture is the cover."
                 android:textSize="12sp" />
 
             <TextView
@@ -433,29 +404,12 @@
                 android:layout_marginTop="8dp"
                 android:text="Stop scan service" />
 
-            <EditText
-                android:id="@+id/exportFileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Text export filename"
-                android:inputType="text"
-                android:singleLine="true"
-                android:text="kindle-ocr.txt" />
-
-            <Button
-                android:id="@+id/saveRawTextButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Save raw OCR text" />
-
             <Button
                 android:id="@+id/clearLogButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Clear all saved text and diagnostics" />
+                android:text="Clear diagnostics" />
 
             <TextView
                 android:layout_width="match_parent"

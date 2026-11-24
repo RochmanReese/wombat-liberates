@@ -4,6 +4,15 @@
 
 Add each session summary immediately below this heading so the newest entry remains first.
 
+## 2026-11-24 (later) — Library, link-safe page turns, illustrations
+
+- Library: every scan is its own book under files/books (the old single book migrates in automatically); main screen lists Your books with author, screens, pictures, quality and EPUB status. Book actions: Review, Continue scanning, Save/Update EPUB in Documents, Open in EPUB reader, Edit title and author, Delete. Test scans stay separate. Import creates a new book.
+- EPUBs auto-save to Documents/Wombat Liberates via MediaStore, replacing the previous file for that book; Review shows where/when and flags when the text, pictures or cover changed since.
+- Page turns are swipes (never follow links or footnotes), with right-margin taps as fallbacks; if a link still takes the screen away from Kindle the scan presses Back up to 3 times, then pauses with a Continue prompt.
+- Illustrations: large text-free areas with detail are cropped from each screen and saved as JPEGs with markers in the text; picture-only pages are kept. In the first 10 screens of a new scan the user is asked Use as cover / Not the cover. Review shows thumbnails (view larger, use as cover, delete). EPUBs include pictures in place and mark the cover (not repeated inside). AI cleanup preserves markers. Setting: Save illustrations into the book (default on).
+- Wombat Reader note: the server clone was behind GitHub (DB v6); the stale build crashed on launch until GitHub's latest was installed. Always fetch before building.
+- Unit tests: 58 passing. Not yet confirmed on device: library migration, Documents saving, cover prompt, picture detection thresholds.
+
 ## 2026-11-24 — Whole-book scanning, review screen, optional Ollama, tables
 
 - Removed the 1,000-screen cap: scans run until Kindle reaches the end (an optional screen limit remains). Scan logs confirmed the table book had simply hit the old cap at 87%.

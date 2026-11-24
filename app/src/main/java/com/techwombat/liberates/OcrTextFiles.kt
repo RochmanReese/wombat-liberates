@@ -1,6 +1,5 @@
 package com.techwombat.liberates
 
-import android.content.Context
 import java.io.File
 import java.io.RandomAccessFile
 
@@ -47,6 +46,8 @@ class OcrTextFiles(directory: File, baseName: String) {
                 file.readFully(tailBytes)
                 val tail = String(tailBytes, Charsets.UTF_8)
                 when {
+                    // Picture markers are always their own paragraph.
+                    tail.endsWith("]]") || nextPage.startsWith("[[image:") -> "\n\n"
                     tail.endsWith("-") -> {
                         end -= 1
                         ""
@@ -105,32 +106,4 @@ class OcrTextFiles(directory: File, baseName: String) {
     private companion object {
         const val TAIL_BYTES = 64L
     }
-}
-
-/** App-wide OCR text: [main] holds real book scans, [test] holds test scans so they never mix. */
-object OcrTextStore {
-    private const val MAIN_BASE_NAME = "kindle-ocr"
-
-    lateinit var main: OcrTextFiles
-        private set
-    lateinit var test: OcrTextFiles
-        private set
-
-    @Synchronized
-    fun initialize(context: Context) = initialize(context.filesDir)
-
-    @Synchronized
-    internal fun initialize(directory: File) {
-        if (::main.isInitialized) return
-        main = OcrTextFiles(directory, MAIN_BASE_NAME)
-        test = OcrTextFiles(File(directory, "test-scan"), "kindle-ocr")
-    }
-
-    fun appendPage(text: String) = main.appendPage(text)
-    fun lastPageText(): String = main.lastPageText()
-    fun hasRawText(): Boolean = main.hasRawText()
-    fun replaceRawText(text: String) = main.replaceRawText(text)
-    fun rawText(): String = main.rawText()
-    fun clear() = main.clear()
-    fun rawFile(): File = main.rawFile()
 }

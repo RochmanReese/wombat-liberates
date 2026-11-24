@@ -10,8 +10,22 @@ import java.util.zip.ZipOutputStream
 object EpubWriter {
     private data class Chapter(val title: String, val paragraphs: List<String>)
 
-    fun write(output: OutputStream, sourceText: String, title: String, author: String) {
-        val chapters = chaptersFrom(sourceText)
+    /**
+     * @param images picture files by id, for "[[image:id]]" markers in the text. Markers without a picture are dropped.
+     * @param coverId the picture to use as the EPUB cover; it is not repeated inside the book.
+     */
+    fun write(
+        output: OutputStream,
+        sourceText: String,
+        title: String,
+        author: String,
+        images: Map<String, ByteArray> = emptyMap(),
+        coverId: String? = null,
+    ) {
+        val cover = coverId?.takeIf { it in images }
+        val text = Illustrations.removeMarkers(sourceText) { id -> id in images && id != cover }
+        val chapters = chaptersFrom(text)
+        val usedImages = (Illustrations.ids(text) + listOfNotNull(cover)).distinct().associateWith { images.getValue(it) }
         ZipOutputStream(output.buffered()).use { zip ->
             // EPUB requires this exact first entry to be uncompressed.
             putStored(zip, "mimetype", "application/epub+zip")
@@ -19,7 +33,8 @@ object EpubWriter {
             putText(zip, "OEBPS/styles/book.css", stylesheet())
             putText(zip, "OEBPS/title.xhtml", titlePage(title, author))
             putText(zip, "OEBPS/nav.xhtml", navigation(title, chapters))
-            putText(zip, "OEBPS/content.opf", packageDocument(title, author, chapters))
+            putText(zip, "OEBPS/content.opf", packageDocument(title, author, chapters, usedImages.keys, cover))
+            usedImages.forEach { (id, bytes) -> putBytes(zip, "OEBPS/images/$id", bytes) }
             chapters.forEachIndexed { index, chapter ->
                 putText(zip, "OEBPS/${chapterPath(index)}", chapterDocument(title, chapter))
             }
@@ -69,7 +84,12 @@ object EpubWriter {
             appendLine("<section epub:type=\"chapter\" xmlns:epub=\"http://www.idpf.org/2007/ops\">")
             appendLine("  <h1>${escape(chapter.title)}</h1>")
             chapter.paragraphs.forEach { paragraph ->
-                appendLine("  <p>${escape(paragraph).replace("\n", "<br />")}</p>")
+                val imageId = Illustrations.ids(paragraph).singleOrNull()?.takeIf { Illustrations.isMarker(paragraph) }
+                if (imageId != null) {
+                    appendLine("  <figure class=\"illustration\"><img src=\"../images/${escape(imageId)}\" alt=\"Illustration\" /></figure>")
+                } else {
+                    appendLine("  <p>${escape(paragraph).replace("\n", "<br />")}</p>")
+                }
             }
             append("</section>")
         },
@@ -100,7 +120,7 @@ object EpubWriter {
         append("</html>\n")
     }
 
-    private fun packageDocument(title: String, author: String, chapters: List<Chapter>): String = buildString {
+    private fun packageDocument(title: String, author: String, chapters: List<Chapter>, imageIds: Set<String>, coverId: String?): String = buildString {
         append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
         append("<package xmlns=\"http://www.idpf.org/2007/opf\" prefix=\"dcterms: http://purl.org/dc/terms/\" unique-identifier=\"book-id\" version=\"3.0\" xml:lang=\"en\">\n")
         append("  <metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n")
@@ -108,6 +128,7 @@ object EpubWriter {
         append("    <dc:title>${escape(title)}</dc:title>\n")
         append("    <dc:creator>${escape(author)}</dc:creator>\n")
         append("    <dc:language>en</dc:language>\n")
+        if (coverId != null) append("    <meta name=\"cover\" content=\"${imageItemId(coverId)}\"/>\n")
         append("    <meta property=\"dcterms:modified\">${Instant.now().toString().replace(Regex("\\.\\d+Z$"), "Z")}</meta>\n")
         append("  </metadata>\n")
         append("  <manifest>\n")
@@ -116,6 +137,10 @@ object EpubWriter {
         append("    <item id=\"style\" href=\"styles/book.css\" media-type=\"text/css\"/>\n")
         chapters.indices.forEach { index ->
             append("    <item id=\"chapter-${index + 1}\" href=\"${chapterPath(index)}\" media-type=\"application/xhtml+xml\"/>\n")
+        }
+        imageIds.forEach { id ->
+            val coverProperty = if (id == coverId) " properties=\"cover-image\"" else ""
+            append("    <item id=\"${imageItemId(id)}\" href=\"images/${escape(id)}\" media-type=\"${imageMediaType(id)}\"$coverProperty/>\n")
         }
         append("  </manifest>\n")
         append("  <spine>\n")
@@ -135,6 +160,8 @@ object EpubWriter {
         .title-page { margin-top: 35%; text-align: center; }
         .title-page h1 { margin: 0 0 1em; page-break-before: avoid; break-before: avoid; font-variant: normal; }
         .author { text-align: center; text-indent: 0; }
+        figure.illustration { margin: 1em 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+        figure.illustration img { max-width: 100%; height: auto; }
     """.trimIndent()
 
     private fun containerXml(): String = """
@@ -143,6 +170,21 @@ object EpubWriter {
     """.trimIndent()
 
     private fun chapterPath(index: Int) = "chapters/chapter-${(index + 1).toString().padStart(3, '0')}.xhtml"
+
+    private fun imageItemId(id: String) = "image-" + id.replace(Regex("[^A-Za-z0-9_-]"), "-")
+
+    private fun imageMediaType(id: String) = when (id.substringAfterLast('.').lowercase()) {
+        "png" -> "image/png"
+        "webp" -> "image/webp"
+        "gif" -> "image/gif"
+        else -> "image/jpeg"
+    }
+
+    private fun putBytes(zip: ZipOutputStream, path: String, bytes: ByteArray) {
+        zip.putNextEntry(ZipEntry(path))
+        zip.write(bytes)
+        zip.closeEntry()
+    }
 
     private fun putText(zip: ZipOutputStream, path: String, text: String) {
         zip.putNextEntry(ZipEntry(path))

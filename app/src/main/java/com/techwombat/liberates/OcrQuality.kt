@@ -37,7 +37,7 @@ object OcrQuality {
     private val LOWER_UPPER_LOWER = Regex("[a-z][A-Z][a-z]")
 
     fun assess(text: String): Report {
-        val tokens = Regex("\\S+").findAll(text).map { it.value }.toList()
+        val tokens = Regex("\\S+").findAll(text).map { it.value }.filterNot { it.startsWith("[[image:") }.toList()
         val counts = linkedMapOf<String, Int>()
         tokens.forEach { token ->
             if (isSuspicious(token)) {

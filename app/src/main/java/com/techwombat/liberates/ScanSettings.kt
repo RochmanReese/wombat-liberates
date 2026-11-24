@@ -6,6 +6,15 @@ import android.content.Context
 object ScanSettings {
     private const val PREFERENCES_NAME = "scan_settings"
     private const val TABLE_MODE = "table_mode"
+    private const val SAVE_ILLUSTRATIONS = "save_illustrations"
+
+    /** Save pictures found while scanning into the book (on by default). */
+    fun saveIllustrations(context: Context): Boolean =
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getBoolean(SAVE_ILLUSTRATIONS, true)
+
+    fun setSaveIllustrations(context: Context, save: Boolean) {
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().putBoolean(SAVE_ILLUSTRATIONS, save).apply()
+    }
 
     /** What to do with pages that look like tables. */
     enum class TableMode { ASK, KEEP, SKIP }

@@ -3,10 +3,11 @@ package com.techwombat.liberates
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
-import android.widget.EditText
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -18,55 +19,32 @@ import com.techwombat.liberates.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DateFormat
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val book by lazy { Workspaces.book(this) }
+    private val library by lazy { Workspaces.library(this) }
     private val logListener: (String) -> Unit = { log ->
         runOnUiThread { binding.logText.text = log }
+    }
+
+    private val importRawText = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) importTextFile(uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PersistentProbeLog.initialize(applicationContext)
-        OcrTextStore.initialize(applicationContext)
         OcrRulesStore.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         renderOcrCorrections()
-        binding.epubTitle.setText(book.title)
-        binding.epubAuthor.setText(book.author)
         OllamaCredentialsStore.load(applicationContext)?.let { credentials ->
             binding.ollamaBaseUrl.setText(credentials.baseUrl)
             binding.ollamaModel.setText(credentials.model)
             binding.ollamaUsername.setText(credentials.username)
             binding.ollamaPassword.setText(credentials.password)
-        }
-
-        val saveRawText = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
-            if (uri != null) writeTextTo(uri, OcrTextStore.rawFile(), "Raw OCR text saved")
-        }
-        val saveEpub = registerForActivityResult(ActivityResultContracts.CreateDocument("application/epub+zip")) { uri ->
-            if (uri != null) exportEpub(uri)
-        }
-        val importRawText = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            if (uri != null) {
-                runCatching {
-                    contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                        ?: error("Could not open the selected file.")
-                }.onSuccess { text ->
-                    runCatching { OcrTextStore.replaceRawText(text) }
-                        .onSuccess {
-                            book.scanSummary = null
-                            binding.statusText.text = "Raw text imported. Open Review to check the device-cleaned version."
-                            Toast.makeText(this, "Imported ${text.length} characters", Toast.LENGTH_LONG).show()
-                            renderBookQuality()
-                        }
-                        .onFailure { binding.statusText.text = "Import failed: ${it.message ?: "invalid text file"}" }
-                }.onFailure {
-                    binding.statusText.text = "Import failed: ${it.message ?: "could not read file"}"
-                }
-            }
         }
 
         binding.startButton.setOnClickListener {
@@ -80,16 +58,15 @@ class MainActivity : AppCompatActivity() {
             renderState()
         }
         binding.startBookCaptureButton.setOnClickListener {
-            val limitText = binding.pageCount.text.toString().trim()
-            val pageLimit = limitText.toIntOrNull()
-            if (limitText.isNotEmpty() && (pageLimit == null || pageLimit < 1)) {
-                binding.statusText.text = "Screen limit must be a whole number of 1 or more, or blank to scan to the end of the book."
-            } else if (OcrTextStore.hasRawText()) {
-                promptContinueOrNewBook(pageLimit)
-            } else {
-                promptForBookTitle(pageLimit, continuing = false)
-            }
+            pageLimitOrNull()?.let { limit -> promptForNewBook(limit.value) }
         }
+        binding.stopBatchButton.setOnClickListener {
+            KindleAccessibilityProbeService.stopBatch()
+            renderState()
+        }
+        binding.importRawTextButton.setOnClickListener { importRawText.launch(arrayOf("text/plain", "text/*")) }
+        binding.helpButton.setOnClickListener { startActivity(Intent(this, HelpActivity::class.java)) }
+
         binding.startTestScanButton.setOnClickListener {
             val testPages = binding.testPageCount.text.toString().trim().toIntOrNull()
             if (testPages == null || testPages !in TEST_SCAN_PAGES) {
@@ -99,34 +76,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.viewTestResultsButton.setOnClickListener {
-            if (OcrTextStore.test.hasRawText()) {
+            if (Workspaces.test(this).hasText()) {
                 startActivity(ReviewActivity.intent(this, Workspaces.TEST))
             } else {
                 binding.statusText.text = "No test scan yet. Start a test scan first."
             }
         }
-        binding.stopBatchButton.setOnClickListener {
-            KindleAccessibilityProbeService.stopBatch()
-            renderState()
-        }
-        binding.helpButton.setOnClickListener { startActivity(Intent(this, HelpActivity::class.java)) }
 
         binding.advancedControlsButton.setOnClickListener {
             val showAdvanced = binding.advancedControls.visibility != View.VISIBLE
             binding.advancedControls.visibility = if (showAdvanced) View.VISIBLE else View.GONE
             binding.advancedControlsButton.text = if (showAdvanced) "Hide advanced settings and diagnostics" else "Show advanced settings and diagnostics"
         }
-
         binding.addOcrCorrectionButton.setOnClickListener { addOcrCorrection() }
         binding.resetOcrCorrectionsButton.setOnClickListener { confirmResetOcrCorrections() }
-
-        binding.importRawTextButton.setOnClickListener {
-            importRawText.launch(arrayOf("text/plain", "text/*"))
-        }
-        binding.reviewBookButton.setOnClickListener {
-            saveTitleAndAuthor()
-            startActivity(ReviewActivity.intent(this, Workspaces.BOOK))
-        }
         binding.saveOllamaSettingsButton.setOnClickListener { saveOllamaSettings() }
         binding.tableModeGroup.check(
             when (ScanSettings.tableMode(this)) {
@@ -143,22 +106,11 @@ class MainActivity : AppCompatActivity() {
             }
             ScanSettings.setTableMode(this, mode)
         }
-        binding.saveRawTextButton.setOnClickListener { saveRawText.launch(exportFileName("kindle-ocr")) }
-        binding.exportEpubButton.setOnClickListener {
-            saveTitleAndAuthor()
-            if (!book.hasText()) {
-                binding.statusText.text = "Scan or import a book before creating an EPUB."
-            } else {
-                saveEpub.launch(epubFileName(book.title.ifBlank { "Untitled" }))
-            }
-        }
+        binding.saveIllustrationsCheck.isChecked = ScanSettings.saveIllustrations(this)
+        binding.saveIllustrationsCheck.setOnCheckedChangeListener { _, checked -> ScanSettings.setSaveIllustrations(this, checked) }
         binding.clearLogButton.setOnClickListener {
             ProbeLog.clear()
-            book.clearAll()
-            Workspaces.test(this).clearAll()
-            renderBookQuality()
-            binding.statusText.text = "Book scan, test scan, all cleaned versions, and diagnostics cleared."
-            Toast.makeText(this, "Captured text and diagnostics cleared", Toast.LENGTH_SHORT).show()
+            binding.statusText.text = "Diagnostics cleared."
         }
     }
 
@@ -166,12 +118,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         ProbeLog.addListener(logListener)
         renderState()
-        renderBookQuality()
-    }
-
-    override fun onPause() {
-        saveTitleAndAuthor()
-        super.onPause()
+        renderLibrary()
     }
 
     override fun onStop() {
@@ -179,19 +126,214 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    private fun startBatch(pageLimit: Int?, continuing: Boolean) {
+    // ---- Library ----
+
+    private data class BookRow(val workspace: ScanWorkspace, val quality: String?, val epubOutOfDate: Boolean, val pictures: Int)
+
+    private fun renderLibrary() {
+        lifecycleScope.launch {
+            val rows = withContext(Dispatchers.IO) {
+                val rules = currentRules()
+                library.books().map { book -> BookRow(book, book.qualitySummary(rules), book.isSavedEpubOutOfDate(rules), book.illustrationIds().size) }
+            }
+            binding.bookList.removeAllViews()
+            binding.emptyLibraryText.visibility = if (rows.isEmpty()) View.VISIBLE else View.GONE
+            rows.forEach { row -> binding.bookList.addView(bookButton(row)) }
+        }
+    }
+
+    private fun bookButton(row: BookRow): Button {
+        val book = row.workspace
+        val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(book.lastActivityMillis()))
+        val details = listOfNotNull(
+            book.author.ifBlank { null },
+            book.scanSummary?.let { "${it.screensCaptured} screens" },
+            row.pictures.takeIf { it > 0 }?.let { if (it == 1) "1 picture" else "$it pictures" },
+            date,
+        ).joinToString(" · ")
+        val saved = book.savedEpub
+        val epub = when {
+            saved == null -> "No EPUB saved yet"
+            row.epubOutOfDate -> "EPUB saved, text changed since"
+            else -> "EPUB saved"
+        }
+        val quality = row.quality ?: "No text yet"
+        return Button(this).apply {
+            isAllCaps = false
+            textAlignment = View.TEXT_ALIGNMENT_VIEW_START
+            text = "${BookExport.title(book)}\n$details\n$quality\n$epub"
+            setOnClickListener { showBookActions(book) }
+        }
+    }
+
+    private fun showBookActions(book: ScanWorkspace) {
+        val saved = book.savedEpub
+        val actions = listOf<Pair<String, () -> Unit>>(
+            "Review, compare and improve" to { startActivity(ReviewActivity.intent(this, book.key)) },
+            "Continue scanning this book" to { pageLimitOrNull()?.let { startBatch(book, it.value, continuing = true) } },
+            (if (saved == null) "Save EPUB to Documents" else "Update EPUB in Documents") to { saveEpub(book) },
+            "Open in EPUB reader" to { openInReader(book) },
+            "Edit title and author" to { editTitleAndAuthor(book) },
+            "Delete this book" to { confirmDelete(book) },
+        )
+        AlertDialog.Builder(this)
+            .setTitle(BookExport.title(book))
+            .setItems(actions.map { it.first }.toTypedArray()) { _, which -> actions[which].second() }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun saveEpub(book: ScanWorkspace) {
+        binding.statusText.text = "Saving EPUB…"
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { runCatching { BookExport.saveToDocuments(applicationContext, book, currentRules()) } }
+            result.onSuccess {
+                binding.statusText.text = "Saved Documents/${BookExport.FOLDER_NAME}/${it.fileName} from ${it.versionLabel}."
+                Toast.makeText(this@MainActivity, "EPUB saved", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                binding.statusText.text = "EPUB save failed: ${it.message ?: it.javaClass.simpleName}"
+            }
+            renderLibrary()
+        }
+    }
+
+    private fun openInReader(book: ScanWorkspace) {
+        lifecycleScope.launch {
+            val file = withContext(Dispatchers.IO) {
+                runCatching {
+                    val version = book.preferredVersion(currentRules()) ?: error("This book has no text yet.")
+                    BookExport.buildShareableEpub(applicationContext, book, version, version.id)
+                }
+            }.getOrElse {
+                binding.statusText.text = "Could not open the book: ${it.message}"
+                return@launch
+            }
+            BookExport.openInReader(this@MainActivity, file)
+        }
+    }
+
+    private fun editTitleAndAuthor(book: ScanWorkspace) {
+        val (view, titleInput, authorInput) = titleAuthorFields(book.title, book.author)
+        AlertDialog.Builder(this)
+            .setTitle("Edit book details")
+            .setView(view)
+            .setPositiveButton("Save") { _, _ ->
+                book.title = titleInput.text.toString().trim()
+                book.author = authorInput.text.toString().trim()
+                renderLibrary()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun confirmDelete(book: ScanWorkspace) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete ${BookExport.title(book)}?")
+            .setMessage("The scanned text and all its cleaned versions are deleted. EPUBs already saved in Documents/${BookExport.FOLDER_NAME} are kept.")
+            .setPositiveButton("Delete") { _, _ ->
+                library.delete(book.key)
+                binding.statusText.text = "Deleted ${BookExport.title(book)}."
+                renderLibrary()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun importTextFile(uri: Uri) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val text = contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                        ?: error("Could not open the selected file.")
+                    val name = contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) cursor.getString(0) else null
+                    }?.substringBeforeLast('.').orEmpty()
+                    val book = library.create(name.ifBlank { "Imported text" }, "")
+                    runCatching { book.raw.replaceRawText(text) }.onFailure {
+                        library.delete(book.key)
+                        throw it
+                    }
+                    book
+                }
+            }
+            result.onSuccess {
+                binding.statusText.text = "Imported as a new book: ${BookExport.title(it)}."
+                renderLibrary()
+            }.onFailure { binding.statusText.text = "Import failed: ${it.message ?: "could not read file"}" }
+        }
+    }
+
+    // ---- Scanning ----
+
+    /** Wraps the optional screen limit so "no limit" (null) can be told apart from "invalid input". */
+    private data class PageLimit(val value: Int?)
+
+    private fun pageLimitOrNull(): PageLimit? {
+        val limitText = binding.pageCount.text.toString().trim()
+        val pageLimit = limitText.toIntOrNull()
+        if (limitText.isNotEmpty() && (pageLimit == null || pageLimit < 1)) {
+            binding.statusText.text = "Screen limit must be a whole number of 1 or more, or blank to scan to the end of the book."
+            return null
+        }
+        return PageLimit(pageLimit)
+    }
+
+    private fun promptForNewBook(pageLimit: Int?) {
+        val (view, titleInput, authorInput) = titleAuthorFields("", "")
+        AlertDialog.Builder(this)
+            .setTitle("What book are you scanning?")
+            .setMessage("A new book is added to your library. You can change these details later.")
+            .setView(view)
+            .setPositiveButton("Start scan") { _, _ ->
+                if (!checkScanningReady()) return@setPositiveButton
+                val book = library.create(titleInput.text.toString().trim(), authorInput.text.toString().trim())
+                startBatch(book, pageLimit, continuing = false)
+                renderLibrary()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun titleAuthorFields(title: String, author: String): Triple<View, EditText, EditText> {
+        val padding = (20 * resources.displayMetrics.density).toInt()
+        val titleInput = EditText(this).apply {
+            hint = "Book title"
+            setText(title)
+            setSingleLine()
+        }
+        val authorInput = EditText(this).apply {
+            hint = "Author"
+            setText(author)
+            setSingleLine()
+        }
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding / 2, padding, 0)
+            addView(titleInput)
+            addView(authorInput)
+        }
+        return Triple(layout, titleInput, authorInput)
+    }
+
+    /** Starts the scanning service if needed; returns false (and explains) if accessibility is off. */
+    private fun checkScanningReady(): Boolean {
         if (!ProbeLog.isActive) ProbeLog.start()
         if (!isAccessibilityServiceEnabled()) {
             binding.statusText.text = "Enable Wombat Liberates in Accessibility settings, then start the scan again."
             showAccessibilitySetupDialog()
-            return
+            return false
         }
-        if (KindleAccessibilityProbeService.startBatch(pageLimit, continuing)) {
+        return true
+    }
+
+    private fun startBatch(book: ScanWorkspace, pageLimit: Int?, continuing: Boolean) {
+        if (!checkScanningReady()) return
+        if (KindleAccessibilityProbeService.startBatch(book.key, pageLimit, continuing)) {
             val scope = pageLimit?.let { "up to $it screens" } ?: "until the end of the book"
             binding.statusText.text = if (continuing) {
-                "Scan will continue $scope; open Kindle at the page where the last scan stopped."
+                "Continuing ${BookExport.title(book)} $scope; open Kindle at the page where the last scan stopped."
             } else {
-                "Book scan ready $scope; open Kindle at the starting page."
+                "Scanning ${BookExport.title(book)} $scope; open Kindle at the starting page."
             }
         } else {
             binding.statusText.text = "Enable Wombat Liberates in Accessibility settings first."
@@ -199,49 +341,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTestScan(pageCount: Int) {
-        if (!ProbeLog.isActive) ProbeLog.start()
-        if (!isAccessibilityServiceEnabled()) {
-            binding.statusText.text = "Enable Wombat Liberates in Accessibility settings, then start the test scan again."
-            showAccessibilitySetupDialog()
-            return
-        }
+        if (!checkScanningReady()) return
         Workspaces.test(this).clearAll()
-        if (KindleAccessibilityProbeService.startBatch(pageCount, continuing = false, test = true)) {
+        if (KindleAccessibilityProbeService.startBatch(Workspaces.TEST, pageCount, continuing = false)) {
             binding.statusText.text = "Test scan ready for $pageCount screens; open Kindle at any page with ordinary text. Results open automatically when it finishes."
         } else {
             binding.statusText.text = "Enable Wombat Liberates in Accessibility settings first."
         }
     }
 
-    private fun promptContinueOrNewBook(pageLimit: Int?) {
-        AlertDialog.Builder(this)
-            .setTitle("Continue previous scan?")
-            .setMessage("Captured text from an earlier scan is still saved. Continue adds new pages after it (the last saved page is skipped if Kindle is still showing it). New book clears the captured and cleaned text first.")
-            .setPositiveButton("Continue scan") { _, _ -> startBatch(pageLimit, continuing = true) }
-            .setNeutralButton("New book") { _, _ -> promptForBookTitle(pageLimit, continuing = false, clearFirst = true) }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun promptForBookTitle(pageLimit: Int?, continuing: Boolean, clearFirst: Boolean = false) {
-        val titleInput = EditText(this).apply {
-            hint = "Book title"
-            setText(binding.epubTitle.text)
-            selectAll()
-        }
-        AlertDialog.Builder(this)
-            .setTitle("What book are you scanning?")
-            .setMessage("This name is shown during cleanup and used for the EPUB. You can change it later.")
-            .setView(titleInput)
-            .setPositiveButton("Start scan") { _, _ ->
-                binding.epubTitle.setText(titleInput.text.toString().trim())
-                if (clearFirst) book.clearAll()
-                saveTitleAndAuthor()
-                startBatch(pageLimit, continuing)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
+    // ---- OCR corrections and Ollama settings ----
 
     private fun renderOcrCorrections() {
         val rules = OcrRulesStore.customRules(applicationContext)
@@ -253,7 +362,6 @@ class MainActivity : AppCompatActivity() {
             })
             return
         }
-
         rules.forEachIndexed { index, rule ->
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -288,7 +396,6 @@ class MainActivity : AppCompatActivity() {
             binding.statusText.text = "A correction for '$find' already exists."
             return
         }
-
         OcrRulesStore.addCustomRule(applicationContext, OcrLiteralRule(find, replace))
         binding.ocrCorrectionFind.text?.clear()
         binding.ocrCorrectionReplace.text?.clear()
@@ -299,7 +406,7 @@ class MainActivity : AppCompatActivity() {
     private fun confirmResetOcrCorrections() {
         AlertDialog.Builder(this)
             .setTitle("Reset custom corrections?")
-            .setMessage("This removes only your added OCR corrections and restores the defaults. Raw OCR, cleaned OCR, diagnostics, and Ollama settings are unchanged.")
+            .setMessage("This removes only your added OCR corrections and restores the defaults. Books, cleaned versions, diagnostics and Ollama settings are unchanged.")
             .setPositiveButton("Reset") { _, _ ->
                 OcrRulesStore.resetToDefaults(applicationContext)
                 renderOcrCorrections()
@@ -307,11 +414,6 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
-    }
-
-    private fun saveTitleAndAuthor() {
-        book.title = binding.epubTitle.text.toString().trim()
-        book.author = binding.epubAuthor.text.toString().trim()
     }
 
     private fun saveOllamaSettings() {
@@ -324,22 +426,13 @@ class MainActivity : AppCompatActivity() {
             return
         }
         OllamaCredentialsStore.save(applicationContext, OllamaCredentialsStore.Credentials(baseUrl, model, username, password))
-        binding.statusText.text = "Ollama settings saved. Use them from the review screen when device OCR is not good enough."
-    }
-
-    /** Shows the quality check for the book's device-cleaned text on the main screen. */
-    private fun renderBookQuality() {
-        lifecycleScope.launch {
-            val text = withContext(Dispatchers.IO) {
-                val device = book.ensureDeviceVersion(currentRules()) ?: return@withContext null
-                OcrQuality.describe(OcrQuality.assess(book.text(device))).lineSequence().first()
-            }
-            binding.bookQualityText.text = text ?: "No book text yet."
-        }
+        binding.statusText.text = "Ollama settings saved. Use them from a book's review screen when device OCR is not good enough."
     }
 
     private fun currentRules(): List<OcrLiteralRule> =
         OcrRulesParser.parse(OcrRulesStore.readRules(applicationContext)).takeIf { it.isValid }?.rules.orEmpty()
+
+    // ---- Service state ----
 
     private fun renderState() {
         binding.statusText.text = if (ProbeLog.isActive) {
@@ -350,50 +443,6 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.isEnabled = !ProbeLog.isActive
         binding.stopButton.isEnabled = ProbeLog.isActive
         binding.logText.text = ProbeLog.snapshot()
-    }
-
-    private fun exportEpub(destination: Uri) {
-        val title = book.title.ifBlank { "Untitled" }
-        val author = book.author.ifBlank { "Unknown author" }
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    val version = book.preferredVersion(currentRules()) ?: error("No book text to export.")
-                    contentResolver.openOutputStream(destination)?.use { EpubWriter.write(it, book.text(version), title, author) }
-                        ?: error("Could not create the EPUB file.")
-                    version.label
-                }
-            }
-            result.onSuccess { label ->
-                binding.statusText.text = "EPUB saved using $label."
-                Toast.makeText(this@MainActivity, "EPUB saved", Toast.LENGTH_LONG).show()
-            }.onFailure { exception ->
-                binding.statusText.text = "EPUB export failed: ${exception.message ?: "unknown error"}"
-                Toast.makeText(this@MainActivity, "EPUB export failed", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun epubFileName(title: String): String {
-        val safe = title.map { character ->
-            if (character.isLetterOrDigit() || character == '_' || character == '-') character else '_'
-        }.joinToString("")
-        return "${safe.ifBlank { "book" }}.epub"
-    }
-
-    private fun exportFileName(defaultName: String): String {
-        val entered = binding.exportFileName.text.toString().trim().ifBlank { defaultName }
-        val safeName = entered.map { character ->
-            if (character.isLetterOrDigit() || character == '.' || character == '_' || character == '-') character else '_'
-        }.joinToString("")
-        return if (safeName.endsWith(".txt", ignoreCase = true)) safeName else "$safeName.txt"
-    }
-
-    private fun writeTextTo(destination: Uri, source: java.io.File, message: String) {
-        contentResolver.openOutputStream(destination)?.use { output ->
-            source.inputStream().use { input -> input.copyTo(output) }
-        } ?: return
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {

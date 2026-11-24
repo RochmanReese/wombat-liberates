@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Tap Start Kindle scan, then open Kindle at the first page you want. The scan stops by itself at the end of the book. If a scan stopped early, tap Start Kindle scan again and choose Continue scan. To check everything works first, run a short Test scan from Advanced settings. You can also import an existing text file instead."
+            android:text="Tap Start Kindle scan, enter the book title, then open Kindle at the first page you want. Each scan becomes a new book in Your books. The scan stops by itself at the end of the book. If it stopped early, tap the book in Your books and choose Continue scanning this book. To check everything works first, run a short Test scan from Advanced settings. You can also import an existing text file instead."
             android:textSize="16sp" />
 
         <TextView
@@ -81,14 +81,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="When a scan finishes, the review screen opens. Text is cleaned on your phone automatically, including removing Kindle footer text, and given a quality rating. View, compare and save any version as text or EPUB. Only if the rating says the OCR is poor, set up Ollama under Advanced settings and tap Clean with Ollama on the review screen, then compare its changes before using it. Raw OCR is never changed."
+            android:text="When a scan finishes, the review screen opens; you can reopen it any time by tapping the book in Your books. Text is cleaned on your phone automatically, including removing Kindle footer text, and given a quality rating. View, compare and save any version as text or EPUB. Pictures from the book are saved too and shown as thumbnails, where you can delete them or choose the cover; near the start of a new scan you are asked whether a picture is the cover. Only if the rating says the OCR is poor, set up Ollama under Advanced settings and tap Clean with Ollama on the review screen, then compare its changes before using it. Raw OCR is never changed."
             android:textSize="16sp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="3. Create EPUB"
+            android:text="3. Save and read your EPUB"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -96,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Enter a title and author, then create an EPUB. It uses the version chosen in Review (device cleanup unless you pick another). Headings such as CHAPTER SIX become entries in the table of contents. Open in EPUB reader on the review screen sends a book straight to your reader app."
+            android:text="Tap a book in Your books and choose Save EPUB to Documents. It is saved to Documents/Wombat Liberates, using the version chosen in Review (device cleanup unless you pick another); save again after changing the text to update it. Open in EPUB reader sends the book straight to your reader app, such as Wombat Reader. Headings such as CHAPTER SIX become entries in the table of contents."
             android:textSize="16sp" />
 
         <TextView

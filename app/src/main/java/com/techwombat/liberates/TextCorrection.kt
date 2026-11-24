@@ -43,6 +43,7 @@ object CorrectionPrompt {
         Preserve the author's exact wording, sentence order, paragraph breaks, dialogue, chapter headings, names, formatting, and meaning.
         Do not rewrite for style. Do not summarize. Do not explain your edits. Do not add or remove sentences.
         If a possible correction is uncertain, leave it unchanged.
+        Lines like [[image:img-0001.jpg]] mark pictures: copy them exactly, on their own line, in the same place.
         Return only the corrected text, with no heading, commentary, Markdown, or quotes around the response.
 
         OCR TEXT START

@@ -15,7 +15,12 @@ data class PageAnalysis(
     /** Reading progress from Kindle's footer, if it was visible. */
     val progressPercent: Int?,
     val isEndOfBookScreen: Boolean,
-)
+    /** Number of picture placeholders in [text], in reading order. */
+    val pictureCount: Int = 0,
+) {
+    /** Text without picture placeholders, for decisions that are about the words on the page. */
+    val wordsOnly: String get() = Illustrations.removeMarkers(text) { false }
+}
 
 /** Turns OCR blocks into page text: drops Kindle chrome, detects tables and reads them row by row. */
 object PageLayout {
@@ -26,7 +31,14 @@ object PageLayout {
     private const val MIN_TABLE_ROWS = 3
     private const val MIN_TABLE_ROW_FRACTION = 0.25
 
-    fun analyze(blocks: List<List<OcrLine>>, imageHeight: Int): PageAnalysis {
+    /** Placeholder for the n-th picture on a page; the scanner swaps it for the saved picture's marker. */
+    fun picturePlaceholder(index: Int) = Illustrations.marker("#$index")
+
+    /**
+     * @param pictures picture areas found on the page (same pixel coordinates as the OCR lines); each becomes a
+     * [picturePlaceholder] paragraph between the text above and below it.
+     */
+    fun analyze(blocks: List<List<OcrLine>>, imageHeight: Int, pictures: List<Box> = emptyList()): PageAnalysis {
         val cleanedBlocks = blocks.map { block -> block.filter { it.text.isNotBlank() } }.filter { it.isNotEmpty() }
         val allLines = cleanedBlocks.flatten()
         val progress = allLines.mapNotNull { KindleChrome.progressPercent(it.text) }.maxOrNull()
@@ -37,8 +49,23 @@ object PageLayout {
             .filter { it.isNotEmpty() }
         val bookLines = bookBlocks.flatten()
         val table = looksLikeTable(bookLines)
-        val text = if (table) tableText(bookLines) else proseText(bookBlocks)
-        return PageAnalysis(KindleChrome.strip(text), table, progress, endScreen)
+        fun assemble(segment: List<List<OcrLine>>): String =
+            KindleChrome.strip(if (table) tableText(segment.flatten()) else proseText(segment))
+
+        // Split the text at each picture so pictures land between the text above and below them.
+        val sortedPictures = pictures.sortedBy { it.top }
+        val parts = mutableListOf<String>()
+        sortedPictures.indices.forEach { index ->
+            val above = bookBlocks.filter { block ->
+                val top = block.minOf { it.top }
+                top < sortedPictures[index].top && (index == 0 || top >= sortedPictures[index - 1].top)
+            }
+            parts += assemble(above)
+            parts += picturePlaceholder(index)
+        }
+        parts += assemble(bookBlocks.filter { block -> sortedPictures.isEmpty() || block.minOf { it.top } >= sortedPictures.last().top })
+        val text = parts.filter { it.isNotBlank() }.joinToString("\n\n")
+        return PageAnalysis(text, table, progress, endScreen, sortedPictures.size)
     }
 
     private fun isChrome(line: OcrLine, imageHeight: Int): Boolean {

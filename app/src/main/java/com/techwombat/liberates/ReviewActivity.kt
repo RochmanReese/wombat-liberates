@@ -1,6 +1,5 @@
 package com.techwombat.liberates
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -17,7 +16,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
@@ -54,7 +52,7 @@ class ReviewActivity : AppCompatActivity() {
     private val saveEpub = registerForActivityResult(ActivityResultContracts.CreateDocument("application/epub+zip")) { uri ->
         val version = pendingSave
         if (uri != null && version != null) {
-            writeToUri(uri, "EPUB saved") { output -> EpubWriter.write(output, workspace.text(version), epubTitle(version), epubAuthor()) }
+            writeToUri(uri, "EPUB saved") { output -> BookExport.writeEpub(output, workspace, workspace.text(version), epubTitle(version)) }
         }
     }
 
@@ -63,9 +61,15 @@ class ReviewActivity : AppCompatActivity() {
         OcrRulesStore.initialize(applicationContext)
         binding = ActivityReviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        workspace = Workspaces.byKey(this, intent.getStringExtra(EXTRA_WORKSPACE))
+        workspace = Workspaces.byKey(this, intent.getStringExtra(EXTRA_WORKSPACE)) ?: run {
+            Toast.makeText(this, "That book no longer exists.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
-        binding.reviewTitle.text = "${workspace.displayName} review"
+        binding.reviewTitle.text = reviewTitle()
+        binding.saveToDocumentsButton.visibility = if (workspace.isTest) View.GONE else View.VISIBLE
+        binding.saveToDocumentsButton.setOnClickListener { saveToDocuments() }
         binding.closeReviewButton.setOnClickListener { finish() }
         binding.compareButton.setOnClickListener { compareSelected() }
         binding.viewerPreviousButton.setOnClickListener { showViewerPage(viewerPage - 1) }
@@ -82,8 +86,9 @@ class ReviewActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (aiJob?.isActive != true) {
-            workspace = Workspaces.byKey(this, intent.getStringExtra(EXTRA_WORKSPACE))
-            binding.reviewTitle.text = "${workspace.displayName} review"
+            workspace = Workspaces.byKey(this, intent.getStringExtra(EXTRA_WORKSPACE)) ?: return
+            binding.reviewTitle.text = reviewTitle()
+            binding.saveToDocumentsButton.visibility = if (workspace.isTest) View.GONE else View.VISIBLE
             refresh()
         }
     }
@@ -93,11 +98,13 @@ class ReviewActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    private fun reviewTitle(): String = if (workspace.isTest) "Test scan review" else "Book review"
+
     // ---- Loading ----
 
     /** Regenerates the device version if needed, then redraws everything. */
     private fun refresh() {
-        binding.reviewSubtitle.text = workspace.title.ifBlank { if (workspace.key == Workspaces.TEST) "" else "Untitled book" }
+        binding.reviewSubtitle.text = if (workspace.isTest) workspace.title else BookExport.title(workspace)
         binding.scanSummaryText.text = "Loading…"
         lifecycleScope.launch {
             val loaded = withContext(Dispatchers.IO) {
@@ -120,6 +127,8 @@ class ReviewActivity : AppCompatActivity() {
                 if (rulesError != null) append("\n\nYour OCR rules file has an invalid entry, so device cleanup used no custom rules: $rulesError")
             }
             renderVersions()
+            renderSavedEpub()
+            renderIllustrations()
             renderCompareChoices()
             renderImproveSection()
         }
@@ -127,6 +136,8 @@ class ReviewActivity : AppCompatActivity() {
 
     private fun showEmpty() {
         versions = emptyList()
+        binding.illustrationsList.removeAllViews()
+        binding.illustrationsSummaryText.text = ""
         binding.scanSummaryText.text = summaryText(null) + "\n\nNo text has been captured yet."
         binding.qualityText.text = "No text to check."
         binding.versionsList.removeAllViews()
@@ -159,7 +170,7 @@ class ReviewActivity : AppCompatActivity() {
             if (version.kind != VersionKind.RAW && version.kind != VersionKind.EARLIER && version.rawSignature != signature) {
                 details += "made before the scan text last changed"
             }
-            val usedForEpub = workspace.key == Workspaces.BOOK && version.id == preferredId
+            val usedForEpub = !workspace.isTest && version.id == preferredId
             val button = Button(this).apply {
                 isAllCaps = false
                 textAlignment = View.TEXT_ALIGNMENT_VIEW_START
@@ -182,11 +193,12 @@ class ReviewActivity : AppCompatActivity() {
             saveEpub.launch(fileName(version, "epub"))
         }
         actions += "Open in EPUB reader…" to { openInReader(version) }
-        if (workspace.key == Workspaces.BOOK && version.complete) {
+        if (!workspace.isTest && version.complete) {
             actions += "Use this version for the EPUB" to {
                 workspace.preferredVersionId = version.id
                 renderVersions()
-                Toast.makeText(this, "Create EPUB will use ${version.label}", Toast.LENGTH_SHORT).show()
+                renderSavedEpub()
+                Toast.makeText(this, "The EPUB will use ${version.label}", Toast.LENGTH_SHORT).show()
             }
         }
         if (version.kind == VersionKind.OLLAMA || version.kind == VersionKind.GEMINI || version.kind == VersionKind.EARLIER) {
@@ -211,6 +223,104 @@ class ReviewActivity : AppCompatActivity() {
             .show()
     }
 
+    // ---- Illustrations ----
+
+    private fun renderIllustrations() {
+        lifecycleScope.launch {
+            val coverId = workspace.coverImageId
+            val thumbnails = withContext(Dispatchers.IO) {
+                workspace.illustrationIds().mapNotNull { id -> workspace.illustrationFile(id)?.let { file -> id to decodeThumbnail(file) } }
+            }
+            binding.illustrationsList.removeAllViews()
+            binding.illustrationsSummaryText.text = when {
+                thumbnails.isEmpty() -> "No pictures saved from this scan."
+                else -> "${thumbnails.size} pictures saved. Tap one to view it, use it as the cover, or delete it." +
+                    if (coverId == null) " No cover chosen." else ""
+            }
+            val density = resources.displayMetrics.density
+            thumbnails.chunked(THUMBNAILS_PER_ROW).forEach { row ->
+                val rowLayout = android.widget.LinearLayout(this@ReviewActivity).apply { orientation = android.widget.LinearLayout.HORIZONTAL }
+                row.forEach { (id, bitmap) ->
+                    val cell = android.widget.LinearLayout(this@ReviewActivity).apply {
+                        orientation = android.widget.LinearLayout.VERTICAL
+                        setPadding((4 * density).toInt(), (4 * density).toInt(), (4 * density).toInt(), (4 * density).toInt())
+                        setOnClickListener { showIllustrationActions(id) }
+                    }
+                    cell.addView(
+                        android.widget.ImageView(this@ReviewActivity).apply {
+                            setImageBitmap(bitmap)
+                            scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                            contentDescription = if (id == coverId) "Cover picture" else "Illustration $id"
+                        },
+                        android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, (THUMBNAIL_HEIGHT_DP * density).toInt()),
+                    )
+                    cell.addView(android.widget.TextView(this@ReviewActivity).apply {
+                        text = if (id == coverId) "Cover" else id.substringBeforeLast('.')
+                        textSize = 12f
+                        textAlignment = View.TEXT_ALIGNMENT_CENTER
+                    })
+                    rowLayout.addView(cell, android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                }
+                // Keep the last row's thumbnails the same size as the others.
+                repeat(THUMBNAILS_PER_ROW - row.size) {
+                    rowLayout.addView(View(this@ReviewActivity), android.widget.LinearLayout.LayoutParams(0, 1, 1f))
+                }
+                binding.illustrationsList.addView(rowLayout)
+            }
+        }
+    }
+
+    private fun decodeThumbnail(file: File): android.graphics.Bitmap? {
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(file.path, bounds)
+        var sample = 1
+        while (bounds.outWidth / (sample * 2) >= THUMBNAIL_DECODE_WIDTH) sample *= 2
+        return android.graphics.BitmapFactory.decodeFile(file.path, android.graphics.BitmapFactory.Options().apply { inSampleSize = sample })
+    }
+
+    private fun showIllustrationActions(id: String) {
+        val isCover = workspace.coverImageId == id
+        val actions = listOf<Pair<String, () -> Unit>>(
+            "View larger" to { showLargeIllustration(id) },
+            (if (isCover) "Stop using as cover" else "Use as book cover") to {
+                workspace.coverImageId = if (isCover) null else id
+                refreshAfterPictureChange()
+            },
+            "Delete picture" to { confirmDeleteIllustration(id) },
+        )
+        AlertDialog.Builder(this)
+            .setTitle(if (isCover) "Cover picture" else "Picture ${id.substringBeforeLast('.')}")
+            .setItems(actions.map { it.first }.toTypedArray()) { _, which -> actions[which].second() }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showLargeIllustration(id: String) {
+        val file = workspace.illustrationFile(id) ?: return
+        val image = android.widget.ImageView(this).apply {
+            setImageBitmap(android.graphics.BitmapFactory.decodeFile(file.path))
+            adjustViewBounds = true
+        }
+        AlertDialog.Builder(this).setView(image).setPositiveButton("Close", null).show()
+    }
+
+    private fun confirmDeleteIllustration(id: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete this picture?")
+            .setMessage("It is removed from the book and from future EPUBs. The text is not changed.")
+            .setPositiveButton("Delete") { _, _ ->
+                workspace.deleteIllustration(id)
+                refreshAfterPictureChange()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun refreshAfterPictureChange() {
+        renderIllustrations()
+        renderSavedEpub()
+    }
+
     // ---- Viewer ----
 
     private fun openViewer(version: TextVersion) {
@@ -225,7 +335,10 @@ class ReviewActivity : AppCompatActivity() {
         val pages = (viewerChunks.size + CHUNKS_PER_VIEWER_PAGE - 1) / CHUNKS_PER_VIEWER_PAGE
         viewerPage = page.coerceIn(0, (pages - 1).coerceAtLeast(0))
         val from = viewerPage * CHUNKS_PER_VIEWER_PAGE
-        binding.viewerText.text = viewerChunks.subList(from, minOf(from + CHUNKS_PER_VIEWER_PAGE, viewerChunks.size)).joinToString("\n\n")
+        binding.viewerText.text = Illustrations.readable(
+            viewerChunks.subList(from, minOf(from + CHUNKS_PER_VIEWER_PAGE, viewerChunks.size)).joinToString("\n\n"),
+            workspace.coverImageId,
+        )
         binding.viewerPageText.text = "Part ${viewerPage + 1} of $pages"
         binding.viewerPreviousButton.isEnabled = viewerPage > 0
         binding.viewerNextButton.isEnabled = viewerPage < pages - 1
@@ -406,7 +519,7 @@ class ReviewActivity : AppCompatActivity() {
                 while (done < rawChunks.size) {
                     binding.aiProgressBar.progress = done
                     binding.aiProgressText.text = "${version.label}: chunk ${done + 1} of ${rawChunks.size}…"
-                    val corrected = correct(rawChunks[done])
+                    val corrected = Illustrations.restoreMarkers(rawChunks[done], correct(rawChunks[done]))
                     if (corrected.isBlank()) error("${kind.shortLabel} returned no text for chunk ${done + 1}.")
                     withContext(Dispatchers.IO) { workspace.appendChunk(version, corrected) }
                     done++
@@ -445,20 +558,43 @@ class ReviewActivity : AppCompatActivity() {
 
     // ---- Saving and opening ----
 
-    private fun epubAuthor(): String = workspace.author.ifBlank { "Unknown author" }
+    private fun preferredId(): String? = workspace.preferredVersionId ?: versions.firstOrNull { it.kind == VersionKind.DEVICE }?.id
 
-    private fun epubTitle(version: TextVersion): String {
-        val base = workspace.title.ifBlank { if (workspace.key == Workspaces.TEST) "Test scan" else "Untitled" }
-        val preferred = workspace.key == Workspaces.BOOK &&
-            version.id == (workspace.preferredVersionId ?: versions.firstOrNull { it.kind == VersionKind.DEVICE }?.id)
-        return if (preferred) base else "$base (${version.label})"
+    private fun epubTitle(version: TextVersion): String = BookExport.epubTitle(workspace, version, preferredId())
+
+    private fun fileName(version: TextVersion, extension: String): String =
+        BookExport.safeFileName("${BookExport.title(workspace)} ${version.label}", extension)
+
+    private fun currentRules(): List<OcrLiteralRule> =
+        OcrRulesParser.parse(OcrRulesStore.readRules(applicationContext)).takeIf { it.isValid }?.rules.orEmpty()
+
+    private fun renderSavedEpub() {
+        if (workspace.isTest) {
+            binding.savedEpubText.text = ""
+            return
+        }
+        lifecycleScope.launch {
+            val (saved, outOfDate) = withContext(Dispatchers.IO) { workspace.savedEpub to workspace.isSavedEpubOutOfDate(currentRules()) }
+            binding.savedEpubText.text = if (saved == null) {
+                "No EPUB saved yet. EPUBs are saved to Documents/${BookExport.FOLDER_NAME}."
+            } else {
+                val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(saved.builtAtMillis))
+                "Saved as Documents/${BookExport.FOLDER_NAME}/${saved.fileName} from ${saved.versionLabel}, $time." +
+                    if (outOfDate) "\nThe text has changed since: save again to update it." else ""
+            }
+            binding.saveToDocumentsButton.text = if (saved == null) "Save EPUB to Documents" else "Update EPUB in Documents"
+        }
     }
 
-    private fun fileName(version: TextVersion, extension: String): String {
-        val base = workspace.title.ifBlank { if (workspace.key == Workspaces.TEST) "test-scan" else "book" }
-        val safe = "$base-${version.label}".map { if (it.isLetterOrDigit() || it == '-' || it == '_') it else '_' }
-            .joinToString("").replace(Regex("_+"), "_").trim('_')
-        return "$safe.$extension"
+    private fun saveToDocuments() {
+        binding.saveToDocumentsButton.isEnabled = false
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { runCatching { BookExport.saveToDocuments(applicationContext, workspace, currentRules()) } }
+            binding.saveToDocumentsButton.isEnabled = true
+            result.onSuccess { Toast.makeText(this@ReviewActivity, "Saved ${it.fileName}", Toast.LENGTH_SHORT).show() }
+                .onFailure { Toast.makeText(this@ReviewActivity, "Save failed: ${it.message}", Toast.LENGTH_LONG).show() }
+            renderSavedEpub()
+        }
     }
 
     private fun writeToUri(uri: Uri, message: String, write: (java.io.OutputStream) -> Unit) {
@@ -471,31 +607,14 @@ class ReviewActivity : AppCompatActivity() {
         }
     }
 
-    /** Builds the EPUB in a private shared folder and opens it in the default (or user-chosen) EPUB reader. */
     private fun openInReader(version: TextVersion) {
         lifecycleScope.launch {
-            val file = withContext(Dispatchers.IO) {
-                runCatching {
-                    val directory = File(cacheDir, "shared-epubs").apply { mkdirs() }
-                    directory.listFiles()?.forEach { it.delete() }
-                    File(directory, fileName(version, "epub")).also { file ->
-                        file.outputStream().use { EpubWriter.write(it, workspace.text(version), epubTitle(version), epubAuthor()) }
-                    }
+            val file = withContext(Dispatchers.IO) { runCatching { BookExport.buildShareableEpub(applicationContext, workspace, version, preferredId()) } }
+                .getOrElse {
+                    Toast.makeText(this@ReviewActivity, "EPUB failed: ${it.message}", Toast.LENGTH_LONG).show()
+                    return@launch
                 }
-            }.getOrElse {
-                Toast.makeText(this@ReviewActivity, "EPUB failed: ${it.message}", Toast.LENGTH_LONG).show()
-                return@launch
-            }
-            val uri = FileProvider.getUriForFile(this@ReviewActivity, "$packageName.fileprovider", file)
-            val view = Intent(Intent.ACTION_VIEW)
-                .setDataAndType(uri, "application/epub+zip")
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            try {
-                // A plain VIEW (not a chooser) lets Android offer "Always", so the user's reader becomes the default.
-                startActivity(view)
-            } catch (_: ActivityNotFoundException) {
-                Toast.makeText(this@ReviewActivity, "No installed app opens EPUB files. Use Save as EPUB instead.", Toast.LENGTH_LONG).show()
-            }
+            BookExport.openInReader(this@ReviewActivity, file)
         }
     }
 
@@ -505,6 +624,9 @@ class ReviewActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_WORKSPACE = "workspace"
         private const val CHUNKS_PER_VIEWER_PAGE = 8
+        private const val THUMBNAILS_PER_ROW = 3
+        private const val THUMBNAIL_HEIGHT_DP = 110
+        private const val THUMBNAIL_DECODE_WIDTH = 320
         private const val MAX_SHOWN_PARAGRAPHS = 300
         private const val HEAVY_CHANGE_FRACTION = 0.2
         private const val GEMINI_MODEL_LABEL = "on-device"
