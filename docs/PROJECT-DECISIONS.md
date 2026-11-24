@@ -55,3 +55,14 @@ Format: `## {Date} — {Topic}` then bullet points.
 ## 24 November 2026 — Illustrations saved by default; cover chosen by the user
 - Pictures are cropped and kept at screen resolution. Only pictures in the first 10 screens of a
   new scan are offered as the cover, and only the user decides; the cover is not repeated inside.
+
+## 24 November 2026 — Fix OCR slips on the phone; AI only for what's left
+- Proofreading a whole book with a 12B model took ~2 min per chunk (~9–10 h a book) — far too much
+  compute for a few dozen slips. Dictionary + book-vocabulary spelling correction runs on the phone
+  in seconds; only sentences still containing doubtful words (~5%) go to the server.
+
+## 24 November 2026 — Chapters from the book's own contents page
+- The printed contents page is the most reliable chapter list: match its entries, in order, to
+  headings in the body, then drop the printed page (the EPUB has its own). Heading patterns are
+  the fallback; garbled "CHAPTER" / "TWELVE" splits are joined.
+

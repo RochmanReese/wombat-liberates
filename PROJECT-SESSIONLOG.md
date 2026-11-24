@@ -20,6 +20,14 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
 - **Calls and notifications**: a call pauses the scan (no swipes, no Back presses) and resumes when
   it ends; notification banners are waited out and captures they spoiled are retaken; optional
   Do Not Disturb while scanning (permission flow, restored after the scan or a crash).
+- **AI cleanup moved to a server**: new `wombat-cleanup` service (`~/repos/wombat-cleanup`, live at
+  cleanup.wombatex.com, gemma3:12b, shared key, resumable jobs). Liberates' Ollama settings replaced
+  by Cleanup server settings; background WorkManager check + notification.
+- Whole-book AI proved far too slow (~2 min/chunk, ~9–10 h/book), so: **on-device spelling
+  correction** (SymSpell dictionaries in assets + the book's own vocabulary; tuned on real scans to
+  ~90 changes per 41k words, nearly all correct) and **AI only for doubtful sentences** (~5%).
+- **Chapter detection** from the printed contents page (or headings); 24/24 sections found on the
+  real sample, contents page dropped. Review shows the chapter list.
 - Created the project scaffolding: `agentstart.md`, `agentexit.md`, this log (renamed from
   `SESSION-LOG.md`), `docs/MASTER.md`, `docs/PROJECT-ARCHITECTURE.md`, `docs/PROJECT-ROADMAP.md`
   (includes the parked v2 Reading mode write-up), `docs/PROJECT-DECISIONS.md`.
@@ -35,9 +43,34 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
 - Agreed next: server AI cleanup as a **separate container** beside Ollama (shared key, no Zitadel
   yet), replacing phone→Ollama. Discussed and declined: reading KFX directly (would mean DRM
   removal). v2 Reading mode parked in the Roadmap.
-- Next: test call/notification handling and DND on the phone (after installing, toggle the
-  accessibility service off/on if scanning doesn't start — its config changed); then the brief for
-  the server cleanup service.
+- Rocky tested spelling fixes, chapters and Clean on server on the phone; committed and pushed.
+- The benchmark whole-book gemma job was cancelled (too slow: about 2 min per chunk).
+- Phone testing, later the same day:
+  - **Hang fixed:** Library, Review and chapters hung on "Loading / Checking text". Cause: Kotlin
+    `Regex.findAll` on Android makes a new ICU matcher per match, and each copies the whole text,
+    so a whole book was quadratic. Server JVM timings hid it. Fix: `Regex.matchesIn`
+    (TextMatches.kt, one matcher) everywhere. The library list now shows books before their
+    quality line.
+  - **OCR rules now match whole words only:** "mne => me" had been turning damned → "damed"
+    (51×), painfully → "painfuly" and I'll → "I'lll".
+  - **Spelling:** when the book clearly uses one candidate, it wins ("stallion" ×16 over
+    "station" ×1).
+  - **Chapters on The Last Ranger: 3 → 57.**
+    - Contents entries lose their numbers.
+    - Titles printed in capitals and glued onto the first sentence ("TREACHERY he heard…") are
+      split off, but only if the next word isn't capitals too.
+    - The lost decorative first letter is restored from the book's names, word pairs, pronoun
+      agreement and common openers ("She heard", "As the", "Leiyn rode").
+    - Titles use the contents page's spelling.
+  - **Server cleanup of doubtful sentences:** 447 sentences.
+    - Ollama 0.12.9 misreads this AMD card's free memory (3 GB of about 18 GB free; only Ollama
+      and Kokoro use the card), so it put just 8 of 49 layers on the card.
+    - wombat-cleanup now sends `num_gpu: 999`: 49/49 layers, about 0.6 s per sentence (was
+      3.6–5.6 s), about 5 min per book.
+    - Resizable BAR appears to be off (`vis_vram_total` is 0.25 GB); worth checking in the BIOS,
+      or upgrade Ollama.
+  - A debug-only freeze watchdog was used to find the hang and has been removed.
+  - Device cleanup version is now 5.
 
 ### Watch out for
 - **Wombat Reader incident**: this server's wombat-reader clone was 5 commits behind GitHub
@@ -45,7 +78,7 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
   migration from 6 to 2 was required"); fixed by installing GitHub's latest. The server clone now
   matches GitHub. Always `git fetch` before building either app; never uninstall to "fix" a crash.
 - The phone is on Rocky's PC, not this server: give adb/scp commands (`scp wombat-server:…`).
-- Untracked, never commit: `scan-log.txt`, `crash.txt`, `rawtext1.txt` (book text). Older loose
+- Untracked, never commit: `scan-log.txt`, `crash.txt`, `rawtext1.txt`, `books.tar`, `liberates-stack.txt` (book text and phone dumps). Older loose
   notes (`HANDOVER.md`, `handover.md`, `build.md`, `briefs/`) are historical; consider moving them
   under `docs/legacy/` with Rocky's OK.
 - Thresholds (pictures, tables, quality, chrome bands) are first guesses; tune from real logs.

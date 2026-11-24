@@ -29,6 +29,6 @@ class OcrQualityTest {
         val report = OcrQuality.assess(text)
         assertEquals(OcrQuality.Level.POOR, report.level)
         assertEquals("|" to 20, report.examples.first())
-        assertTrue(OcrQuality.describe(report).contains("Ollama cleanup recommended"))
+        assertTrue(OcrQuality.describe(report).contains("AI cleanup recommended"))
     }
 }

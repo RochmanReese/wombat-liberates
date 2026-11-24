@@ -10,6 +10,7 @@ enum class VersionKind(val shortLabel: String) {
     RAW("Raw OCR"),
     DEVICE("Device cleanup"),
     OLLAMA("Ollama"),
+    SERVER("Server AI"),
     GEMINI("Gemini Nano"),
     EARLIER("Earlier cleanup"),
 }
@@ -118,12 +119,16 @@ class ScanWorkspace(
     @Synchronized
     fun ensureDeviceVersion(rules: List<OcrLiteralRule>): TextVersion? {
         if (!hasText()) return null
-        val signature = "$DEVICE_CLEANUP_VERSION:${rawSignature()}:${rules.hashCode()}"
+        val spelling = SpellingDictionary.get()
+        val signature = "$DEVICE_CLEANUP_VERSION:${rawSignature()}:${rules.hashCode()}:spelling=${spelling != null}"
         versions().firstOrNull { it.kind == VersionKind.DEVICE }?.let { existing ->
             if (existing.complete && existing.model == null && deviceRulesSignature(existing) == signature) return existing
             delete(existing)
         }
-        val chunks = rawChunks().map { OcrCleanup.clean(it, rules) }
+        val cleaned = rawChunks().map { OcrCleanup.clean(it, rules) }
+        // Spelling fixes use word counts from the whole book, so names it spells consistently are kept.
+        val corrector = spelling?.let { OcrSpelling(it, cleaned.joinToString("\n\n")) }
+        val chunks = if (corrector == null) cleaned else cleaned.map(corrector::correct)
         val version = TextVersion(
             id = DEVICE_ID,
             kind = VersionKind.DEVICE,
@@ -176,6 +181,62 @@ class ScanWorkspace(
         writeMeta(updated)
         return updated
     }
+
+    /** Saves a finished set of chunks (e.g. from the cleanup server) as a complete version. */
+    @Synchronized
+    fun saveCompletedVersion(kind: VersionKind, model: String, chunks: List<String>, seconds: Long, rawSignature: String): TextVersion {
+        val now = System.currentTimeMillis()
+        val version = TextVersion(
+            id = "${kind.name.lowercase()}-$now",
+            kind = kind,
+            model = model,
+            createdAtMillis = now,
+            seconds = seconds,
+            rawSignature = rawSignature,
+            expectedChunks = chunks.size,
+            complete = true,
+        )
+        chunksFile(version.id).writeText(chunks.joinToString("") { JSONArray().put(it).toString() + "\n" })
+        writeMeta(version)
+        return version
+    }
+
+    /** A cleanup job running on the Wombat Cleanup server for this scan. */
+    data class ServerJob(val jobId: String, val model: String, val submittedAtMillis: Long, val rawSignature: String, val total: Int)
+
+    var serverJob: ServerJob?
+        get() = readMeta().optJSONObject("serverJob")?.let {
+            ServerJob(it.optString("jobId"), it.optString("model"), it.optLong("submittedAtMillis"), it.optString("rawSignature"), it.optInt("total"))
+        }?.takeIf { it.jobId.isNotBlank() }
+        set(value) = updateMeta { meta ->
+            if (value == null) {
+                meta.remove("serverJob")
+            } else {
+                meta.put(
+                    "serverJob",
+                    JSONObject()
+                        .put("jobId", value.jobId)
+                        .put("model", value.model)
+                        .put("submittedAtMillis", value.submittedAtMillis)
+                        .put("rawSignature", value.rawSignature)
+                        .put("total", value.total),
+                )
+            }
+        }
+
+    /** The sentences sent for a server job (so the corrected ones can be put back into the text). */
+    fun saveServerPieces(jobId: String, json: String) = File(directory, "server-pieces-$jobId.json").writeText(json)
+
+    fun serverPieces(jobId: String): String? = File(directory, "server-pieces-$jobId.json").takeIf { it.exists() }?.readText()
+
+    fun deleteServerPieces(jobId: String) {
+        File(directory, "server-pieces-$jobId.json").delete()
+    }
+
+    /** Why the last server cleanup stopped, shown in Review until the next attempt. */
+    var serverJobError: String?
+        get() = readMeta().optString("serverJobError").ifBlank { null }
+        set(value) = updateMeta { if (value == null) it.remove("serverJobError") else it.put("serverJobError", value) }
 
     /** An unfinished AI run for the current raw text that can be continued. */
     fun resumableVersion(kind: VersionKind, model: String): TextVersion? =
@@ -409,7 +470,7 @@ class ScanWorkspace(
         const val DEVICE_ID = "device"
         val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
         // Bump when OcrCleanup's built-in fixes change, so device versions are regenerated.
-        const val DEVICE_CLEANUP_VERSION = 2
+        const val DEVICE_CLEANUP_VERSION = 5
     }
 }
 
@@ -498,8 +559,10 @@ object Workspaces {
     private var library: Library? = null
 
     @Synchronized
-    fun library(context: Context): Library =
-        library ?: Library(context.applicationContext.filesDir).also { library = it }
+    fun library(context: Context): Library {
+        SpellingDictionary.useAssets(context)
+        return library ?: Library(context.applicationContext.filesDir).also { library = it }
+    }
 
     fun test(context: Context): ScanWorkspace = library(context).test()
 

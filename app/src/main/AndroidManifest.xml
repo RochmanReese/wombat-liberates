@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Short buzz when a scan pauses to ask a question. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- "Cleanup finished" notifications from the background server check (asked for on first use). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Optional: turn on Do Not Disturb during a scan (the user grants this in Settings). -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 

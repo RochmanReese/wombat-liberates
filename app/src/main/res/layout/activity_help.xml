@@ -81,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="When a scan finishes, the review screen opens; you can reopen it any time by tapping the book in Your books. Text is cleaned on your phone automatically, including removing Kindle footer text, and given a quality rating. View, compare and save any version as text or EPUB. Pictures from the book are saved too and shown as thumbnails, where you can delete them or choose the cover; near the start of a new scan you are asked whether a picture is the cover. Only if the rating says the OCR is poor, set up Ollama under Advanced settings and tap Clean with Ollama on the review screen, then compare its changes before using it. Raw OCR is never changed."
+            android:text="When a scan finishes, the review screen opens; you can reopen it any time by tapping the book in Your books. Text is cleaned on your phone automatically, including removing Kindle footer text, and given a quality rating. View, compare and save any version as text or EPUB. Pictures from the book are saved too and shown as thumbnails, where you can delete them or choose the cover; near the start of a new scan you are asked whether a picture is the cover. To fix the remaining OCR slips (like &quot;er&quot; for &quot;her&quot;), tap Clean on server: the book is sent once to your Wombat Cleanup server, which proofreads it with AI while your phone is free, and you get a notification when the cleaned version is ready to compare. Add the server address and key under Advanced settings first. Raw OCR is never changed."
             android:textSize="16sp" />
 
         <TextView
@@ -111,7 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Screenshots are OCRed locally and discarded. Text remains on your phone unless you choose Ollama cleanup, which sends text only to the server you configure."
+            android:text="Screenshots are OCRed locally and discarded. Text remains on your phone unless you choose Clean on server, which sends the book only to your own Wombat Cleanup server and is deleted there once the phone downloads the result."
             android:textSize="16sp" />
 
         <Button

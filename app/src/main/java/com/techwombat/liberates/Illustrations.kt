@@ -19,7 +19,7 @@ object Illustrations {
 
     fun isMarker(text: String): Boolean = MARKER.matches(text.trim())
 
-    fun ids(text: String): List<String> = MARKER.findAll(text).map { it.groupValues[1] }.toList()
+    fun ids(text: String): List<String> = MARKER.matchesIn(text).map { it.groupValues[1] }
 
     /** Replaces markers with a short readable placeholder, for on-screen text views. */
     fun readable(text: String, coverId: String? = null): String =

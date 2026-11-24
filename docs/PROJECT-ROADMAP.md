@@ -19,6 +19,9 @@ The single source of truth for what's done, what's next, and what's parked. Arch
 - [x] Illustrations saved, cover question, thumbnails with delete/cover, pictures in EPUBs
 - [x] Calls pause the scan (no Back presses); notification banners waited out and spoiled captures
       retaken; optional Do Not Disturb while scanning
+- [x] Wombat Cleanup server (separate container, shared key) replaces phone→Ollama; background check
+- [x] On-device spelling correction (dictionary + the book's own words); AI only for doubtful sentences
+- [x] Chapters from the printed contents page or headings; contents page left out of the EPUB
 
 ## Now — confirm on the phone
 
@@ -31,15 +34,12 @@ The single source of truth for what's done, what's next, and what's parked. Arch
 - [ ] Dark / sepia Kindle theme test scan
 - [ ] Text and call during a scan: no banner text in the book, pause/resume in the log, no Back presses
 - [ ] Do Not Disturb setting: permission flow, on during scan, off afterwards
+- [ ] Spelling fixes and chapters on a real book; Clean on server with only doubtful sentences
 
 ## Next — candidates (not yet scoped)
 
-- **Server AI cleanup service** (agreed direction, not started): a separate container on
-  wombat-server beside Ollama; the phone uploads device-cleaned chunks once, the server works
-  through them and saves progress, the phone downloads the result later. Simple shared key for
-  access to start (no Zitadel until it proves worthwhile). Replaces the phone→Ollama path so the
-  phone is never tied up. Write a brief first.
-- Send the device-cleaned text (not raw) to AI cleanup, so Compare shows only AI changes.
+- Review: let the user edit the detected chapter list (rename, add, remove).
+- Tune spelling thresholds and chapter detection from more real books.
 
 - Tune picture/table/quality thresholds from real scan logs.
 - Editable AI cleanup prompt (so Ollama over-editing can be tightened from Review results).

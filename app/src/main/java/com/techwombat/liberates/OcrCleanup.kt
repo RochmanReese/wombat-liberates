@@ -1,13 +1,44 @@
 package com.techwombat.liberates
 
-/** Removes Kindle's footer/header text, applies built-in contextual OCR fixes, then ordered literal user rules. */
+/**
+ * Removes Kindle's footer/header text, applies built-in contextual OCR fixes, then ordered literal rules.
+ * Literal rules match whole words only: "mne => me" fixes "mne" but leaves "damned" alone.
+ */
 object OcrCleanup {
     fun clean(text: String, literalRules: List<OcrLiteralRule>): String {
         var cleaned = correctContextualPipes(KindleChrome.strip(text))
         literalRules.forEach { rule ->
-            cleaned = cleaned.replace(rule.find, rule.replace)
+            cleaned = replaceWholeWords(cleaned, rule.find, rule.replace)
         }
         return cleaned
+    }
+
+    /**
+     * Replaces [find] where it is not part of a longer word: if it starts (or ends) with a letter or
+     * digit, the character before (or after) it must not be one. Rules like "4| => “I" or ". => !"
+     * that start or end with punctuation still match anywhere on that side.
+     */
+    fun replaceWholeWords(text: String, find: String, replace: String): String {
+        if (find.isEmpty()) return text
+        val checkStart = find.first().isLetterOrDigit()
+        val checkEnd = find.last().isLetterOrDigit()
+        val out = StringBuilder(text.length)
+        var last = 0
+        var index = text.indexOf(find)
+        while (index >= 0) {
+            val end = index + find.length
+            val startOk = !checkStart || index == 0 || !text[index - 1].isLetterOrDigit()
+            val endOk = !checkEnd || end == text.length || !text[end].isLetterOrDigit()
+            if (startOk && endOk) {
+                out.append(text, last, index).append(replace)
+                last = end
+                index = text.indexOf(find, end)
+            } else {
+                index = text.indexOf(find, index + 1)
+            }
+        }
+        if (last == 0) return text
+        return out.append(text, last, text.length).toString()
     }
 
     private fun correctContextualPipes(text: String): String {

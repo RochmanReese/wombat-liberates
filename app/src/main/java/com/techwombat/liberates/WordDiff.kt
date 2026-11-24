@@ -11,9 +11,10 @@ object WordDiff {
     }
 
     const val PARAGRAPH = "\n\n"
+    private val TOKEN = Regex("\\n\\s*\\n|\\S+")
 
     fun tokenize(text: String): List<String> =
-        Regex("\\n\\s*\\n|\\S+").findAll(text.trim()).map { if (it.value.isBlank()) PARAGRAPH else it.value }.toList()
+        TOKEN.matchesIn(text.trim()).map { if (it.value.isBlank()) PARAGRAPH else it.value }
 
     fun diff(before: String, after: String): List<Piece> {
         val a = tokenize(before)

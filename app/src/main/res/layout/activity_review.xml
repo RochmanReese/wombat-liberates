@@ -87,6 +87,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:text="Chapters"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/chaptersSummaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Finding chapters…"
+                android:textSize="14sp" />
+            <TextView
+                android:id="@+id/chaptersListText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textIsSelectable="true"
+                android:textSize="14sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
                 android:text="Illustrations"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -211,11 +232,24 @@
                 android:layout_marginTop="4dp"
                 android:textSize="14sp" />
             <Button
-                android:id="@+id/ollamaButton"
+                android:id="@+id/serverCleanupButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Clean with Ollama" />
+                android:text="Clean on server" />
+            <TextView
+                android:id="@+id/serverStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp" />
+            <Button
+                android:id="@+id/serverCancelButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Cancel server cleanup"
+                android:visibility="gone" />
             <Button
                 android:id="@+id/geminiButton"
                 android:layout_width="match_parent"
@@ -246,7 +280,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="AI cleanup runs only while this screen is open. If it stops, tap the same button to continue where it left off. Ollama sends text only to the server in your Ollama settings."
+                android:text="Clean on server sends the device-cleaned text to your Wombat Cleanup server once and frees the phone: it checks back every 15 minutes and lets you know when the cleaned version is ready. On-device AI runs only while this screen is open; if it stops, tap it again to continue."
                 android:textSize="12sp" />
             <Button
                 android:id="@+id/closeReviewButton"

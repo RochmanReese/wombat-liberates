@@ -255,7 +255,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Scans a few pages, cleans them on your phone and opens the review screen, where you can view, save and compare the result, and try Ollama only if needed. Test text is kept separate and does not affect your book scan."
+                android:text="Scans a few pages, cleans them on your phone and opens the review screen, where you can view, save and compare the result, and try server AI cleanup only if needed. Test text is kept separate and does not affect your book scan."
                 android:textSize="12sp" />
 
             <EditText
@@ -339,60 +339,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Ollama connection"
+                android:text="Cleanup server (AI proofreading)"
 
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/ollamaBaseUrl"
+                android:id="@+id/cleanupServerUrl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Ollama HTTPS base URL"
+                android:hint="Cleanup server address"
                 android:inputType="textUri"
                 android:singleLine="true" />
 
             <EditText
-                android:id="@+id/ollamaModel"
+                android:id="@+id/cleanupServerKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Ollama model"
-                android:inputType="text"
-                android:singleLine="true"
-                android:text="mistral-nemo:latest" />
-
-            <EditText
-                android:id="@+id/ollamaUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Ollama username"
-                android:inputType="text"
-                android:singleLine="true" />
-
-            <EditText
-                android:id="@+id/ollamaPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Ollama password"
+                android:hint="Access key"
                 android:inputType="textPassword"
                 android:singleLine="true" />
 
             <Button
-                android:id="@+id/saveOllamaSettingsButton"
+                android:id="@+id/saveCleanupServerButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Save Ollama settings" />
+                android:text="Save and test connection" />
 
             <TextView
+                android:id="@+id/cleanupServerStatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Ollama is used only when you choose it on the review screen. The password is stored encrypted on this phone."
+                android:text="Your Wombat Cleanup server proofreads a whole book with AI while your phone is free. It is used only when you choose Clean on server in a book's review. The key is stored encrypted on this phone."
                 android:textSize="12sp" />
 
 

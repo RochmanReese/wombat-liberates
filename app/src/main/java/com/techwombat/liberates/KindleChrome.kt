@@ -44,6 +44,10 @@ object KindleChrome {
         "rate this book",
     )
     private const val END_SCREEN_MIN_PHRASES = 2
+    private val PERCENT_AT_END = Regex("""(\d{1,3})\s*/?\s*%$""")
+    private val PAGE_OF = Regex("""^(?i:page)\s+(\d+)\s+(?i:of)\s+(\d+)$""")
+    private val PARAGRAPH_BREAK = Regex("""\n\s*\n""")
+    private val REPEATED_SPACES = Regex("""[ \t]{2,}""")
 
     fun isChromeLine(line: String): Boolean {
         val text = line.trim()
@@ -53,10 +57,10 @@ object KindleChrome {
     /** Reading progress shown in the footer, e.g. "87%", "87/%", "Page 375 of 376 • 100%". */
     fun progressPercent(line: String): Int? {
         val text = line.trim()
-        Regex("""(\d{1,3})\s*/?\s*%$""").find(text)?.let { match ->
+        PERCENT_AT_END.find(text)?.let { match ->
             if (isChromeLine(text)) return match.groupValues[1].toInt().takeIf { it <= 100 }
         }
-        Regex("""^(?i:page)\s+(\d+)\s+(?i:of)\s+(\d+)$""").find(text)?.let { match ->
+        PAGE_OF.find(text)?.let { match ->
             val (page, total) = match.destructured
             if (total.toInt() > 0) return (page.toInt() * 100 / total.toInt()).coerceAtMost(100)
         }
@@ -73,10 +77,10 @@ object KindleChrome {
      * glued into real sentences (e.g. "18 mins left in book leather." becomes "leather.").
      */
     fun strip(text: String): String {
-        val paragraphs = text.split(Regex("""\n\s*\n""")).mapNotNull { paragraph ->
+        val paragraphs = text.split(PARAGRAPH_BREAK).mapNotNull { paragraph ->
             val lines = paragraph.lines().filterNot(::isChromeLine).map { line ->
                 INLINE_CHROME.fold(line) { current, pattern -> current.replace(pattern, " ") }
-                    .replace(Regex("""[ \t]{2,}"""), " ")
+                    .replace(REPEATED_SPACES, " ")
                     .trim()
             }.filter { it.isNotEmpty() }
             lines.joinToString("\n").takeIf { it.isNotBlank() }

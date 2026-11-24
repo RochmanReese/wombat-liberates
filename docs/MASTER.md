@@ -69,6 +69,10 @@ What the app now does (details in `PROJECT-ARCHITECTURE.md`):
 - **Ollama is optional**, run only from Review when the quality check suggests it.
 - **Calls and notifications**: a call pauses the scan (never presses Back); notification banners
   are waited out and spoiled captures retaken; optional Do Not Disturb while scanning.
+- **Spelling fixes on the phone** (no AI) during device cleanup; **Clean on server** sends only the
+  sentences still in doubt to the Wombat Cleanup service (`cleanup.wombatex.com`, gemma3:12b) and
+  notifies when done.
+- **Chapters** from the book's printed contents page (dropped from the text) or chapter headings.
 
 58 unit tests pass. Not yet confirmed on the phone: migration of the old single book into the
 library, saving to Documents, the full Review/thumbnail flow, picture-detection accuracy, the
@@ -76,9 +80,9 @@ table prompt, and link recovery via Back.
 
 ## Next Up
 
-1. Test the call/notification handling and the Do Not Disturb setting on the phone.
-2. Write the brief for the **server AI cleanup service** (separate container beside Ollama on
-   wombat-server, shared key, replaces phone→Ollama) — see Roadmap.
+1. Test on the phone: spelling fixes and chapters on a real book, Clean on server (doubtful
+   sentences only), calls/notifications and Do Not Disturb.
+2. Decide whether `wombat-cleanup` gets a GitHub repository (local git only so far).
 3. Short test scan with Kindle's **dark or sepia** page colour; work through the Roadmap's
    "confirm on the phone" list.
 

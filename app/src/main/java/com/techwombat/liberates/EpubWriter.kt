@@ -46,32 +46,30 @@ object EpubWriter {
     }
 
     private fun chaptersFrom(text: String): List<Chapter> {
-        val paragraphs = text.replace("\r\n", "\n")
+        val input = text.replace("\r\n", "\n")
             .split(Regex("\\n\\s*\\n"))
             .map(String::trim)
             .filter(String::isNotBlank)
-        if (paragraphs.isEmpty()) error("There is no text to export.")
+        if (input.isEmpty()) error("There is no text to export.")
+
+        val detection = ChapterDetector.detect(input)
+        if (detection.chapters.isEmpty()) return listOf(Chapter("Book", input))
+        val paragraphs = detection.paragraphs // inline headings split off, decorative first letters restored
+        // The printed contents page and the heading lines themselves are not body text.
+        val skipped = HashSet<Int>()
+        detection.contentsPage?.let { skipped.addAll(it) }
+        detection.chapters.forEach { chapter -> repeat(chapter.headingParagraphs) { skipped += chapter.paragraph + it } }
 
         val chapters = mutableListOf<Chapter>()
-        var currentTitle = "Book"
-        var currentParagraphs = mutableListOf<String>()
-        paragraphs.forEach { paragraph ->
-            if (isChapterHeading(paragraph)) {
-                if (currentParagraphs.isNotEmpty()) {
-                    chapters += Chapter(currentTitle, currentParagraphs)
-                    currentParagraphs = mutableListOf()
-                }
-                currentTitle = paragraph.replace(Regex("\\s+"), " ")
-            } else {
-                currentParagraphs += paragraph
-            }
+        val front = (0 until detection.chapters.first().paragraph).filterNot { it in skipped }.map { paragraphs[it] }
+        if (front.isNotEmpty()) chapters += Chapter("Front matter", front)
+        detection.chapters.forEachIndexed { index, chapter ->
+            val end = detection.chapters.getOrNull(index + 1)?.paragraph ?: paragraphs.size
+            val body = (chapter.paragraph until end).filterNot { it in skipped }.map { paragraphs[it] }
+            chapters += Chapter(chapter.title.replace(Regex("\\s+"), " "), body.ifEmpty { listOf(" ") })
         }
-        if (currentParagraphs.isNotEmpty()) chapters += Chapter(currentTitle, currentParagraphs)
-        return chapters.ifEmpty { listOf(Chapter("Book", paragraphs)) }
+        return chapters
     }
-
-    private fun isChapterHeading(value: String): Boolean =
-        value.length <= 100 && value.matches(Regex("(?i)^chapter\\s+(?:[0-9]+|[ivxlcdm]+|[a-z][a-z -]*)[.!: -]*$"))
 
     private fun titlePage(title: String, author: String): String = xhtml(
         "$title — Title page",

@@ -40,12 +40,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         renderOcrCorrections()
-        OllamaCredentialsStore.load(applicationContext)?.let { credentials ->
-            binding.ollamaBaseUrl.setText(credentials.baseUrl)
-            binding.ollamaModel.setText(credentials.model)
-            binding.ollamaUsername.setText(credentials.username)
-            binding.ollamaPassword.setText(credentials.password)
-        }
+        binding.cleanupServerUrl.setText(CleanupServerSettings.url(applicationContext))
+        CleanupServerSettings.load(applicationContext)?.let { binding.cleanupServerKey.setText(it.key) }
 
         binding.startButton.setOnClickListener {
             ProbeLog.start()
@@ -90,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.addOcrCorrectionButton.setOnClickListener { addOcrCorrection() }
         binding.resetOcrCorrectionsButton.setOnClickListener { confirmResetOcrCorrections() }
-        binding.saveOllamaSettingsButton.setOnClickListener { saveOllamaSettings() }
+        binding.saveCleanupServerButton.setOnClickListener { saveCleanupServer() }
         binding.tableModeGroup.check(
             when (ScanSettings.tableMode(this)) {
                 ScanSettings.TableMode.ASK -> R.id.tableModeAsk
@@ -126,6 +122,15 @@ class MainActivity : AppCompatActivity() {
         renderState()
         renderLibrary()
         renderDoNotDisturbStatus()
+        // Pick up server cleanups that finished while the app was closed, and keep checking if any are pending.
+        lifecycleScope.launch {
+            val pending = withContext(Dispatchers.IO) {
+                CleanupSync.checkAll(applicationContext).forEach { CleanupSync.notify(applicationContext, it) }
+                CleanupSync.pendingWorkspaces(applicationContext).isNotEmpty()
+            }
+            if (pending) CleanupSync.schedule(applicationContext)
+            renderLibrary()
+        }
     }
 
     private fun askForDoNotDisturbPermission() {
@@ -157,17 +162,35 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderLibrary() {
         lifecycleScope.launch {
-            val rows = withContext(Dispatchers.IO) {
-                val rules = currentRules()
-                library.books().map { book -> BookRow(book, book.qualitySummary(rules), book.isSavedEpubOutOfDate(rules), book.illustrationIds().size) }
-            }
+            binding.emptyLibraryText.text = "Loading books…"
+            binding.emptyLibraryText.visibility = View.VISIBLE
+            // Show the books straight away; the quality line needs the cleaned text, which can take
+            // several seconds per book the first time (e.g. after a spelling-fix update).
+            val books = withContext(Dispatchers.IO) { library.books() }
+            binding.emptyLibraryText.text = "No books yet. Start a Kindle scan or import a text file."
+            binding.emptyLibraryText.visibility = if (books.isEmpty()) View.VISIBLE else View.GONE
             binding.bookList.removeAllViews()
-            binding.emptyLibraryText.visibility = if (rows.isEmpty()) View.VISIBLE else View.GONE
-            rows.forEach { row -> binding.bookList.addView(bookButton(row)) }
+            val buttons = books.map { book ->
+                bookButton(BookRow(book, "Checking text…", false, 0)).also { binding.bookList.addView(it) }
+            }
+            val rules = withContext(Dispatchers.IO) { currentRules() }
+            books.zip(buttons).forEach { (book, button) ->
+                val row = withContext(Dispatchers.IO) {
+                    BookRow(book, book.qualitySummary(rules), book.isSavedEpubOutOfDate(rules), book.illustrationIds().size)
+                }
+                button.text = bookText(row)
+            }
         }
     }
 
-    private fun bookButton(row: BookRow): Button {
+    private fun bookButton(row: BookRow): Button = Button(this).apply {
+        isAllCaps = false
+        textAlignment = View.TEXT_ALIGNMENT_VIEW_START
+        text = bookText(row)
+        setOnClickListener { showBookActions(row.workspace) }
+    }
+
+    private fun bookText(row: BookRow): String {
         val book = row.workspace
         val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(book.lastActivityMillis()))
         val details = listOfNotNull(
@@ -183,12 +206,7 @@ class MainActivity : AppCompatActivity() {
             else -> "EPUB saved"
         }
         val quality = row.quality ?: "No text yet"
-        return Button(this).apply {
-            isAllCaps = false
-            textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-            text = "${BookExport.title(book)}\n$details\n$quality\n$epub"
-            setOnClickListener { showBookActions(book) }
-        }
+        return "${BookExport.title(book)}\n$details\n$quality\n$epub"
     }
 
     private fun showBookActions(book: ScanWorkspace) {
@@ -375,7 +393,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ---- OCR corrections and Ollama settings ----
+    // ---- OCR corrections and cleanup server settings ----
 
     private fun renderOcrCorrections() {
         val rules = OcrRulesStore.customRules(applicationContext)
@@ -431,7 +449,7 @@ class MainActivity : AppCompatActivity() {
     private fun confirmResetOcrCorrections() {
         AlertDialog.Builder(this)
             .setTitle("Reset custom corrections?")
-            .setMessage("This removes only your added OCR corrections and restores the defaults. Books, cleaned versions, diagnostics and Ollama settings are unchanged.")
+            .setMessage("This removes only your added OCR corrections and restores the defaults. Books, cleaned versions, diagnostics and cleanup server settings are unchanged.")
             .setPositiveButton("Reset") { _, _ ->
                 OcrRulesStore.resetToDefaults(applicationContext)
                 renderOcrCorrections()
@@ -441,17 +459,22 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun saveOllamaSettings() {
-        val baseUrl = binding.ollamaBaseUrl.text.toString().trim().trimEnd('/')
-        val model = binding.ollamaModel.text.toString().trim()
-        val username = binding.ollamaUsername.text.toString().trim()
-        val password = binding.ollamaPassword.text.toString()
-        if (!baseUrl.startsWith("https://") || model.isBlank() || username.isBlank() || password.isBlank()) {
-            binding.statusText.text = "Enter an HTTPS Ollama URL, model, username, and password."
+    private fun saveCleanupServer() {
+        val url = binding.cleanupServerUrl.text.toString().trim().trimEnd('/').ifBlank { CleanupServerSettings.DEFAULT_URL }
+        val key = binding.cleanupServerKey.text.toString().trim()
+        if (!url.startsWith("https://") || key.isBlank()) {
+            binding.cleanupServerStatusText.text = "Enter the server's https:// address and its access key."
             return
         }
-        OllamaCredentialsStore.save(applicationContext, OllamaCredentialsStore.Credentials(baseUrl, model, username, password))
-        binding.statusText.text = "Ollama settings saved. Use them from a book's review screen when device OCR is not good enough."
+        CleanupServerSettings.save(applicationContext, url, key)
+        binding.cleanupServerStatusText.text = "Saved. Testing the connection…"
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { runCatching { CleanupClient.test(CleanupServerSettings.Settings(url, key)) } }
+            binding.cleanupServerStatusText.text = result.fold(
+                onSuccess = { model -> "Connected. The server will proofread with $model. Use Clean on server in a book's review." },
+                onFailure = { "Saved, but the test failed: ${it.message ?: it.javaClass.simpleName}" },
+            )
+        }
     }
 
     private fun currentRules(): List<OcrLiteralRule> =

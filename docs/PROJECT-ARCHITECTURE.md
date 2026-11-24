@@ -14,7 +14,7 @@ covers why things are the way they are.
 | Platform | Android, Kotlin, View system with `viewBinding` | `minSdk 26`, `compileSdk`/`targetSdk 35`, Java 17. Scanning needs **Android 11+** (accessibility screenshots); saving to Documents needs **Android 10+** |
 | Kindle control | `AccessibilityService` | `canTakeScreenshot`, `canPerformGestures`, `canRetrieveWindowContent`; config in `res/xml/accessibility_probe_config.xml` |
 | OCR | Google ML Kit text recognition `16.0.1` (bundled model) | Fully offline; model ships inside the APK |
-| Optional AI cleanup | Ollama `/api/generate` over HTTPS (user's own server); ML Kit GenAI Prompt (Gemini Nano) `1.0.0-beta2` | Never on the main path; run from Review only |
+| Optional AI cleanup | Wombat Cleanup server (separate container beside Ollama, `gemma3:12b`, shared key); ML Kit GenAI Prompt (Gemini Nano) `1.0.0-beta2` | Never on the main path; run from Review only |
 | EPUB | Hand-written EPUB 3 writer (`EpubWriter.kt`) | Uncompressed `mimetype` first, nav + title page + chapters, images, cover |
 | Storage | App-private files + JSON; `SharedPreferences`; Android Keystore for the Ollama password; MediaStore for Documents | No database |
 | Tests | JUnit 4 on the JVM (`org.json` added for tests) | `./gradlew :app:testDebugUnitTest` — 58 tests |
@@ -31,12 +31,16 @@ covers why things are the way they are.
 | `OcrTextFiles.kt` | Raw OCR file per scan (append-only page joining, last-page memory) |
 | `OcrCleanup.kt`, `OcrRulesParser.kt`, `OcrRulesStore.kt` | Device cleanup: chrome strip → contextual `|` fixes → ordered literal rules (`assets/ocr-rules.txt` defaults + user rules) |
 | `OcrQuality.kt` | Offline quality score: share of words that look like OCR errors, with examples |
-| `TextCorrection.kt` | `TextChunker` (2,500-char paragraph chunks), shared AI prompt, `OllamaClient` |
+| `OcrSpelling.kt` | On-device spelling correction (no AI): SymSpell word/word-pair frequencies (`assets/spelling/`, MIT) plus the book's own vocabulary; joins broken words; `needsReview()` flags doubtful words for AI |
+| `ChapterDetector.kt` | Chapters from the printed contents page (matched in order to body headings; contents page dropped), else heading patterns; split "CHAPTER" / "TWELVE" headings joined |
+| `AiReviewSelection.kt` | Picks the sentences still containing doubtful words (typically ~5% of the text) for server AI, and merges corrected sentences back |
+| `CleanupServer.kt`, `KeystoreText.kt` | Wombat Cleanup client, settings (key Keystore-encrypted), background WorkManager check and notifications |
+| `TextCorrection.kt` | `TextChunker` (2,500-char paragraph chunks) and the on-device (Gemini Nano) prompt |
 | `WordDiff.kt` | Word-level diff for comparing versions |
 | `EpubWriter.kt`, `BookExport.kt` | EPUB building; saving to Documents; opening in a reader app via `FileProvider` |
 | `MainActivity.kt` | Main screen: scan/import, **Your books** library, Advanced settings (scan limit, tables, pictures, test scan, OCR corrections, Ollama, diagnostics) |
 | `ReviewActivity.kt` | Review screen for a book or the test scan |
-| `ScanSettings.kt`, `OllamaCredentialsStore.kt` | Preferences; Keystore-encrypted Ollama password |
+| `ScanSettings.kt` | Scan preferences |
 | `ScanDoNotDisturb.kt` | Optional Do Not Disturb (priority-only) for the length of a scan, restored afterwards and after a crash |
 | `ProbeLog.kt`, `PersistentProbeLog.kt` | Diagnostics shown in the app and written to `files/kindle-accessibility-probe.log` |
 | `HelpActivity.kt` | Help screen |
@@ -50,6 +54,7 @@ files/
     kindle-ocr-last-page.txt       last saved page (de-duplicates a continued scan)
     images/img-0001.jpg …          saved pictures; ids never reused
     versions/
+      server-pieces-<job>.json     sentences sent to the cleanup server (until merged)
       workspace.json               title, author, scan summary, preferred version, cover, saved EPUB, quality cache, picture counter
       device.meta.json / .chunks.jsonl        device cleanup (regenerated automatically)
       ollama-<millis>.meta.json / .chunks.jsonl   one per AI run (also gemini-…)
@@ -57,7 +62,7 @@ files/
   ocr-rules.txt                    editable cleanup rules (seeded from assets)
   kindle-accessibility-probe.log   diagnostics (contains book text — never commit)
 cache/shared-epubs/                temporary EPUBs handed to reader apps
-SharedPreferences: scan_settings (table_mode, save_illustrations, dnd_while_scanning, dnd_set_by_scan), ollama_connection
+SharedPreferences: scan_settings (table_mode, save_illustrations, dnd_while_scanning, dnd_set_by_scan), cleanup_server (url, Keystore-encrypted key)
 Documents/Wombat Liberates/<Title>.epub   saved EPUBs (MediaStore; survive app deletion)
 ```
 
@@ -119,7 +124,11 @@ screenshot, with a short buzz to get attention.
 ## After the Scan
 
 - **Device cleanup** (automatic, regenerated whenever raw text, rules or cleanup code change):
-  Kindle chrome strip → contextual `|` fixes (`|` → I/l by context) → ordered literal rules.
+  Kindle chrome strip → contextual `|` fixes (`|` → I/l by context) → ordered literal rules →
+  **spelling correction** (`OcrSpelling`): only OCR-style edits (missing/extra/swapped or look-alike
+  letters), stray capitals, missing apostrophes, broken words joined, real-word slips like "er"→"her"
+  only when both neighbouring words strongly agree; names and words the book uses regularly are kept.
+  ~2 s for 660k words; ~90 changes per 41k words on a real scan, nearly all correct.
   Rules: defaults in `assets/ocr-rules.txt`, user additions in Advanced settings.
 - **Quality check** on the device version: share of suspicious words (odd symbols, letter/digit
   mixes, "yOur"-style capitals, stray single letters; names like "WillCo" and picture markers are
@@ -130,7 +139,11 @@ screenshot, with a short buzz to get attention.
   thumbnails (view larger, use as cover, delete), compare any two versions (red removed / green
   added, warning if a chunk changed > 20%), and **Improve with AI** (Ollama or Gemini Nano;
   resumable; markers restored if the model drops them).
-- **EPUB**: chapters from headings like "CHAPTER SIX", paragraphs, single newlines as line
+- **Server AI cleanup** (Wombat Cleanup, `~/repos/wombat-cleanup`): only sentences with words
+  `OcrSpelling.needsReview()` still doubts are uploaded (about 5% of a book); the server proofreads
+  them with `gemma3:12b` and the phone merges plausible corrections back as a "Server AI" version.
+  A WorkManager check every 15 min downloads results and notifies; the job is deleted from the server.
+- **EPUB**: chapters from `ChapterDetector` (printed contents page, else headings), paragraphs, single newlines as line
   breaks (table rows), pictures as figures, the chosen cover as the EPUB cover (not repeated
   inside), deleted pictures dropped. Saved to `Documents/Wombat Liberates/<Title>.epub`,
   overwriting the book's previous file; flagged out of date when text, version choice, pictures

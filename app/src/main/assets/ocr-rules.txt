@@ -1,6 +1,7 @@
 # Wombat Liberates OCR rules
 #
 # One literal correction per line: find => replace
+# Rules match whole words only ("mne => me" leaves "damned" alone).
 # Lines beginning with # are notes. Apply these after the built-in contextual pipe rules.
 
 # Pipe / capital-I OCR errors

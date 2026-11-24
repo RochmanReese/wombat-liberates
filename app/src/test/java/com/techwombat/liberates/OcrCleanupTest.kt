@@ -47,6 +47,13 @@ class OcrCleanupTest {
     }
 
     @Test
+    fun `literal rules only match whole words`() {
+        assertEquals("She'd be damned if it came to me.", OcrCleanup.clean("She'd be damned if it camne to mne.", defaultRules))
+        assertEquals("a candidate, painfully", OcrCleanup.clean("a candidate, painfully", defaultRules))
+        assertEquals("“I said", OcrCleanup.clean("4| said", defaultRules))
+    }
+
+    @Test
     fun `cleanup does not mutate the raw input`() {
         val raw = "As | told Councilman"
 

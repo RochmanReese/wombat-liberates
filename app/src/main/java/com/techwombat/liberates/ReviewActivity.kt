@@ -1,6 +1,8 @@
 package com.techwombat.liberates
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -75,7 +77,8 @@ class ReviewActivity : AppCompatActivity() {
         binding.viewerPreviousButton.setOnClickListener { showViewerPage(viewerPage - 1) }
         binding.viewerNextButton.setOnClickListener { showViewerPage(viewerPage + 1) }
         binding.viewerCloseButton.setOnClickListener { binding.viewerSection.visibility = View.GONE }
-        binding.ollamaButton.setOnClickListener { startOllama() }
+        binding.serverCleanupButton.setOnClickListener { onServerCleanupButton() }
+        binding.serverCancelButton.setOnClickListener { confirmCancelServerCleanup() }
         binding.geminiButton.setOnClickListener { startGemini() }
         binding.aiStopButton.setOnClickListener { aiJob?.cancel() }
 
@@ -129,6 +132,7 @@ class ReviewActivity : AppCompatActivity() {
             renderVersions()
             renderSavedEpub()
             renderIllustrations()
+            renderChapters()
             renderCompareChoices()
             renderImproveSection()
         }
@@ -142,7 +146,7 @@ class ReviewActivity : AppCompatActivity() {
         binding.qualityText.text = "No text to check."
         binding.versionsList.removeAllViews()
         binding.compareButton.isEnabled = false
-        binding.ollamaButton.isEnabled = false
+        binding.serverCleanupButton.isEnabled = false
         binding.geminiButton.isEnabled = false
         binding.improveAdviceText.text = ""
     }
@@ -221,6 +225,27 @@ class ReviewActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    // ---- Chapters ----
+
+    /** Shows the chapters the EPUB will get, found in the version chosen for the EPUB. */
+    private fun renderChapters() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.Default) {
+                val version = workspace.preferredVersion(currentRules()) ?: return@withContext null
+                val paragraphs = workspace.text(version).split(Regex("\\n\\s*\\n")).map { it.trim() }.filter { it.isNotEmpty() }
+                ChapterDetector.detect(paragraphs)
+            }
+            if (result == null) {
+                binding.chaptersSummaryText.text = "No text yet."
+                binding.chaptersListText.text = ""
+                return@launch
+            }
+            binding.chaptersSummaryText.text = ChapterDetector.describe(result)
+            binding.chaptersListText.text = result.chapters.take(MAX_CHAPTERS_SHOWN).joinToString("\n") { it.title } +
+                if (result.chapters.size > MAX_CHAPTERS_SHOWN) "\n… and ${result.chapters.size - MAX_CHAPTERS_SHOWN} more" else ""
+        }
     }
 
     // ---- Illustrations ----
@@ -444,41 +469,146 @@ class ReviewActivity : AppCompatActivity() {
     private fun renderImproveSection() {
         val report = qualityReport
         binding.improveAdviceText.text = when (report?.level) {
-            OcrQuality.Level.POOR -> "Device OCR looks poor for this scan. Ollama cleanup is recommended: compare the result with device cleanup before using it."
-            OcrQuality.Level.FAIR -> "Device OCR has a few problems. Adding your own OCR corrections may be enough; use Ollama only if they are not."
+            OcrQuality.Level.POOR -> "Device OCR looks poor for this scan. Server AI cleanup is recommended: compare the result with device cleanup before using it."
+            OcrQuality.Level.FAIR -> "Device OCR has a few problems. Server AI cleanup can fix slips like \"er\" for \"her\"; compare before using it."
             OcrQuality.Level.GOOD -> "Device OCR looks good. AI cleanup is probably not needed."
             null -> ""
         }
-        val credentials = OllamaCredentialsStore.load(applicationContext)
-        binding.ollamaButton.isEnabled = true
         binding.geminiButton.isEnabled = true
-        binding.ollamaButton.text = if (credentials == null) {
-            "Clean with Ollama (set up in Advanced settings first)"
-        } else {
-            val resumable = workspace.resumableVersion(VersionKind.OLLAMA, credentials.model)
-            if (resumable != null) {
-                "Continue Ollama cleanup (${workspace.chunkCount(resumable)} of ${resumable.expectedChunks} done)"
-            } else {
-                "Clean with Ollama (${credentials.model})"
-            }
-        }
         val geminiResumable = workspace.resumableVersion(VersionKind.GEMINI, GEMINI_MODEL_LABEL)
         binding.geminiButton.text = if (geminiResumable != null) {
             "Continue on-device AI cleanup (${workspace.chunkCount(geminiResumable)} of ${geminiResumable.expectedChunks} done)"
         } else {
             "Clean with on-device AI (Gemini Nano)"
         }
+        renderServerCleanup()
     }
 
-    private fun startOllama() {
-        val credentials = OllamaCredentialsStore.load(applicationContext)
-        if (credentials == null || !credentials.baseUrl.startsWith("https://") || credentials.model.isBlank()) {
-            binding.aiProgressText.text = "Ollama is not set up. Enter an HTTPS URL, model, username and password under Ollama connection in Advanced settings, then tap Save Ollama settings."
+    // ---- Server AI cleanup (Wombat Cleanup) ----
+
+    private var serverPollJob: Job? = null
+    private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    /** Shows the server job's state; while a job is pending, checks it every 15 seconds. */
+    private fun renderServerCleanup(status: CleanupClient.JobStatus? = null) {
+        val job = workspace.serverJob
+        binding.serverCleanupButton.isEnabled = true
+        if (job == null) {
+            serverPollJob?.cancel()
+            serverPollJob = null
+            binding.serverCancelButton.visibility = View.GONE
+            binding.serverCleanupButton.text = if (CleanupServerSettings.load(applicationContext) == null) {
+                "Clean on server (add the server key in Advanced settings first)"
+            } else {
+                "Clean on server"
+            }
+            binding.serverStatusText.text = workspace.serverJobError?.let { "Last server cleanup stopped: $it" }.orEmpty()
             return
         }
-        runAiCleanup(VersionKind.OLLAMA, credentials.model) { chunk ->
-            withContext(Dispatchers.IO) { OllamaClient.correct(credentials, chunk) }
+        binding.serverCancelButton.visibility = View.VISIBLE
+        binding.serverCleanupButton.text = "Check server progress now"
+        binding.serverStatusText.text = status?.let { describeServerStatus(it) }
+            ?: "Sent ${job.total} doubtful sentences to the cleanup server (${job.model}). Your phone is free: you'll get a notification when it's ready."
+        if (serverPollJob?.isActive != true) {
+            serverPollJob = lifecycleScope.launch {
+                while (true) {
+                    checkServerJob(quiet = true)
+                    if (workspace.serverJob == null) break
+                    kotlinx.coroutines.delay(SERVER_POLL_MS)
+                }
+            }
         }
+    }
+
+    private fun describeServerStatus(status: CleanupClient.JobStatus): String {
+        val eta = status.etaSeconds?.let { seconds ->
+            when {
+                seconds < 90 -> ", about a minute left"
+                seconds < 3600 -> ", about ${seconds / 60} min left"
+                else -> ", about ${seconds / 3600} h ${(seconds % 3600) / 60} min left"
+            }
+        }.orEmpty()
+        return when (status.status) {
+            "queued" -> if ((status.queuePosition ?: 0) > 0) "Waiting on the server behind ${status.queuePosition} other book(s)$eta." else "Starting on the server…"
+            "running" -> "Checking doubtful sentences on server (${status.model}): ${status.done} of ${status.total}$eta. Your phone is free."
+            else -> status.status
+        }
+    }
+
+    private fun onServerCleanupButton() {
+        if (workspace.serverJob != null) {
+            lifecycleScope.launch { checkServerJob(quiet = false) }
+            return
+        }
+        val settings = CleanupServerSettings.load(applicationContext)
+        if (settings == null) {
+            binding.serverStatusText.text = "Add the cleanup server's address and access key under Advanced settings → Cleanup server first."
+            return
+        }
+        if (aiJob?.isActive == true) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        binding.serverCleanupButton.isEnabled = false
+        binding.serverStatusText.text = "Uploading to the cleanup server…"
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val device = workspace.ensureDeviceVersion(currentRules()) ?: error("This book has no text yet.")
+                    val chunks = workspace.chunks(device)
+                    // Send only the sentences that still contain a doubtful word after the phone's own fixes.
+                    val spelling = SpellingDictionary.get()?.let { OcrSpelling(it, chunks.joinToString("\n\n")) }
+                    val pieces = AiReviewSelection.select(chunks) { word -> spelling?.needsReview(word) ?: OcrQuality.isSuspicious(word) }
+                    if (pieces.isEmpty()) return@runCatching 0
+                    val (jobId, model) = CleanupClient.submit(settings, BookExport.title(workspace), pieces.map { it.text })
+                    workspace.saveServerPieces(jobId, AiReviewSelection.toJson(pieces))
+                    workspace.serverJob = ScanWorkspace.ServerJob(jobId, model, System.currentTimeMillis(), device.rawSignature, pieces.size)
+                    workspace.serverJobError = null
+                    pieces.size
+                }
+            }
+            binding.serverCleanupButton.isEnabled = true
+            result.onSuccess { count ->
+                if (count == 0) {
+                    binding.serverStatusText.text = "Nothing doubtful is left: the phone's own spelling fixes covered this book."
+                } else {
+                    CleanupSync.schedule(applicationContext)
+                    renderServerCleanup()
+                }
+            }.onFailure { binding.serverStatusText.text = "Could not send to the cleanup server: ${it.message ?: it.javaClass.simpleName}" }
+        }
+    }
+
+    /** Asks the server for progress; downloads and saves the result when it's finished. */
+    private suspend fun checkServerJob(quiet: Boolean) {
+        val outcome = withContext(Dispatchers.IO) { runCatching { CleanupSync.check(applicationContext, workspace) } }
+        outcome.onSuccess { result ->
+            when (result) {
+                is CleanupSync.Outcome.Running -> renderServerCleanup(result.status)
+                is CleanupSync.Outcome.Finished -> {
+                    Toast.makeText(this, "${result.version.label} is ready", Toast.LENGTH_LONG).show()
+                    refresh()
+                }
+                is CleanupSync.Outcome.Failed -> refresh()
+                null -> renderServerCleanup()
+            }
+        }.onFailure {
+            if (!quiet) binding.serverStatusText.text = "Could not check the cleanup server: ${it.message ?: it.javaClass.simpleName}"
+        }
+    }
+
+    private fun confirmCancelServerCleanup() {
+        val job = workspace.serverJob ?: return
+        AlertDialog.Builder(this)
+            .setTitle("Cancel server cleanup?")
+            .setMessage("The server stops working on this book and deletes its copy of the text. Your versions on the phone are not affected.")
+            .setPositiveButton("Cancel cleanup") { _, _ ->
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) { CleanupServerSettings.load(applicationContext)?.let { CleanupClient.delete(it, job.jobId) } }
+                    workspace.serverJob = null
+                    renderServerCleanup()
+                }
+            }
+            .setNegativeButton("Keep going", null)
+            .show()
     }
 
     private fun startGemini() {
@@ -507,7 +637,10 @@ class ReviewActivity : AppCompatActivity() {
         if (aiJob?.isActive == true) return
         setAiRunning(true)
         aiJob = lifecycleScope.launch {
-            val rawChunks = withContext(Dispatchers.IO) { workspace.rawChunks() }
+            // Start from the device-cleaned text (rules and footer removal already applied); it lines up with raw.
+            val rawChunks = withContext(Dispatchers.IO) {
+                workspace.ensureDeviceVersion(currentRules())?.let { workspace.chunks(it) } ?: workspace.rawChunks()
+            }
             var version = withContext(Dispatchers.IO) {
                 workspace.resumableVersion(kind, model)?.takeIf { it.expectedChunks == rawChunks.size }
                     ?: workspace.startAiVersion(kind, model, rawChunks.size)
@@ -552,7 +685,7 @@ class ReviewActivity : AppCompatActivity() {
     private fun setAiRunning(running: Boolean) {
         binding.aiProgressBar.visibility = if (running) View.VISIBLE else View.GONE
         binding.aiStopButton.visibility = if (running) View.VISIBLE else View.GONE
-        binding.ollamaButton.isEnabled = !running
+        binding.serverCleanupButton.isEnabled = !running
         binding.geminiButton.isEnabled = !running
     }
 
@@ -630,6 +763,8 @@ class ReviewActivity : AppCompatActivity() {
         private const val MAX_SHOWN_PARAGRAPHS = 300
         private const val HEAVY_CHANGE_FRACTION = 0.2
         private const val GEMINI_MODEL_LABEL = "on-device"
+        private const val SERVER_POLL_MS = 15_000L
+        private const val MAX_CHAPTERS_SHOWN = 60
         private val REMOVED_COLOR = Color.argb(0x66, 0xE5, 0x39, 0x35)
         private val ADDED_COLOR = Color.argb(0x66, 0x43, 0xA0, 0x47)
 

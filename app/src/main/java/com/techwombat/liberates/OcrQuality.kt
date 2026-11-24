@@ -2,13 +2,13 @@ package com.techwombat.liberates
 
 /**
  * Rough, offline estimate of OCR quality: the share of words that look like recognition errors.
- * Used to suggest Ollama only when device OCR plus local cleanup is not good enough.
+ * Used to suggest AI cleanup only when device OCR plus local cleanup is not good enough.
  */
 object OcrQuality {
     enum class Level(val heading: String) {
         GOOD("Looks good"),
         FAIR("A few problems"),
-        POOR("Poor: Ollama cleanup recommended"),
+        POOR("Poor: AI cleanup recommended"),
     }
 
     data class Report(
@@ -35,9 +35,10 @@ object OcrQuality {
     private val SINGLE_LETTER_WORDS = setOf("a", "A", "I", "O")
     private val NUMBER_WITH_SUFFIX = Regex("^\\d+(st|nd|rd|th|s|am|pm|AM|PM|km|kg|cm|mm|m)?$")
     private val LOWER_UPPER_LOWER = Regex("[a-z][A-Z][a-z]")
+    private val NON_SPACE = Regex("\\S+")
 
     fun assess(text: String): Report {
-        val tokens = Regex("\\S+").findAll(text).map { it.value }.filterNot { it.startsWith("[[image:") }.toList()
+        val tokens = NON_SPACE.matchesIn(text).map { it.value }.filterNot { it.startsWith("[[image:") }
         val counts = linkedMapOf<String, Int>()
         tokens.forEach { token ->
             if (isSuspicious(token)) {
