@@ -1,6 +1,19 @@
 # Session log
+- Prepared `handover.md` for the next agent: integrate the standalone `OCR-rules` template into an editable, app-private OCR rules system; preserve raw OCR, keep contextual pipe handling built in, add user add/delete/reset controls, and validate against synthetic cases plus the untracked `rawtext1.txt` sample.
+- Working rule: do not use complex shell-inline edits for Kotlin or XML. Make one validated file change at a time, inspect its diff, build immediately, and restore promptly on any failure.
 
 Add each session summary immediately below this heading so the newest entry remains first.
+
+## 2026-11-24 — Whole-book scanning, review screen, optional Ollama, tables
+
+- Removed the 1,000-screen cap: scans run until Kindle reaches the end (an optional screen limit remains). Scan logs confirmed the table book had simply hit the old cap at 87%.
+- Blank/picture pages are skipped instead of stopping the scan; Continue scan resumes without duplicating the last page; raw OCR is appended instead of rewriting the whole file.
+- Kindle footer/header text ("mins left in book", "Page X of Y", "Location…", percentages, "Back to", "Aa") is removed by screen position and patterns; device cleanup also strips it from existing scans (about 3,800 fragments down to 8 on the 5,233-page log).
+- Page-turn recovery: tap, swipe, lower tap, then finish if Kindle showed 99–100% or pause with an on-screen question. Kindle's end-of-book screen ends the scan without being saved. Interrupted gestures are retried.
+- Tables are detected from side-by-side OCR lines and read row by row; new Pages with tables setting (Ask / Keep / Skip) with a buzz and Keep/Skip panel over Kindle.
+- Every scan (book and separate test scan) now has versions: Raw, Device cleanup (automatic), and any Ollama or Gemini Nano runs, saved chunk by chunk so AI runs can be continued. New Review screen: OCR quality rating with most common suspect words, paged viewer, red/green comparison of any two versions with a rewrite warning, save as text/EPUB, Open in EPUB reader, choose the version used for Create EPUB.
+- Ollama is optional and only runs when chosen on the Review screen; settings have their own Save button. Help updated to match.
+- Unit tests: 49 passing (text store, workspace versions, quality scorer, diff, Kindle chrome, page layout).
 - Finalised and user-tested the app: the streamlined Kindle scan → Ollama cleanup → EPUB workflow, Help guidance, whole-book safety limit, Calibre-compatible EPUB output with paragraph spacing, wombat banner/adaptive launcher icon, and clearer accessibility instructions are all working as intended.
 
 - Expanded Help with clear scan-time requirements: Kindle must remain open in the foreground, the phone should not be used for anything else, and long books may take five to ten minutes; charging and scanning during idle time are recommended.

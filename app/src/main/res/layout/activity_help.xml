@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Tap Start Kindle scan, then open Kindle at the first page you want. Leave Kindle in the foreground until the scan finishes or you tap Stop scan. You can also import an existing text file instead."
+            android:text="Tap Start Kindle scan, then open Kindle at the first page you want. The scan stops by itself at the end of the book. If a scan stopped early, tap Start Kindle scan again and choose Continue scan. To check everything works first, run a short Test scan from Advanced settings. You can also import an existing text file instead."
             android:textSize="16sp" />
 
         <TextView
@@ -66,14 +66,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="A long book can take five to ten minutes. It is best to connect your phone to power, start the scan when you do not need the phone, and leave Kindle on screen until it finishes."
+            android:text="Each screen takes about 1.5 seconds, so a long book can take 30 minutes or more. Connect your phone to power and leave Kindle on screen. If Kindle will not turn a page, or a page looks like a table, the phone buzzes and a small panel asks what to do. Set Pages with tables to Keep or Skip in Advanced settings for unattended scans."
             android:textSize="16sp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="2. Clean text"
+            android:text="2. Review and improve"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -81,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Set up your Ollama server once under Advanced settings, then tap Clean OCR with Ollama. Raw OCR is always kept unchanged; cleanup is saved separately."
+            android:text="When a scan finishes, the review screen opens. Text is cleaned on your phone automatically, including removing Kindle footer text, and given a quality rating. View, compare and save any version as text or EPUB. Only if the rating says the OCR is poor, set up Ollama under Advanced settings and tap Clean with Ollama on the review screen, then compare its changes before using it. Raw OCR is never changed."
             android:textSize="16sp" />
 
         <TextView
@@ -96,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Enter a title and author, then create an EPUB. Cleaned text is used when available. Headings such as CHAPTER SIX become entries in the table of contents."
+            android:text="Enter a title and author, then create an EPUB. It uses the version chosen in Review (device cleanup unless you pick another). Headings such as CHAPTER SIX become entries in the table of contents. Open in EPUB reader on the review screen sends a book straight to your reader app."
             android:textSize="16sp" />
 
         <TextView

@@ -109,39 +109,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="2. Clean text"
+            android:text="2. Review and improve"
             android:textSize="20sp"
             android:textStyle="bold" />
 
-
-        <Button
-            android:id="@+id/quickLocalCleanupButton"
+        <TextView
+            android:id="@+id/bookQualityText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Quick local cleanup" />
+            android:text="No book text yet."
+            android:textSize="14sp" />
 
         <Button
-            android:id="@+id/correctOllamaButton"
+            android:id="@+id/reviewBookButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Clean OCR with Ollama" />
-
-        <ProgressBar
-            android:id="@+id/correctionProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:visibility="gone" />
+            android:text="Review, compare and save" />
 
         <TextView
-            android:id="@+id/correctionProgressText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="No correction running."
+            android:text="Text is cleaned on your phone automatically. Ollama is optional and only needed if the quality check says the OCR is poor."
             android:textSize="12sp" />
 
 
@@ -183,7 +174,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Uses cleaned text when available; chapter headings become the contents list."
+            android:text="Uses the version chosen in Review (device cleanup unless you pick another). Chapter headings become the contents list."
             android:textSize="12sp" />
 
 
@@ -215,17 +206,93 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Maximum screens (safety limit)"
+                android:hint="Maximum screens (blank = whole book)"
                 android:inputType="number"
-                android:singleLine="true"
-                android:text="1000" />
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="The app normally stops at the end of a book. Leave this at 1,000 unless you want to capture only part of one."
+                android:text="The app stops by itself at the end of a book. Leave this blank unless you want to capture only part of one."
                 android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Pages with tables"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/tableModeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/tableModeAsk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ask me (the scan pauses on each table)" />
+
+                <RadioButton
+                    android:id="@+id/tableModeKeep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Always keep table text" />
+
+                <RadioButton
+                    android:id="@+id/tableModeSkip"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Always skip tables" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Tables are read row by row. Choose Keep or Skip to leave a long scan running unattended."
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Test scan"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Scans a few pages, cleans them on your phone and opens the review screen, where you can view, save and compare the result, and try Ollama only if needed. Test text is kept separate and does not affect your book scan."
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/testPageCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Test screens (10 to 100)"
+                android:inputType="number"
+                android:singleLine="true"
+                android:text="20" />
+
+            <Button
+                android:id="@+id/startTestScanButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start test scan" />
+
+            <Button
+                android:id="@+id/viewTestResultsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View last test results" />
 
 
             <TextView
@@ -329,17 +396,17 @@
                 android:singleLine="true" />
 
             <Button
-                android:id="@+id/correctOnDeviceButton"
+                android:id="@+id/saveOllamaSettingsButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Try on-device correction" />
+                android:text="Save Ollama settings" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="On-device correction needs a compatible Gemini Nano phone. Ollama settings remain encrypted on this phone."
+                android:text="Ollama is used only when you choose it on the review screen. The password is stored encrypted on this phone."
                 android:textSize="12sp" />
 
 
@@ -382,13 +449,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Save raw OCR text" />
-
-            <Button
-                android:id="@+id/saveCorrectedTextButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Save cleaned OCR text" />
 
             <Button
                 android:id="@+id/clearLogButton"

@@ -1,0 +1,20 @@
+package com.techwombat.liberates
+
+import android.content.Context
+
+/** Scan preferences shared by the main screen and the scanning service. */
+object ScanSettings {
+    private const val PREFERENCES_NAME = "scan_settings"
+    private const val TABLE_MODE = "table_mode"
+
+    /** What to do with pages that look like tables. */
+    enum class TableMode { ASK, KEEP, SKIP }
+
+    fun tableMode(context: Context): TableMode =
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getString(TABLE_MODE, null)
+            ?.let { runCatching { TableMode.valueOf(it) }.getOrNull() } ?: TableMode.ASK
+
+    fun setTableMode(context: Context, mode: TableMode) {
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().putString(TABLE_MODE, mode.name).apply()
+    }
+}

@@ -1,9 +1,9 @@
 package com.techwombat.liberates
 
-/** Applies built-in contextual OCR fixes followed by ordered literal user rules. */
+/** Removes Kindle's footer/header text, applies built-in contextual OCR fixes, then ordered literal user rules. */
 object OcrCleanup {
     fun clean(text: String, literalRules: List<OcrLiteralRule>): String {
-        var cleaned = correctContextualPipes(text)
+        var cleaned = correctContextualPipes(KindleChrome.strip(text))
         literalRules.forEach { rule ->
             cleaned = cleaned.replace(rule.find, rule.replace)
         }
