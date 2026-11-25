@@ -11,7 +11,7 @@ covers why things are the way they are.
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Platform | Android, Kotlin, View system with `viewBinding` | `minSdk 26`, `compileSdk`/`targetSdk 35`, Java 17. Scanning needs **Android 11+** (accessibility screenshots); saving to Documents needs **Android 10+** |
+| Platform | Android, Kotlin, View system with `viewBinding` | `minSdk 30` (**Android 11+**, the first version with accessibility screenshots, which scanning needs; Android won't install it on older phones), `compileSdk`/`targetSdk 35`, Java 17 |
 | Kindle control | `AccessibilityService` | `canTakeScreenshot`, `canPerformGestures`, `canRetrieveWindowContent`; config in `res/xml/accessibility_probe_config.xml` |
 | OCR | Google ML Kit text recognition `16.0.1` (bundled model) | Fully offline; model ships inside the APK |
 | Optional AI cleanup | Wombat Cleanup server (separate container beside Ollama, `gemma3:12b`, shared key); ML Kit GenAI Prompt (Gemini Nano) `1.0.0-beta2` | Never on the main path; run from Review only |

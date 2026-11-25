@@ -28,6 +28,9 @@ object ChapterDetector {
     private const val MAX_STRAY_LINES = 3
     private const val MAX_GLUED_LINE_WORDS = 5
     private const val OPENER_WEIGHT = 4
+    private const val MIN_PROSE_PARAGRAPH_WORDS = 12
+    private const val MIN_PROSE_WORDS = 30
+    private const val MIN_TRAILING_SPLIT_WORDS = 5
 
     private val NUMBER_WORDS = listOf(
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen",
@@ -38,6 +41,8 @@ object ChapterDetector {
     private val CHAPTER_HEADING = Regex("(?i)^(?:chapter|ch\\.)\\s+$NUMBER\\b[\\s:.\\-–—]*(.*)$")
     private val NAMED_SECTION = Regex("(?i)^(?:prologue|epilogue|interlude|foreword|preface|introduction|afterword|part\\s+$NUMBER)\\b.{0,60}$")
     private val BARE_NUMBER = Regex("(?i)^$NUMBER$")
+    private val TRAILING_CHAPTER_HEADING = Regex("(?is)^(.*\\S)\\s+(chapter\\s+$NUMBER|prologue|epilogue|afterword|interlude)$")
+    private val PARAGRAPH_BREAK = Regex("\\n\\s*\\n")
     private val CONTENTS_HEADING = Regex("(?i)^(?:table of )?contents$")
     private val CHAPTER_OR_PART = Regex("(?i)^(?:chapter|part)$")
     private val LETTERS_AND_DIGITS = Regex("[A-Za-z0-9]+")
@@ -49,15 +54,73 @@ object ChapterDetector {
     private val LEADING_NUMBER = Regex("^\\d{1,3}\\s+")
     private val TRAILING_NUMBER = Regex("\\s+\\d{1,3}$")
 
+    /**
+     * During a scan: does this screen open a chapter? True when the screen starts with a chapter heading
+     * (CHAPTER ONE, Chapter 3: Title, Prologue, Part Two, or a bare number) followed by real prose. The prose
+     * requirement keeps a contents page ("Chapter 7 ... Chapter 8 ...") and title pages from counting.
+     */
+    fun isChapterStartPage(pageText: String): Boolean {
+        val paragraphs = pageText.split(PARAGRAPH_BREAK).map { it.trim() }
+            .filter { it.isNotEmpty() && !Illustrations.isMarker(it) }
+        val headingParagraphs = leadingHeadingParagraphs(paragraphs)
+        if (headingParagraphs == 0) return false
+        val prose = paragraphs.drop(headingParagraphs)
+        return prose.any { wordCount(it) >= MIN_PROSE_PARAGRAPH_WORDS } && prose.sumOf { wordCount(it) } >= MIN_PROSE_WORDS
+    }
+
+    /** Does this page start with a chapter heading line? Used when joining pages, so a heading is never glued on. */
+    fun startsWithHeading(pageText: String): Boolean =
+        leadingHeadingParagraphs(pageText.trim().split(PARAGRAPH_BREAK).map { it.trim() }.filter { it.isNotEmpty() }) > 0
+
+    /** How many paragraphs at the start are a chapter heading (0, 1, or 2 for "CHAPTER" + "TWO"). */
+    private fun leadingHeadingParagraphs(paragraphs: List<String>): Int {
+        val first = paragraphs.firstOrNull() ?: return 0
+        val second = paragraphs.getOrNull(1)
+        return when {
+            first.length <= MAX_HEADING_LENGTH && CHAPTER_HEADING.matches(first) -> 1
+            NAMED_SECTION.matches(first) && isHeadingLike(first) -> 1
+            BARE_NUMBER.matches(first) && first.length <= 12 -> 1
+            CHAPTER_OR_PART.matches(first) && second != null && BARE_NUMBER.matches(second) -> 2
+            else -> 0
+        }
+    }
+
+    /**
+     * "…let's ride out" Chapter Three, or "…example-author.com/ Epilogue": OCR dropped the full stop, so the next screen's heading was joined
+     * onto the last paragraph of the previous screen. Splits such a heading back off into its own paragraph.
+     */
+    private fun splitTrailingHeadings(paragraphs: List<String>): List<String> {
+        val out = ArrayList<String>(paragraphs.size + 8)
+        paragraphs.forEachIndexed { index, paragraph ->
+            val match = TRAILING_CHAPTER_HEADING.find(paragraph.trim())
+            val before = match?.groupValues?.get(1)
+            val heading = match?.groupValues?.get(2)
+            if (match == null || before == null || heading == null || index == paragraphs.lastIndex ||
+                !heading.first().isUpperCase() || wordCount(before) < MIN_TRAILING_SPLIT_WORDS
+            ) {
+                out += paragraph
+            } else {
+                out += before
+                out += heading
+            }
+        }
+        return out
+    }
+
     fun detect(input: List<String>, dictionary: SpellingDictionary? = SpellingDictionary.get()): Result {
-        val paragraphs = splitInlineHeadings(input, dictionary)
+        val paragraphs = splitInlineHeadings(splitTrailingHeadings(input), dictionary)
         val headings = fromHeadings(paragraphs)
         fromContentsPage(paragraphs)?.let { listed ->
             // Add clear "Chapter …" headings the contents-page match missed (e.g. a garbled line).
             val extra = headings.filter { heading ->
-                CHAPTER_HEADING.matches(heading.title.substringBefore(':').trim()) &&
+                // Clear "Chapter …" headings, and sections such as a surprise Epilogue that the printed contents leaves out.
+                (CHAPTER_HEADING.matches(heading.title.substringBefore(':').trim()) || NAMED_SECTION.matches(heading.title)) &&
                     listed.chapters.none { kotlin.math.abs(it.paragraph - heading.paragraph) <= 2 } &&
-                    heading.paragraph > listed.chapters.first().paragraph
+                    // After the printed contents (an early "Chapter One" can sit before the first matched entry),
+                    // and not itself another contents entry.
+                    heading.paragraph > (listed.contentsPage?.last ?: listed.chapters.first().paragraph) &&
+                    paragraphs.getOrNull(heading.paragraph + heading.headingParagraphs)?.trim()
+                        ?.let { CHAPTER_HEADING.matches(it) } != true
             }
             return removeStrayNumbers(listed.copy(chapters = (listed.chapters + extra).sortedBy { it.paragraph }))
         }
@@ -275,7 +338,6 @@ object ChapterDetector {
     private fun fromContentsPage(paragraphs: List<String>): Result? {
         val window = frontWindow(paragraphs.size)
         val front = paragraphs.subList(0, window).map(::normalize)
-        val frontText = front.joinToString(" ")
         // Where each front paragraph starts in frontText, to turn a match position back into a paragraph.
         val starts = IntArray(front.size)
         for (i in 1 until front.size) starts[i] = starts[i - 1] + front[i - 1].length + 1
@@ -284,12 +346,12 @@ object ChapterDetector {
             val text = splitHeading(paragraphs, index) ?: paragraphs[index].trim()
             if (!isHeadingLike(text)) return@mapNotNull null
             val key = normalize(text)
-            if (key.length < 3) return@mapNotNull null
-            val position = frontText.indexOf(key)
-            if (position < 0 || BARE_NUMBER.matches(text)) return@mapNotNull null
-            val at = starts.binarySearch(position).let { if (it >= 0) it else -it - 2 }
-            val frontParagraph = if (front[at].contains(key)) at else front.indexOfFirst { it.contains(key) }
-            if (frontParagraph < 0 || frontParagraph == index) return@mapNotNull null // not listed, or it *is* the listing
+            if (key.length < 3 || BARE_NUMBER.matches(text)) return@mapNotNull null
+            // Only a contents-style line counts as a listing, and only for the title as whole words:
+            // "plan" inside "explained" or a sentence that happens to use the word is not a contents entry.
+            val frontParagraph = front.indices.firstOrNull { i -> i != index && isListLine(paragraphs[i]) && wordIndexOf(front[i], key) >= 0 }
+                ?: return@mapNotNull null
+            val position = starts[frontParagraph] + wordIndexOf(front[frontParagraph], key)
             // Show the title as the contents page prints it ("Pride & Shame", not "PRIDE && SHAME").
             val listed = stripNumbers(paragraphs[frontParagraph]).takeIf { normalize(it) == key && isAllCaps(text) }
             // A heading in capitals must be exactly a contents entry ("THE" from a map is not "The Writ").
@@ -301,15 +363,34 @@ object ChapterDetector {
 
         // The printed contents page: front paragraphs listing these titles (plus a "Contents" heading).
         val keys = ordered.map { normalize(it.text) }
-        val listing = front.indices.filter { i -> i < ordered.first().index && keys.any { front[i].contains(it) } }
+        val listing = front.indices.filter { i ->
+            i < ordered.first().index && isListLine(paragraphs[i]) && keys.any { wordIndexOf(front[i], it) >= 0 }
+        }
         if (listing.isEmpty()) return null
         var startIndex = listing.first()
         if (startIndex > 0 && CONTENTS_HEADING.matches(paragraphs[startIndex - 1].trim())) startIndex--
         // The listing continues while the lines stay list-like (entries for chapters not matched in the body).
         var endIndex = listing.last()
         while (endIndex + 1 < ordered.first().index && isListLine(paragraphs[endIndex + 1])) endIndex++
+        // Safety net: the skipped range never includes real text. It ends before the first paragraph that is
+        // not a contents line (a sentence, a picture), so a wrong match can't drop part of the story.
+        val firstNonList = (startIndex + 1..endIndex).firstOrNull { !isListLine(paragraphs[it]) }
+        if (firstNonList != null) endIndex = firstNonList - 1
         val chapters = ordered.map { Chapter(it.index, it.title, headingParagraphs = if (splitHeading(paragraphs, it.index) != null) 2 else 1) }
         return Result(chapters, startIndex..endIndex, Source.CONTENTS_PAGE, paragraphs)
+    }
+
+    /** Where [key] appears in [text] as whole words (both already normalized), or -1. */
+    private fun wordIndexOf(text: String, key: String): Int {
+        var from = 0
+        while (true) {
+            val at = text.indexOf(key, from)
+            if (at < 0) return -1
+            val startOk = at == 0 || text[at - 1] == ' '
+            val end = at + key.length
+            if (startOk && (end == text.length || text[end] == ' ')) return at
+            from = at + 1
+        }
     }
 
     /** A contents-page line: a short heading-like entry, possibly several run together ("Chapter 25 Chapter 26"). */
@@ -374,7 +455,12 @@ object ChapterDetector {
         }
         // Bare numbers are only trusted when there are several of them.
         if (bareNumbers.size >= 3) chapters += bareNumbers
-        return chapters.sortedBy { it.paragraph }
+        val sorted = chapters.sortedBy { it.paragraph }
+        // A heading followed straight away by another heading, with no text between, is a contents listing.
+        return sorted.filterIndexed { i, chapter ->
+            val next = sorted.getOrNull(i + 1)
+            next == null || next.paragraph > chapter.paragraph + chapter.headingParagraphs
+        }
     }
 
     /** A short description for the Review screen. */

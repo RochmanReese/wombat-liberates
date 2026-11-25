@@ -47,6 +47,8 @@ data class ScanSummary(
     val blankPagesSkipped: Int,
     val stopReason: String,
     val finishedAtMillis: Long,
+    /** Typical body-text line height on the screenshots, in pixels, for font-size advice (see [TextSize]). */
+    val lineHeightPx: Int? = null,
 )
 
 /**
@@ -382,6 +384,7 @@ class ScanWorkspace(
                 blankPagesSkipped = it.optInt("blankPagesSkipped"),
                 stopReason = it.optString("stopReason"),
                 finishedAtMillis = it.optLong("finishedAtMillis"),
+                lineHeightPx = it.optInt("lineHeightPx").takeIf { px -> px > 0 },
             )
         }
         set(value) = updateMeta { meta ->
@@ -395,7 +398,8 @@ class ScanWorkspace(
                         .put("screensCaptured", value.screensCaptured)
                         .put("blankPagesSkipped", value.blankPagesSkipped)
                         .put("stopReason", value.stopReason)
-                        .put("finishedAtMillis", value.finishedAtMillis),
+                        .put("finishedAtMillis", value.finishedAtMillis)
+                        .apply { value.lineHeightPx?.let { put("lineHeightPx", it) } },
                 )
             }
         }

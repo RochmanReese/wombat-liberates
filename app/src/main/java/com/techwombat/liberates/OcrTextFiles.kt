@@ -48,6 +48,8 @@ class OcrTextFiles(directory: File, baseName: String) {
                 when {
                     // Picture markers are always their own paragraph.
                     tail.endsWith("]]") || nextPage.startsWith("[[image:") -> "\n\n"
+                    // A chapter heading starts its own paragraph even if OCR lost the previous full stop.
+                    ChapterDetector.startsWithHeading(nextPage) -> "\n\n"
                     tail.endsWith("-") -> {
                         end -= 1
                         ""

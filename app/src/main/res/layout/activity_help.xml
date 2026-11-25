@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Wombat Liberates needs Android Accessibility access so it can read the Kindle page currently on screen. When Android opens Accessibility settings, scroll down to Wombat Liberates, tap it, then turn on Allow."
+            android:text="Wombat Liberates needs Android 11 or later. It also needs Android Accessibility access so it can read the Kindle page currently on screen. When Android opens Accessibility settings, scroll down to Wombat Liberates, tap it, then turn on Allow."
             android:textSize="16sp" />
 
         <TextView
@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Tap Start Kindle scan, enter the book title, then open Kindle at the first page you want. Each scan becomes a new book in Your books. The scan stops by itself at the end of the book. If it stopped early, tap the book in Your books and choose Continue scanning this book. To check everything works first, run a short Test scan from Advanced settings. You can also import an existing text file instead."
+            android:text="1. Tap Start Kindle scan, enter the book title and press Start scan.&#10;2. Switch to Kindle, open the book and turn to the first page you want, such as the title page or contents. Kindle often opens a book at chapter 1 or where you last read, not at the real start, so check before you begin.&#10;3. Tap Start here on the panel at the bottom of the screen. Nothing is scanned until you do.&#10;4. If the scan stops early, tap the book in Your books and choose Continue scanning this book. Turn Kindle to the page where it stopped and tap Start here again.&#10;&#10;Each scan becomes a new book in Your books. The scan stops by itself at the end of the book. To check everything works first, run a short Test scan from Advanced settings. You can also import an existing text file instead."
             android:textSize="16sp" />
 
         <TextView

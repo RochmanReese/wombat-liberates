@@ -325,7 +325,10 @@ class MainActivity : AppCompatActivity() {
         val (view, titleInput, authorInput) = titleAuthorFields("", "")
         AlertDialog.Builder(this)
             .setTitle("What book are you scanning?")
-            .setMessage("A new book is added to your library. You can change these details later.")
+            .setMessage(
+                "A new book is added to Your books.\n\nAfter Start scan, open the book in Kindle and turn to the first " +
+                    "page you want (Kindle often opens at chapter 1). Then tap Start here on the panel.",
+            )
             .setView(view)
             .setPositiveButton("Start scan") { _, _ ->
                 if (!checkScanningReady()) return@setPositiveButton
@@ -374,9 +377,9 @@ class MainActivity : AppCompatActivity() {
         if (KindleAccessibilityProbeService.startBatch(book.key, pageLimit, continuing)) {
             val scope = pageLimit?.let { "up to $it screens" } ?: "until the end of the book"
             binding.statusText.text = if (continuing) {
-                "Continuing ${BookExport.title(book)} $scope; open Kindle at the page where the last scan stopped."
+                "Continuing ${BookExport.title(book)} $scope. Open Kindle at the page where the last scan stopped, then tap Start here."
             } else {
-                "Scanning ${BookExport.title(book)} $scope; open Kindle at the starting page."
+                "Scanning ${BookExport.title(book)} $scope. Open Kindle, turn to the first page you want, then tap Start here."
             }
         } else {
             binding.statusText.text = "Enable Wombat Liberates in Accessibility settings first."

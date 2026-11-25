@@ -2,6 +2,53 @@
 
 _Newest entries go at the top of this file, not the bottom. Format: see `agentexit.md`._
 
+## Session 4: 26 November 2026 — Start here panel, text-size check, contents/epilogue fixes
+
+### What we did
+- **Start here panel**: a scan no longer starts the instant Kindle comes to the front (Kindle often
+  opens a book at chapter 1 or the last-read page, so scans missed the contents page). New and
+  continued scans now show a panel over Kindle — turn to the first page, tap **Start here**; Cancel
+  removes an empty new book. Test scans still start straight away. Dialog, status text and Help
+  updated with the steps.
+- **Text-size check**: each scan records the median body-text line height; the review screen shows
+  estimated letter height in pixels and advice (too small / small edge / good / bigger than needed),
+  based on ML Kit's ~16–24 px guidance. `TextSize.kt`.
+- **Minimum Android 11** (`minSdk 30`): Android refuses to install on older phones (scanning needs
+  accessibility screenshots, API 30). Lint confirmed nothing needs a newer API. Dead version checks
+  removed.
+- **Lost early chapters (book "the world 22 oukitel")**: the scan was complete, but the EPUB builder
+  matched junk back-matter "headings" ("Down", "Plan", "Path") inside words near the front
+  ("explained", "sympathy", "downstairs"), so the "contents page" ran deep into the story and was
+  skipped. Fixed: contents entries must be whole contents-style lines; a safety net stops the skipped
+  range at the first real sentence or picture; early "Chapter One" headings are added back;
+  back-to-back headings count as a listing, not chapters.
+- **Glued headings**: "…let's ride out" Chapter Three and "…example-author.com/ Epilogue" (OCR lost
+  the full stop at a page break) are split back off when the EPUB is built (fixes existing scans),
+  and a screen starting with a heading always starts a new paragraph at scan time. Surprise sections
+  missing from the printed contents (a post-credit Epilogue) are added to the chapter list.
+  Rocky confirmed the rebuilt book was "much better" before the epilogue fix.
+- **"First chapter only" scanning**: built (`ChapterDetector.isChapterStartPage`, stop at the second
+  chapter opening, 300-screen safety cap) but its **UI was withdrawn**: the new-book dialog grew too
+  tall on Rocky's phone and pushed Start scan off-screen. The code path is inert until the choices
+  return in a layout that keeps the button visible. Full version of that UI:
+  `~/liberates-apk/all-today-incl-scan-choices.patch` (not in git).
+- Tests: 92 unit tests pass (new: `TextSizeTest`, `ChapterStartPageTest`, `ContentsSafetyTest`).
+- Related: wombat-cleanup's prompt now names Prologue/Epilogue/Chapter headings explicitly (tested on
+  gemma3:12b: headings kept). Narrates preview change logged there.
+
+### Where we left off
+- Rocky installed `~/liberates-apk/liberates-contents-fix.apk` and rebuilt the book from its raw
+  OCR; the epilogue build is `~/liberates-apk/liberates-epilogue-fix.apk` (to check: Epilogue is the
+  last chapter after "Update EPUB"). Testing also on an Android 12 Doogee.
+- Next: bring back scan choices (whole book / first chapter / N screens) with a compact layout;
+  optional "Check text size" calibration panel in Kindle (discussed, not built).
+
+### First thing next session
+- Ask whether the **Zitadel `wombat-narrates-premium` role** was created (reminder from 25 Nov).
+- **Resizable BAR** check at the next server reboot (see Session 3).
+
+---
+
 ## Session 3: 24 November 2026 — Whole-book scanning, library, illustrations, project docs
 
 ### What we did

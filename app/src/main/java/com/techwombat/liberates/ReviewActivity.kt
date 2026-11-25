@@ -157,7 +157,8 @@ class ReviewActivity : AppCompatActivity() {
         val requested = if (summary.screensRequested > 0) " of ${summary.screensRequested}" else ""
         val blanks = if (summary.blankPagesSkipped > 0) " ${summary.blankPagesSkipped} screens had no text and were skipped." else ""
         val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(summary.finishedAtMillis))
-        return "Last scan: ${summary.screensCaptured}$requested screens, finished $time.$blanks $words\n${summary.stopReason}".trim()
+        val textSize = summary.lineHeightPx?.let { "\n\nText size: ${TextSize.advice(it)}" }.orEmpty()
+        return "Last scan: ${summary.screensCaptured}$requested screens, finished $time.$blanks $words\n${summary.stopReason}$textSize".trim()
     }
 
     // ---- Versions list ----

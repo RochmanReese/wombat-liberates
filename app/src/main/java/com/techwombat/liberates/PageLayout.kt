@@ -17,6 +17,8 @@ data class PageAnalysis(
     val isEndOfBookScreen: Boolean,
     /** Number of picture placeholders in [text], in reading order. */
     val pictureCount: Int = 0,
+    /** Median line height of body text in pixels (see [TextSize]), or null if the page has too little text. */
+    val bodyLineHeight: Int? = null,
 ) {
     /** Text without picture placeholders, for decisions that are about the words on the page. */
     val wordsOnly: String get() = Illustrations.removeMarkers(text) { false }
@@ -65,7 +67,8 @@ object PageLayout {
         }
         parts += assemble(bookBlocks.filter { block -> sortedPictures.isEmpty() || block.minOf { it.top } >= sortedPictures.last().top })
         val text = parts.filter { it.isNotBlank() }.joinToString("\n\n")
-        return PageAnalysis(text, table, progress, endScreen, sortedPictures.size)
+        val lineHeight = if (table) null else TextSize.bodyLineHeight(bookLines)
+        return PageAnalysis(text, table, progress, endScreen, sortedPictures.size, lineHeight)
     }
 
     private fun isChrome(line: OcrLine, imageHeight: Int): Boolean {

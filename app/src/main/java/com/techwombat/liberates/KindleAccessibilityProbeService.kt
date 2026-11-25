@@ -9,7 +9,6 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.Path
 import android.graphics.Rect
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.media.AudioManager
@@ -28,6 +27,7 @@ import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.google.mlkit.vision.common.InputImage
@@ -52,8 +52,16 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private var batchPagesCompleted = 0
     private var batchContinuing = false
     private var batchAwaitingFirstCapture = false
+    // New and continued scans wait for the user to tap "Start here" in Kindle: Kindle often opens a book at
+    // its own idea of the start (chapter 1, past the contents) or the last-read page, not where the user wants.
+    private var batchAwaitingStartTap = false
+    // "First chapter only": stop when a second chapter opening is reached (that screen is not saved).
+    private var stopAtNextChapter = false
+    private var chapterStartsSeen = 0
+    private var startPromptShown = false
     private var consecutiveBlankPages = 0
     private var blankPagesSkipped = 0
+    private val pageLineHeights = mutableListOf<Int>()
     /** The book (or test scan) this scan writes into. */
     private var batchWorkspace: ScanWorkspace? = null
     private var tablesSkipped = 0
@@ -96,6 +104,11 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         if (waitingOutInterruption()) return@Runnable
         if (!isKindleForeground()) {
             if (turnInFlight) handleLeftKindle() else mainHandler.postDelayed(batchRunnable, BATCH_FOREGROUND_CHECK_MS)
+            return@Runnable
+        }
+        if (batchAwaitingStartTap) {
+            if (!startPromptShown) showStartPrompt()
+            mainHandler.postDelayed(batchRunnable, BATCH_FOREGROUND_CHECK_MS)
             return@Runnable
         }
         if (backPresses > 0) ProbeLog.appendDiagnostic("BATCH OCR", "Back in Kindle; continuing.")
@@ -157,11 +170,6 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     }
 
     private fun captureOnePageForOcr(onComplete: ((OcrCapture?) -> Unit)? = null) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            ProbeLog.appendDiagnostic("ONE-PAGE OCR ERROR", "Screenshot capture requires Android 11 or later.")
-            onComplete?.invoke(null)
-            return
-        }
         ProbeLog.appendDiagnostic("ONE-PAGE OCR", "Taking one accessibility screenshot; it will not be saved.")
         takeScreenshot(Display.DEFAULT_DISPLAY, ocrExecutor, object : TakeScreenshotCallback {
             override fun onSuccess(screenshot: ScreenshotResult) {
@@ -250,6 +258,59 @@ class KindleAccessibilityProbeService : AccessibilityService() {
     private fun screenLabel(screenNumber: Int): String =
         batchPageLimit?.let { "screen $screenNumber of $it" } ?: "screen $screenNumber"
 
+    /** Asks the user to choose the starting page in Kindle before anything is captured. */
+    private fun showStartPrompt() {
+        startPromptShown = true
+        val (title, message) = if (batchContinuing) {
+            "Find where the last scan stopped" to "Turn Kindle to the page where the last scan stopped, then tap Start here. " +
+                "If you land on the last page that was saved, that's fine: it won't be added twice."
+        } else {
+            "Choose the first page" to "Turn Kindle to the first page you want in the book, such as the title page or " +
+                "contents. Kindle often opens at chapter 1 or where you last read. Then tap Start here."
+        }
+        ProbeLog.appendDiagnostic("BATCH OCR", "Kindle is open; waiting for the user to tap Start here.")
+        batchStatus = "Waiting for you to choose the starting page in Kindle."
+        showPrompt(
+            title = title,
+            message = message,
+            rows = listOf(
+                listOf(
+                    "Start here" to {
+                        if (!isKindleForeground()) {
+                            Toast.makeText(this, "Open Kindle first, then tap Start here.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            batchAwaitingStartTap = false
+                            hidePrompt()
+                            ProbeLog.appendDiagnostic("BATCH OCR", "User tapped Start here; scanning.")
+                            batchStatus = "Batch running."
+                            mainHandler.removeCallbacks(batchRunnable)
+                            // Give the panel time to disappear so it isn't in the first screenshot.
+                            mainHandler.postDelayed(batchRunnable, PROMPT_RESUME_DELAY_MS)
+                        }
+                    },
+                    "Cancel" to { cancelBeforeStart() },
+                ),
+            ),
+        )
+    }
+
+    /** Cancel from the start panel: nothing was scanned, so keep the book's previous scan summary as it was. */
+    private fun cancelBeforeStart() {
+        batchActive = false
+        batchAwaitingStartTap = false
+        mainHandler.removeCallbacks(batchRunnable)
+        hidePrompt()
+        ScanDoNotDisturb.restoreAfterScan(this)
+        batchStatus = "Scan cancelled before the first page."
+        ProbeLog.appendDiagnostic("BATCH OCR", batchStatus)
+        val workspace = batchWorkspace
+        // A brand-new book with no text yet would just be an empty entry in Your books.
+        if (workspace != null && !batchContinuing && !workspace.isTest && !workspace.hasText()) {
+            Workspaces.library(this).delete(workspace.key)
+            batchWorkspace = null
+        }
+    }
+
     private fun captureBatchPage() {
         hidePrompt()
         captureStartedAt = SystemClock.uptimeMillis()
@@ -298,6 +359,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         unchangedPageAttempts = 0
         lastBatchFingerprint = capture.fingerprint
         batchPagesCompleted += 1
+        page.bodyLineHeight?.let { pageLineHeights += it }
         when {
             page.wordsOnly.isBlank() && page.pictureCount == 0 -> {
                 blankPagesSkipped += 1
@@ -315,6 +377,19 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             }
             else -> {
                 consecutiveBlankPages = 0
+                if (stopAtNextChapter && ChapterDetector.isChapterStartPage(page.text)) {
+                    chapterStartsSeen += 1
+                    if (chapterStartsSeen >= 2) {
+                        batchPagesCompleted -= 1  // this screen belongs to the next chapter and is not saved
+                        finishBatch("Batch complete: first chapter scanned (stopped at the start of the next chapter) after $batchPagesCompleted screens.")
+                        return
+                    }
+                    ProbeLog.appendDiagnostic("BATCH OCR", "First chapter starts on ${screenLabel(screenNumber)}.")
+                }
+                if (stopAtNextChapter && batchPagesCompleted >= FIRST_CHAPTER_MAX_SCREENS) {
+                    finishBatch("Batch stopped: no next chapter heading found within $FIRST_CHAPTER_MAX_SCREENS screens.")
+                    return
+                }
                 val (text, pictureIds) = storePictures(page, capture)
                 savePage(text, screenNumber, pictures = pictureIds.size)
                 askAboutCover(pictureIds) { advance() }
@@ -742,6 +817,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
                 blankPagesSkipped = blankPagesSkipped,
                 stopReason = batchStatus,
                 finishedAtMillis = System.currentTimeMillis(),
+                lineHeightPx = TextSize.median(pageLineHeights),
             )
             // Accessibility services may start activities from the background; bring the user to the review screen.
             startActivity(
@@ -910,6 +986,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
         private const val MAX_GESTURE_RETRIES = 3
         private const val GESTURE_RETRY_DELAY_MS = 1_000L
         private const val PROMPT_RESUME_DELAY_MS = 600L
+        private const val FIRST_CHAPTER_MAX_SCREENS = 300
         private const val TABLE_PREVIEW_LINES = 4
         private const val INTERRUPTION_CHECK_MS = 1_000L
         /** Notification banners usually stay up about 5 seconds. */
@@ -944,7 +1021,7 @@ class KindleAccessibilityProbeService : AccessibilityService() {
          * @param pageLimit maximum screens to capture, or null to scan until the end of the book.
          * @param continuing true to add to previously captured text, skipping a repeat of the last saved page.
          */
-        fun startBatch(workspaceKey: String, pageLimit: Int?, continuing: Boolean): Boolean {
+        fun startBatch(workspaceKey: String, pageLimit: Int?, continuing: Boolean, firstChapterOnly: Boolean = false): Boolean {
             val service = activeService ?: return false
             if (!ProbeLog.isActive || (pageLimit != null && pageLimit < 1)) return false
             val workspace = Workspaces.byKey(service, workspaceKey) ?: return false
@@ -954,11 +1031,16 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             service.batchPagesCompleted = 0
             service.batchContinuing = continuing
             service.batchAwaitingFirstCapture = true
+            service.batchAwaitingStartTap = !test  // a test scan can start on any page
+            service.startPromptShown = false
+            service.stopAtNextChapter = firstChapterOnly
+            service.chapterStartsSeen = 0
             // The remembered last screen only helps when continuing the same book.
             if (!continuing || service.batchWorkspace?.key != workspace.key) service.lastBatchFingerprint = null
             service.unchangedPageAttempts = 0
             service.consecutiveBlankPages = 0
             service.blankPagesSkipped = 0
+            service.pageLineHeights.clear()
             service.tablesSkipped = 0
             service.tablePolicy = ScanSettings.tableMode(service)
             service.lastProgressPercent = null
@@ -978,7 +1060,11 @@ class KindleAccessibilityProbeService : AccessibilityService() {
             service.batchWorkspace = workspace
             service.batchActive = true
             service.batchStatus = "Batch armed: waiting for Kindle to be foreground."
-            val scope = pageLimit?.let { "up to $it screens" } ?: "the rest of the book"
+            val scope = when {
+                firstChapterOnly -> "the first chapter"
+                pageLimit != null -> "up to $pageLimit screens"
+                else -> "the rest of the book"
+            }
             val mode = when {
                 test -> "test scan"
                 continuing -> "continuing previous scan"
