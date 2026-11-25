@@ -77,7 +77,16 @@ _Newest entries go at the top of this file, not the bottom. Format: see `agentex
     "Chapter 4 –" prefixes).
   - EPUBs now have a visible Contents page (nav.xhtml in the spine) after the title page.
 
+### Same session, 24–25 Nov: Qwen premium voices (other repos)
+This session went on to build Qwen3-TTS premium voices for Wombat Narrates. That work is logged in
+`~/repos/wombat-qwen-tts/PROJECT-SESSIONLOG.md` (the service, the voice lab, designed voices) and
+`~/repos/wombat-narrates/PROJECT-SESSIONLOG.md` Session 18 (Phases 2–4, live). Its brief is
+`wombat-narrates/briefs/WOMBAT-NARRATES-QWEN-PREMIUM-VOICES-BRIEF.md`. wombat-cleanup now unloads
+gemma when its queue empties (`810f70d`).
+
 ### First thing next session
+- Remind Rocky to create the **`wombat-narrates-premium` role** in the Zitadel console (Narrates
+  project) and grant it to premium users. He asked for this reminder on 26 Nov.
 - Remind Rocky to check **Resizable BAR / Above 4G decoding** in the BIOS at the next server reboot
   (`vis_vram_total` is 0.25 GB; Ollama sees 3 GB of about 18 GB free VRAM). After the reboot, confirm
   gemma loads 49/49 layers without `num_gpu`. If not, consider upgrading Ollama (0.12.9).
